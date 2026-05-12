@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Last Drop: Water Survival 0009</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <div id="feedback-toast">
+        <div class="toast-text" id="toast-text">Good action!</div>
+        <div class="toast-stats" id="toast-stats">+10 points</div>
+    </div>
+
+    <div id="game-hud">
+        <div class="hud-bar">
+            <div class="hud-item">
+                <span class="hud-icon">💧</span>
+                <span class="hud-label">Water Quality</span>
+                <div class="hud-track">
+                    <div class="hud-fill water" id="hud-water-fill" style="width:60%"></div>
+                </div>
+                <span class="hud-value" id="hud-water-val">60%</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">🦋</span>
+                <span class="hud-label">Biodiversity</span>
+                <div class="hud-track">
+                    <div class="hud-fill bio" id="hud-bio-fill" style="width:50%"></div>
+                </div>
+                <span class="hud-value" id="hud-bio-val">50%</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="todo-panel">
+        <div class="todo-title">🎯 Mission Checklist</div>
+        <div class="todo-item" id="todo-0"><span class="todo-check"></span>Help trapped marine animal</div>
+        <div class="todo-item" id="todo-1"><span class="todo-check"></span>Clean plastic waste on the shore</div>
+        <div class="todo-item" id="todo-2"><span class="todo-check"></span>Stop oil leak source</div>
+        <div class="todo-item" id="todo-3"><span class="todo-check"></span>Clean oil spill in the ocean</div>
+    </div>
+
+    <div class="scene active" id="scene-landing">
+        <div class="landing-stars"></div>
+        <div class="landing-ocean">
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+        <div class="landing-drop">💧</div>
+        <div class="landing-title">
+            <h1>LAST <span>DROP</span></h1>
+            <div class="subtitle">WATER SURVIVAL</div>
+        </div>
+        <div class="tap-to-start">⋆ tap anywhere to start ⋆</div>
+    </div>
+
+    <div class="scene" id="scene-cinematic">
+        <div id="cinematic-slides-container"></div>
+        <div class="cinematic-progress">
+            <div class="cinematic-dot active"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+            <div class="cinematic-dot"></div>
+        </div>
+        <button class="cinematic-next-btn" id="cin-next-btn">Next →</button>
+    </div>
+
+    <div class="scene" id="scene-map">
+        <div class="map-title">🗺️ Coastal Region</div>
+        <div class="map-container">
+            <div class="map-svg-wrapper" id="map-bounds">
+                <svg class="map-bg-svg" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" style="z-index: 1; position: absolute; width: 100%; height: 100%;">
+                    <!-- Ocean Base -->
+                    <rect width="800" height="600" fill="#041e2e" />
+                    <!-- Shallow water -->
+                    <path d="M 100,300 C 100,100 300,50 500,50 C 700,50 750,250 750,400 C 750,550 500,580 300,550 C 100,520 100,450 100,300 Z" fill="#0a4f7a" />
+                    
+                    <!-- Beach (Sand) around the edge -->
+                    <path d="M 150,300 C 150,150 320,100 480,100 C 650,100 680,250 680,380 C 680,500 500,530 320,500 C 150,470 150,420 150,300 Z" fill="#e9c46a" />
+                    
+                    <!-- Main Island (Grass) -->
+                    <path d="M 180,300 C 180,180 330,130 470,130 C 620,130 650,260 650,370 C 650,470 500,500 340,470 C 180,440 180,400 180,300 Z" fill="#2a9d8f" />
+
+                    <!-- River cutting through -->
+                    <path d="M 400,130 Q 380,250 450,350 T 650,420" fill="none" stroke="#0a4f7a" stroke-width="20" stroke-linecap="round"/>
+
+                    <!-- INDUSTRIAL AREA (Top Left) -->
+                    <g id="visual-industrial">
+                        <rect x="230" y="170" width="80" height="60" fill="#546e7a" />
+                        <rect x="250" y="140" width="15" height="30" fill="#37474f" />
+                        <circle cx="257" cy="120" r="15" fill="#cfd8dc" opacity="0.6"/>
+                        <circle cx="265" cy="100" r="20" fill="#cfd8dc" opacity="0.5"/>
+                        <rect x="210" y="200" width="40" height="40" fill="#455a64" />
+                        <!-- Toxic pipe dripping -->
+                        <rect x="180" y="210" width="30" height="10" fill="#263238" />
+                        <circle cx="160" cy="215" r="8" fill="#8bc34a" opacity="0.8"/>
+                    </g>
+
+                    <!-- AGRICULTURAL AREA (Top Right) -->
+                    <g id="visual-agricultural">
+                        <rect x="480" y="160" width="100" height="80" fill="#8bc34a" />
+                        <line x1="480" y1="180" x2="580" y2="180" stroke="#558b2f" stroke-width="4"/>
+                        <line x1="480" y1="200" x2="580" y2="200" stroke="#558b2f" stroke-width="4"/>
+                        <line x1="480" y1="220" x2="580" y2="220" stroke="#558b2f" stroke-width="4"/>
+                        <rect x="450" y="190" width="20" height="20" fill="#795548" />
+                        <polygon points="450,190 460,175 470,190" fill="#5d4037" />
+                    </g>
+
+                    <!-- RESIDENTIAL AREA (Bottom Left) -->
+                    <g id="visual-residential">
+                        <rect x="240" y="380" width="30" height="25" fill="#f5f5f5" />
+                        <polygon points="235,380 255,365 275,380" fill="#e53935" />
+                        <rect x="290" y="360" width="30" height="25" fill="#f5f5f5" />
+                        <polygon points="285,360 305,345 325,360" fill="#1e88e5" />
+                        <rect x="260" y="420" width="30" height="25" fill="#f5f5f5" />
+                        <polygon points="255,420 275,405 295,420" fill="#fb8c00" />
+                        <path d="M 220,400 Q 280,400 350,380" fill="none" stroke="#9e9e9e" stroke-width="12" />
+                    </g>
+
+                    <!-- COASTAL AREA (Bottom Right) -->
+                    <g id="visual-coastal">
+                        <rect x="620" y="380" width="60" height="15" fill="#795548" />
+                        <rect x="630" y="395" width="5" height="15" fill="#5d4037" />
+                        <rect x="660" y="395" width="5" height="15" fill="#5d4037" />
+                        <ellipse cx="680" cy="450" rx="40" ry="15" fill="#1a1a0a" opacity="0.8"/>
+                        <circle cx="580" cy="420" r="4" fill="#e53935"/>
+                        <circle cx="560" cy="430" r="3" fill="#1e88e5"/>
+                        <rect x="590" y="440" width="6" height="4" fill="#fff"/>
+                    </g>
+                </svg>
+                
+                <!-- Player Character -->
+                <div id="player-char">🧍</div>
+
+                <!-- Interaksi Area yang telah disesuaikan letaknya dengan gambar pulau di atas -->
+                <div class="map-area" id="map-industrial" data-area="industrial" style="top:23%; left:22%; width:15%; height:20%; z-index:10;">
+                    <span class="area-icon">🏭</span><span class="area-name">Industrial</span>
+                </div>
+                <div class="map-area" id="map-agricultural" data-area="agricultural" style="top:25%; left:56%; width:18%; height:20%; z-index:10;">
+                    <span class="area-icon">🌾</span><span class="area-name">Agricultural</span>
+                </div>
+                <div class="map-area" id="map-residential" data-area="residential" style="top:58%; left:26%; width:18%; height:20%; z-index:10;">
+                    <span class="area-icon">🏠</span><span class="area-name">Residential</span>
+                </div>
+                <div class="map-area coastal" id="map-coastal" data-area="coastal" style="top:60%; left:66%; width:20%; height:22%; z-index:10;">
+                    <span class="map-alert-dot"></span><span class="area-icon">🌊</span><span class="area-name">Coastal</span>
+                    <span class="area-status">🚨 CRISIS</span>
+                </div>
+
+                <!-- Prompt Interaksi -->
+                <div id="interact-prompt" class="hidden">Tekan [E] untuk masuk</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene task-scene" id="scene-task1">
+        <div class="task-header">
+            <div class="task-number">Task 1 of 4</div>
+            <div class="task-title-text">🐢 Help Trapped Animal</div>
+            <div class="task-instruction">Click the turtle to free it from plastic entanglement</div>
+        </div>
+        <div class="turtle-container" id="turtle-container">
+            <svg id="turtle-svg-main" class="turtle-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="150" cy="170" rx="100" ry="80" fill="#4a7a4a" />
+                <ellipse cx="220" cy="150" rx="40" ry="35" fill="#5a8a5a" />
+                <g id="plastic-net-overlay" class="plastic-net">
+                    <path d="M80,120 Q110,100 140,115" stroke="#ff4444" stroke-width="3" fill="none" opacity="0.8" />
+                </g>
+            </svg>
+        </div>
+        <div class="help-progress" id="help-progress">
+            <div class="help-progress-fill" id="help-progress-fill"></div>
+        </div>
+        <div class="help-label" id="help-label"></div>
+    </div>
+
+    <div class="scene task-scene" id="scene-task2">
+        <div class="task-header">
+            <div class="task-number">Task 2 of 4</div>
+            <div class="task-title-text">🧹 Clean Beach Plastic</div>
+            <div class="task-instruction">Click each trash item to collect it</div>
+        </div>
+        <div class="beach-scene" id="beach-scene-content">
+            <div class="trash-bin" id="trash-bin">🗑️</div>
+            <div class="beach-counter" id="beach-counter">🗑️ 0 / 8 cleaned</div>
+        </div>
+    </div>
+
+    <div class="scene task-scene" id="scene-task3">
+        <div class="task-header">
+            <div class="task-number">Task 3 of 4</div>
+            <div class="task-title-text">🔧 Stop Oil Leak</div>
+            <div class="task-instruction">Click the broken pipe to seal the leak</div>
+        </div>
+        <div class="underwater-scene" id="underwater-scene-content">
+            <div class="pipe-container" id="pipe-container"
+                style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);">
+                <svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="80" y="60" width="200" height="30" rx="8" fill="#6a6a6a" />
+                    <g id="oil-drop-anim">
+                        <ellipse cx="220" cy="95" rx="8" ry="12" fill="#1a1a0a" />
+                    </g>
+                </svg>
+                <div id="pipe-fixed-indicator" style="display:none;text-align:center;margin-top:10px;"><span
+                        style="font-size:2rem;">✅</span>
+                    <div style="color:var(--green-light);font-weight:600;font-size:1rem;">Pipe Sealed!</div>
+                </div>
+            </div>
+            <div class="fix-progress" id="fix-progress">
+                <div class="fix-progress-fill" id="fix-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene task-scene" id="scene-task4">
+        <div class="task-header">
+            <div class="task-number">Task 4 of 4 — Decision</div>
+            <div class="task-title-text">🛢️ Clean Oil Spill</div>
+            <div class="task-instruction">Choose a method to clean up the oil spill</div>
+        </div>
+        <div class="oil-spill-area" id="oil-spill-clickable" style="bottom:30%;left:50%;transform:translateX(-50%);">
+            <svg id="oil-spill-svg" class="oil-spill-svg" width="350" height="200" viewBox="0 0 350 200"
+                xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="175" cy="80" rx="150" ry="50" fill="#1a1a0a" opacity="0.85" /><text x="175" y="130"
+                    text-anchor="middle" fill="#90e0ef" font-size="12" font-weight="bold" opacity="0.9">👆 Click to
+                    choose cleanup method</text>
+            </svg></div>
+    </div>
+
+    <div class="scene" id="scene-complete">
+        <div class="complete-content">
+            <div class="complete-icon">🌊</div>
+            <div class="complete-title">ALL TASKS COMPLETED</div>
+            <div class="complete-subtitle">The coastal environment is improving.</div>
+            <div class="complete-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="final-water">60%</div>
+                    <div class="stat-label">💧 Water Quality</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="final-bio">50%</div>
+                    <div class="stat-label">🦋 Biodiversity</div>
+                </div>
+            </div>
+            <button class="modal-btn" id="btn-restart">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-map-alert">
+        <div class="modal-box">
+            <div class="modal-icon">🚨</div>
+            <div class="modal-title">Crisis Detected!</div>
+            <div class="modal-body">A pollution crisis has been detected in the <strong>Coastal
+                    Area</strong>!<br>Complete all tasks to restore environmental balance.</div><button
+                class="modal-btn" id="btn-start-mission">▶ Start Mission</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay decision-modal" id="modal-decision">
+        <div class="modal-box">
+            <div class="modal-icon">🛢️</div>
+            <div class="modal-title">Choose Cleanup Method</div>
+            <div class="decision-options">
+                <div class="decision-card burning" id="btn-burning">
+                    <div class="card-icon">🔥</div>
+                    <div class="card-title">In-Situ Burning</div>
+                    <div class="card-effects"><span class="effect-positive">💧 +25</span> <span
+                            class="effect-positive">🦋 +5</span></div>
+                </div>
+                <div class="decision-card chemical" id="btn-chemical">
+                    <div class="card-icon">⚗️</div>
+                    <div class="card-title">Corexit</div>
+                    <div class="card-effects"><span class="effect-positive">💧 +20</span> <span
+                            class="effect-negative">🦋 -15</span></div>
+                    <div class="decision-warning" id="chemical-warning">⚠️ This method may harm marine life due to toxic
+                        substances.</div>
+                </div>
+            </div>
+            <button class="modal-btn danger" onclick="Modal.hide('modal-decision')">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay steps-modal" id="modal-burning-steps">
+        <div class="modal-box">
+            <div class="modal-icon">🔥</div>
+            <div class="modal-title success">In-Situ Burning</div>
+            <div class="step-item">
+                <div class="step-num fire">1</div>
+                <div class="step-content">
+                    <div class="step-title">Melokalisir Minyak</div>
+                    <div class="step-desc">Oil booms isolate spill.</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num fire">2</div>
+                <div class="step-content">
+                    <div class="step-title">Penyalaan</div>
+                    <div class="step-desc">Ignition at localized oil.</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num fire">3</div>
+                <div class="step-content">
+                    <div class="step-title">Pembakaran</div>
+                    <div class="step-desc">Burn hydrocarbons in situ.</div>
+                </div>
+            </div>
+            <div class="mt-20"><button class="modal-btn" id="btn-burning-done">✓ Complete</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay steps-modal" id="modal-chemical-steps">
+        <div class="modal-box">
+            <div class="modal-icon">⚗️</div>
+            <div class="modal-title">Corexit Application</div>
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <div class="step-title">Penyemprotan Permukaan</div>
+                    <div class="step-desc">Spray dispersant from vessel.</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <div class="step-title">Injeksi Bawah Laut</div>
+                    <div class="step-desc">Inject at subsea leak point.</div>
+                </div>
+            </div>
+            <div class="mt-20"><button class="modal-btn" id="btn-chemical-done">✓ Complete</button></div>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1512 @@
+/* ============================================
+   LAST DROP: WATER SURVIVAL 0009
+   Main Stylesheet
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap');
+
+/* ---- RESET & BASE ---- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --water-blue: #0a4f7a;
+    --ocean-deep: #041e2e;
+    --ocean-mid: #0d3a5c;
+    --teal: #00b4d8;
+    --teal-light: #90e0ef;
+    --green: #2d9e4f;
+    --green-light: #52c97a;
+    --red: #e63946;
+    --orange: #f4a261;
+    --yellow: #ffd166;
+    --white: #f0f8ff;
+    --gray: #8ecae6;
+    --dark: #03111e;
+    --pollution: #4a7c59;
+    --oil: #1a1a0a;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--dark);
+    font-family: 'Exo 2', sans-serif;
+    color: var(--white);
+    user-select: none;
+}
+
+/* ============================================
+   SCENE SYSTEM
+   ============================================ */
+.scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    z-index: 1;
+}
+
+.scene.active {
+    opacity: 1;
+    pointer-events: all;
+    z-index: 10;
+}
+
+.scene.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ============================================
+   LANDING PAGE
+   ============================================ */
+#scene-landing {
+    background: radial-gradient(ellipse at center, #041e2e 0%, #010a12 100%);
+    cursor: pointer;
+}
+
+.landing-ocean {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, #0a4f7a 0%, #041e2e 100%);
+    overflow: hidden;
+}
+
+.wave {
+    position: absolute;
+    width: 200%;
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%2300b4d8' fill-opacity='0.3' d='M0,50 C360,100 720,0 1080,50 C1260,75 1350,60 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E") repeat-x;
+    background-size: 720px 100px;
+    animation: waveMove 6s linear infinite;
+}
+
+.wave:nth-child(2) {
+    top: 20px;
+    opacity: 0.5;
+    animation: waveMove 9s linear infinite reverse;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%230077b6' fill-opacity='0.4' d='M0,30 C360,80 720,10 1080,40 C1260,55 1350,45 1440,30 L1440,100 L0,100 Z'/%3E%3C/svg%3E") repeat-x;
+    background-size: 720px 100px;
+}
+
+@keyframes waveMove {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.landing-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+}
+
+.landing-title {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.landing-title h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    color: var(--teal-light);
+    text-shadow: 0 0 30px rgba(0, 180, 216, 0.8), 0 0 60px rgba(0, 180, 216, 0.4);
+    letter-spacing: 4px;
+    line-height: 1.1;
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+.landing-title h1 span {
+    color: var(--white);
+}
+
+.landing-title .subtitle {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.7rem, 2vw, 1rem);
+    color: var(--teal);
+    letter-spacing: 8px;
+    margin-top: 8px;
+    opacity: 0.8;
+}
+
+@keyframes titleGlow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 30px rgba(0, 180, 216, 0.8), 0 0 60px rgba(0, 180, 216, 0.4);
+    }
+
+    50% {
+        text-shadow: 0 0 50px rgba(0, 180, 216, 1), 0 0 100px rgba(0, 180, 216, 0.6);
+    }
+}
+
+.tap-to-start {
+    position: relative;
+    z-index: 5;
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: var(--teal-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: blink 1.5s ease-in-out infinite;
+    margin-top: 40px;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.landing-drop {
+    position: relative;
+    z-index: 5;
+    font-size: 5rem;
+    animation: dropFloat 3s ease-in-out infinite;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 20px rgba(0, 180, 216, 0.8));
+}
+
+@keyframes dropFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* ============================================
+   CINEMATIC SCENES
+   ============================================ */
+#scene-cinematic {
+    background: #000;
+}
+
+.cinematic-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 80px;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+}
+
+.cinematic-slide.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.cinematic-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.cinematic-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+}
+
+.cinematic-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+    padding: 0 30px;
+}
+
+.cinematic-scene-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--teal);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.cinematic-text h2 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(1.2rem, 3.5vw, 2rem);
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.5;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    animation: textReveal 1s ease forwards;
+}
+
+.cinematic-text h2 em {
+    font-style: normal;
+    color: var(--teal-light);
+    font-weight: 600;
+}
+
+@keyframes textReveal {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cinematic-progress {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.cinematic-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: background 0.3s;
+}
+
+.cinematic-dot.active {
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal);
+}
+
+.cinematic-next-btn {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    z-index: 10;
+    background: rgba(0, 180, 216, 0.2);
+    border: 1px solid var(--teal);
+    color: var(--teal-light);
+    padding: 10px 24px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.cinematic-next-btn:hover {
+    background: rgba(0, 180, 216, 0.4);
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
+}
+
+/* Cinematic Illustrations */
+.cin-illustration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* ============================================
+   GAME HUD (Floating UI)
+   ============================================ */
+#game-hud {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    pointer-events: none;
+    display: none;
+}
+
+#game-hud.visible {
+    display: block;
+}
+
+.hud-bar {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(4, 30, 46, 0.85);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-width: 220px;
+    backdrop-filter: blur(10px);
+}
+
+.hud-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.hud-label {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.hud-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hud-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease, background 0.5s ease;
+}
+
+.hud-fill.water {
+    background: linear-gradient(90deg, var(--teal), var(--teal-light));
+    box-shadow: 0 0 8px rgba(0, 180, 216, 0.6);
+}
+
+.hud-fill.bio {
+    background: linear-gradient(90deg, var(--green), var(--green-light));
+    box-shadow: 0 0 8px rgba(45, 158, 79, 0.6);
+}
+
+.hud-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--white);
+    min-width: 35px;
+    text-align: right;
+}
+
+/* ============================================
+   TODO LIST (Floating)
+   ============================================ */
+#todo-panel {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(4, 30, 46, 0.9);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 260px;
+    backdrop-filter: blur(10px);
+    display: none;
+    pointer-events: none;
+}
+
+#todo-panel.visible {
+    display: block;
+}
+
+.todo-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--teal);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 180, 216, 0.2);
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.8rem;
+    color: rgba(240, 248, 255, 0.7);
+    transition: all 0.5s ease;
+}
+
+.todo-item.done {
+    color: var(--green-light);
+}
+
+.todo-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0, 180, 216, 0.5);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s;
+    font-size: 0.7rem;
+}
+
+.todo-item.done .todo-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+}
+
+/* ============================================
+   MAP SCENE
+   ============================================ */
+#scene-map {
+    background: radial-gradient(ellipse at center, #0d3a5c 0%, #041e2e 100%);
+    cursor: default;
+}
+
+.map-container {
+    position: relative;
+    width: min(90vw, 800px);
+    aspect-ratio: 8 / 6;
+    margin: 0 auto;
+}
+
+.map-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    color: var(--teal);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.map-svg-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Map Area Buttons */
+.map-area {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    border: 2px solid transparent;
+}
+
+.map-area:hover {
+    transform: scale(1.05);
+}
+
+.map-area .area-icon {
+    font-size: 2.5rem;
+    margin-bottom: 6px;
+}
+
+.map-area .area-name {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.map-area .area-status {
+    font-size: 0.65rem;
+    margin-top: 3px;
+    opacity: 0.7;
+}
+
+.map-area.coastal {
+    background: rgba(230, 57, 70, 0.15);
+    border-color: var(--red);
+    color: var(--white);
+    animation: areaPulse 1.5s ease-in-out infinite;
+}
+
+.map-area.locked {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+}
+
+@keyframes areaPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.4);
+        border-color: var(--red);
+    }
+
+    50% {
+        box-shadow: 0 0 0 12px rgba(230, 57, 70, 0);
+        border-color: #ff6b6b;
+    }
+}
+
+.map-alert-dot {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 14px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: dotBlink 0.8s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: scale(0.7);
+    }
+}
+
+/* Player Character */
+#player-char {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    /* Kita gunakan transform untuk performa gerak yang lebih baik via JS */
+    transform: translate(0px, 0px);
+    transition: transform 0.1s linear; /* Smooth movement */
+    user-select: none;
+    pointer-events: none; /* Jangan block klik */
+}
+
+/* Prompt Interaksi */
+#interact-prompt {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(4, 30, 46, 0.9);
+    border: 2px solid var(--teal);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: bold;
+    font-size: 0.9rem;
+    z-index: 110;
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
+    animation: promptPulse 1s infinite alternate;
+}
+
+@keyframes promptPulse {
+    from { transform: translateX(-50%) scale(1); }
+    to { transform: translateX(-50%) scale(1.05); }
+}
+
+/* Map SVG Background */
+.map-bg-svg {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 180, 216, 0.2);
+    overflow: hidden;
+}
+
+/* ============================================
+   POPUP / MODAL
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-box {
+    background: linear-gradient(135deg, #041e2e, #0d3a5c);
+    border: 1px solid rgba(0, 180, 216, 0.4);
+    border-radius: 16px;
+    padding: 32px 36px;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.8);
+    transition: transform 0.3s;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 180, 216, 0.1);
+}
+
+.modal-overlay.visible .modal-box {
+    transform: scale(1);
+}
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    animation: iconBounce 0.5s ease;
+}
+
+@keyframes iconBounce {
+    0% {
+        transform: scale(0);
+    }
+
+    70% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--red);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.modal-title.success {
+    color: var(--teal-light);
+}
+
+.modal-body {
+    font-size: 0.9rem;
+    color: rgba(240, 248, 255, 0.85);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.modal-btn {
+    background: linear-gradient(135deg, var(--teal), #0077b6);
+    border: none;
+    color: white;
+    padding: 12px 32px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 180, 216, 0.5);
+}
+
+.modal-btn.danger {
+    background: linear-gradient(135deg, var(--red), #c1121f);
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+}
+
+/* ============================================
+   FEEDBACK TOAST
+   ============================================ */
+#feedback-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(4, 30, 46, 0.95);
+    border: 1px solid var(--teal);
+    border-radius: 12px;
+    padding: 14px 28px;
+    z-index: 300;
+    text-align: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+#feedback-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.9rem;
+    color: var(--teal-light);
+    font-weight: 600;
+}
+
+.toast-stats {
+    font-size: 0.8rem;
+    color: var(--green-light);
+    margin-top: 4px;
+}
+
+/* ============================================
+   TASK SCENES
+   ============================================ */
+.task-scene {
+    background: linear-gradient(180deg, #041e2e 0%, #0a4f7a 50%, #0d3a5c 100%);
+    position: fixed;
+    overflow: hidden;
+}
+
+.task-header {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+}
+
+.task-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--teal);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.task-title-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 700;
+    color: var(--white);
+}
+
+.task-instruction {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 6px;
+}
+
+/* ============================================
+   TASK 1: SAVE ANIMAL
+   ============================================ */
+#scene-task1 {
+    background: linear-gradient(180deg, #87ceeb 0%, #4a9eca 30%, #1a6fa8 60%, #0a4f7a 100%);
+}
+
+.turtle-container {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.turtle-container:hover {
+    transform: scale(1.05);
+}
+
+.turtle-svg {
+    width: min(300px, 60vw);
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+}
+
+.plastic-net {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.help-progress {
+    width: min(300px, 60vw);
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    margin-top: 20px;
+    overflow: hidden;
+    display: none;
+}
+
+.help-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--green-light));
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(45, 158, 79, 0.6);
+}
+
+.help-label {
+    font-size: 0.8rem;
+    color: var(--green-light);
+    margin-top: 8px;
+    display: none;
+}
+
+/* ============================================
+   TASK 2: CLEAN BEACH
+   ============================================ */
+#scene-task2 {
+    background: linear-gradient(180deg, #87ceeb 0%, #f4d03f 40%, #c8a96e 60%, #a0845c 100%);
+}
+
+.beach-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.trash-bin {
+    position: absolute;
+    bottom: 60px;
+    right: 60px;
+    font-size: 3.5rem;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    transition: transform 0.2s;
+    z-index: 20;
+}
+
+.trash-bin:hover {
+    transform: scale(1.1);
+}
+
+.trash-bin.shake {
+    animation: binShake 0.3s ease;
+}
+
+@keyframes binShake {
+
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+
+    25% {
+        transform: rotate(-10deg) scale(1.1);
+    }
+
+    75% {
+        transform: rotate(10deg) scale(1.1);
+    }
+}
+
+.trash-item {
+    position: absolute;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 15;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: trashFloat 3s ease-in-out infinite;
+}
+
+.trash-item:hover {
+    transform: scale(1.2) rotate(10deg);
+    filter: drop-shadow(0 4px 12px rgba(230, 57, 70, 0.5));
+}
+
+.trash-item.collected {
+    animation: collectAnim 0.5s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes collectAnim {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes trashFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(5deg);
+    }
+}
+
+.beach-counter {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    color: var(--white);
+    background: rgba(4, 30, 46, 0.7);
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 180, 216, 0.3);
+}
+
+/* ============================================
+   TASK 3: STOP OIL LEAK
+   ============================================ */
+#scene-task3 {
+    background: linear-gradient(180deg, #041e2e 0%, #0a3a5c 40%, #0d4a6e 100%);
+}
+
+.underwater-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(144, 224, 239, 0.3);
+    border: 1px solid rgba(144, 224, 239, 0.5);
+    animation: bubbleRise linear infinite;
+}
+
+@keyframes bubbleRise {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(-100vh) translateX(20px);
+        opacity: 0;
+    }
+}
+
+.pipe-container {
+    position: relative;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.oil-leak {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    animation: oilDrip 0.5s ease-in-out infinite;
+}
+
+@keyframes oilDrip {
+
+    0%,
+    100% {
+        height: 20px;
+        opacity: 1;
+    }
+
+    50% {
+        height: 35px;
+        opacity: 0.7;
+    }
+}
+
+.oil-drop {
+    position: absolute;
+    width: 12px;
+    height: 16px;
+    background: radial-gradient(ellipse, #3d3000, #1a1a0a);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: dropFall 1.5s ease-in infinite;
+}
+
+@keyframes dropFall {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(80px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.fix-progress {
+    width: min(300px, 60vw);
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    margin-top: 20px;
+    overflow: hidden;
+    display: none;
+}
+
+.fix-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--yellow));
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/* ============================================
+   TASK 4: OIL SPILL DECISION
+   ============================================ */
+#scene-task4 {
+    background: linear-gradient(180deg, #87ceeb 0%, #4a9eca 20%, #1a6fa8 50%, #0a4f7a 100%);
+}
+
+.oil-spill-area {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.3s;
+}
+
+.oil-spill-area:hover {
+    transform: scale(1.05);
+}
+
+.oil-spill-svg {
+    filter: drop-shadow(0 0 20px rgba(26, 26, 10, 0.8));
+    animation: oilPulse 2s ease-in-out infinite;
+}
+
+@keyframes oilPulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 20px rgba(26, 26, 10, 0.8));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 35px rgba(100, 80, 0, 0.6));
+    }
+}
+
+/* Decision Modal */
+.decision-modal .modal-box {
+    max-width: 600px;
+}
+
+.decision-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.decision-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.decision-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.decision-card.burning:hover {
+    border-color: var(--orange);
+    background: rgba(244, 162, 97, 0.1);
+}
+
+.decision-card.chemical:hover {
+    border-color: var(--teal);
+    background: rgba(0, 180, 216, 0.1);
+}
+
+.decision-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.decision-card .card-title {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.decision-card .card-desc {
+    font-size: 0.75rem;
+    color: rgba(240, 248, 255, 0.6);
+    line-height: 1.4;
+}
+
+.decision-card .card-effects {
+    margin-top: 10px;
+    font-size: 0.75rem;
+}
+
+.effect-positive {
+    color: var(--green-light);
+}
+
+.effect-negative {
+    color: var(--red);
+}
+
+.decision-warning {
+    background: rgba(230, 57, 70, 0.1);
+    border: 1px solid rgba(230, 57, 70, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    color: rgba(240, 248, 255, 0.7);
+    margin-top: 8px;
+    display: none;
+}
+
+/* ============================================
+   METHOD STEPS MODAL
+   ============================================ */
+.steps-modal .modal-box {
+    max-width: 520px;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.5s ease;
+}
+
+.step-item.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-num.fire {
+    background: var(--orange);
+}
+
+.step-content .step-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--white);
+    margin-bottom: 3px;
+}
+
+.step-content .step-desc {
+    font-size: 0.75rem;
+    color: rgba(240, 248, 255, 0.6);
+    line-height: 1.4;
+}
+
+/* ============================================
+   COMPLETION SCREEN
+   ============================================ */
+#scene-complete {
+    background: radial-gradient(ellipse at center, #0d3a5c 0%, #041e2e 100%);
+}
+
+.complete-content {
+    text-align: center;
+    z-index: 5;
+    position: relative;
+}
+
+.complete-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: completePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes completePop {
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
+}
+
+.complete-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--teal-light);
+    text-shadow: 0 0 30px rgba(0, 180, 216, 0.8);
+    margin-bottom: 12px;
+}
+
+.complete-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: var(--green-light);
+    margin-bottom: 30px;
+}
+
+.complete-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+}
+
+.stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--teal-light);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* Particle effects */
+.particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 500;
+    animation: particleFly 1s ease-out forwards;
+}
+
+@keyframes particleFly {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   ALARM ANIMATION
+   ============================================ */
+.alarm-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(230, 57, 70, 0.15);
+    z-index: 50;
+    pointer-events: none;
+    animation: alarmFlash 0.5s ease-in-out 4;
+}
+
+@keyframes alarmFlash {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+    .decision-options {
+        grid-template-columns: 1fr;
+    }
+
+    .hud-item {
+        min-width: 180px;
+        padding: 6px 10px;
+    }
+
+    #todo-panel {
+        min-width: 200px;
+        padding: 12px 14px;
+    }
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--teal);
+    border-radius: 2px;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
