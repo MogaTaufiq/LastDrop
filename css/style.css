@@ -1510,3 +1510,231 @@ body {
 .mt-20 {
     margin-top: 20px;
 }
+
+/* ============================================
+   TASK 4 INTERACTIVE STYLES
+   ============================================ */
+.t4-ocean-container {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    border-top: 2px solid var(--teal-dark);
+    border-bottom: 2px solid var(--teal-dark);
+}
+
+.t4-oil-blob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 150px;
+    background: radial-gradient(ellipse at center, #0a0a0a 20%, #1a1a1a 70%, transparent 100%);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    opacity: 0.85;
+    animation: blobPulse 4s infinite alternate ease-in-out;
+    pointer-events: none;
+    transition: transform 2.5s ease-out, opacity 2.5s ease-out, background 1s;
+}
+
+@keyframes blobPulse {
+    0% { transform: translate(-50%, -50%) scale(0.95); }
+    100% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+#t4-boom-canvas, #t4-spray-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 5;
+    cursor: crosshair;
+}
+
+#t4-boat {
+    position: absolute;
+    font-size: 2rem;
+    z-index: 10;
+    cursor: grab;
+    user-select: none;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s linear;
+}
+#t4-boat:active { cursor: grabbing; }
+
+/* Underwater Scene */
+#t4-underwater-scene {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(180deg, #062b40 0%, #010a10 100%);
+    z-index: 15;
+}
+.t4-pipe {
+    position: absolute;
+    bottom: -10px; left: 50%;
+    width: 60px; height: 100px;
+    background: #333;
+    transform: translateX(-50%);
+    border: 2px solid #555;
+}
+.t4-bubbles {
+    position: absolute;
+    bottom: 90px; left: 50%;
+    transform: translateX(-50%);
+    width: 20px; height: 100px;
+    background: linear-gradient(0deg, rgba(20,20,20,0.8) 0%, transparent 100%);
+}
+.t4-inject-target {
+    position: absolute;
+    bottom: 50px; left: 50%;
+    width: 40px; height: 40px;
+    border: 2px dashed #ffeb3b;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    animation: targetPulse 1s infinite alternate;
+}
+@keyframes targetPulse {
+    from { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px #ffeb3b; }
+    to { transform: translateX(-50%) scale(1.2); box-shadow: 0 0 20px #ffeb3b; }
+}
+.t4-inject-counter {
+    position: absolute;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+#t4-action-progress-container {
+    position: absolute;
+    bottom: 10%; left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 10px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 5px;
+    z-index: 20;
+    overflow: hidden;
+}
+#t4-action-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--yellow);
+    transition: width 0.1s linear;
+}
+
+.t4-bottom-ui {
+    padding: 20px;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.t4-method-selection {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+}
+.t4-method-card {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid var(--teal-dark);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.t4-method-card:hover {
+    background: rgba(0, 180, 216, 0.1);
+    border-color: var(--teal);
+    transform: translateY(-5px);
+}
+.t4-card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--white);
+    margin-bottom: 5px;
+}
+.t4-card-stats {
+    font-size: 0.9rem;
+    color: var(--blue-light);
+    margin-bottom: 10px;
+}
+.t4-card-tag {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.t4-card-tag.recommended { background: rgba(42, 157, 143, 0.2); color: var(--green); border: 1px solid var(--green); }
+.t4-card-tag.warning { background: rgba(230, 57, 70, 0.2); color: var(--red); border: 1px solid var(--red); }
+
+.t4-result-card {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 20, 30, 0.95);
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    z-index: 30;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+#t4-result-icon { font-size: 3rem; margin-bottom: 10px; }
+#t4-result-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+.t4-r-stat { margin: 5px 0; font-size: 1.1rem; }
+.t4-r-stat span { font-weight: bold; color: var(--green); }
+.t4-r-stat span.negative { color: var(--red); }
+.info-text { font-size: 0.85rem; color: #aaa; margin: 15px 0; line-height: 1.4; }
+.warning-text { font-size: 0.85rem; color: var(--red); margin: 15px 0; line-height: 1.4; font-weight: bold; }
+
+.pulsing-btn {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    background: var(--red);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    animation: pulseRed 1s infinite alternate;
+}
+@keyframes pulseRed {
+    from { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 10px var(--red); }
+    to { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 30px var(--red); }
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 10px 0 20px 0;
+}
+.badge.eco { background: rgba(42, 157, 143, 0.2); color: var(--green); border: 2px solid var(--green); }
+.badge.costly { background: rgba(233, 196, 106, 0.2); color: var(--yellow); border: 2px solid var(--yellow); }
+
+.fish-sick {
+    position: absolute;
+    font-size: 2rem;
+    animation: sickFishAnim 2s infinite ease-in-out;
+    filter: grayscale(80%) sepia(50%) hue-rotate(90deg);
+}
+@keyframes sickFishAnim {
+    0% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-5px) rotate(15deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(5px) rotate(-15deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}

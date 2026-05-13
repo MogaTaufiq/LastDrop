@@ -223,26 +223,81 @@
         </div>
     </div>
 
-    <div class="scene task-scene" id="scene-task4">
+    <div class="scene task-scene" id="scene-task4" style="background: linear-gradient(180deg, #02111b 0%, #062b40 100%);">
         <div class="task-header">
-            <div class="task-number">Task 4 of 4 — Decision</div>
+            <div class="task-number" id="t4-step-indicator">Task 4 of 4 — Decision</div>
             <div class="task-title-text">🛢️ Clean Oil Spill</div>
-            <div class="task-instruction">Choose a method to clean up the oil spill</div>
+            <div class="task-instruction" id="t4-instruction">Choose a method to clean up the oil spill</div>
         </div>
-        <div class="oil-spill-area" id="oil-spill-clickable" style="bottom:30%;left:50%;transform:translateX(-50%);">
-            <svg id="oil-spill-svg" class="oil-spill-svg" width="350" height="200" viewBox="0 0 350 200"
-                xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="175" cy="80" rx="150" ry="50" fill="#1a1a0a" opacity="0.85" /><text x="175" y="130"
-                    text-anchor="middle" fill="#90e0ef" font-size="12" font-weight="bold" opacity="0.9">👆 Click to
-                    choose cleanup method</text>
-            </svg></div>
+
+        <!-- Main Ocean Canvas Area -->
+        <div class="t4-ocean-container" id="t4-ocean-container">
+            <!-- The Oil Blob -->
+            <div class="t4-oil-blob" id="t4-oil-blob"></div>
+
+            <!-- Method A: Boom Drawing Canvas -->
+            <canvas id="t4-boom-canvas" class="hidden"></canvas>
+            <button id="btn-t4-ignite" class="hidden pulsing-btn danger" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">🔥 IGNITE</button>
+
+            <!-- Method B: Boat & Underwater -->
+            <div id="t4-boat" class="hidden">🚢</div>
+            <canvas id="t4-spray-canvas" class="hidden"></canvas>
+
+            <div id="t4-underwater-scene" class="hidden">
+                <div class="t4-pipe"></div>
+                <div class="t4-bubbles" id="t4-bubbles"></div>
+                <div class="t4-inject-target" id="t4-inject-target"></div>
+                <div class="t4-inject-counter" id="t4-inject-counter">Injections: 0/3</div>
+            </div>
+
+            <div id="t4-fish-container" class="hidden"></div>
+
+            <!-- Progress bar for combustion / spraying -->
+            <div id="t4-action-progress-container" class="hidden">
+                <div id="t4-action-progress-bar"></div>
+            </div>
+            
+            <!-- Result Overlay Card in Ocean -->
+            <div class="t4-result-card hidden" id="t4-result-card">
+                <div id="t4-result-icon">✅</div>
+                <div id="t4-result-title">Oil successfully removed by combustion.</div>
+                <div class="t4-result-stats">
+                    <div class="t4-r-stat">Water Quality: <span id="t4-r-water">+25</span></div>
+                    <div class="t4-r-stat">Biodiversity: <span id="t4-r-bio" class="">+5</span></div>
+                </div>
+                <div id="t4-result-warning" class="hidden warning-text"></div>
+                <div id="t4-result-info" class="info-text"></div>
+                <button class="modal-btn mt-10" id="btn-t4-complete">Complete Task ✓</button>
+            </div>
+        </div>
+
+        <!-- Bottom UI Area -->
+        <div class="t4-bottom-ui" id="t4-bottom-ui">
+            <!-- Method Selection -->
+            <div class="t4-method-selection" id="t4-method-selection">
+                <div class="t4-method-card" id="btn-method-a">
+                    <div class="t4-card-title">🔥 In-Situ Burning</div>
+                    <div class="t4-card-stats">Water +25 | Bio +5</div>
+                    <div class="t4-card-tag recommended">Recommended</div>
+                </div>
+                <div class="t4-method-card" id="btn-method-b">
+                    <div class="t4-card-title">🧪 Corexit Dispersant</div>
+                    <div class="t4-card-stats">Water +20 | Bio -15</div>
+                    <div class="t4-card-tag warning">⚠ May harm marine life</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="scene" id="scene-complete">
         <div class="complete-content">
             <div class="complete-icon">🌊</div>
-            <div class="complete-title">ALL TASKS COMPLETED</div>
+            <div class="complete-title">ALL TASKS COMPLETED! 🌊</div>
             <div class="complete-subtitle">The coastal environment is improving.</div>
+            
+            <!-- Dynamic Choice Badge -->
+            <div id="complete-choice-badge" class="badge"></div>
+            
             <div class="complete-stats">
                 <div class="stat-box">
                     <div class="stat-value" id="final-water">60%</div>
@@ -264,81 +319,6 @@
             <div class="modal-body">A pollution crisis has been detected in the <strong>Coastal
                     Area</strong>!<br>Complete all tasks to restore environmental balance.</div><button
                 class="modal-btn" id="btn-start-mission">▶ Start Mission</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay decision-modal" id="modal-decision">
-        <div class="modal-box">
-            <div class="modal-icon">🛢️</div>
-            <div class="modal-title">Choose Cleanup Method</div>
-            <div class="decision-options">
-                <div class="decision-card burning" id="btn-burning">
-                    <div class="card-icon">🔥</div>
-                    <div class="card-title">In-Situ Burning</div>
-                    <div class="card-effects"><span class="effect-positive">💧 +25</span> <span
-                            class="effect-positive">🦋 +5</span></div>
-                </div>
-                <div class="decision-card chemical" id="btn-chemical">
-                    <div class="card-icon">⚗️</div>
-                    <div class="card-title">Corexit</div>
-                    <div class="card-effects"><span class="effect-positive">💧 +20</span> <span
-                            class="effect-negative">🦋 -15</span></div>
-                    <div class="decision-warning" id="chemical-warning">⚠️ This method may harm marine life due to toxic
-                        substances.</div>
-                </div>
-            </div>
-            <button class="modal-btn danger" onclick="Modal.hide('modal-decision')">Cancel</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay steps-modal" id="modal-burning-steps">
-        <div class="modal-box">
-            <div class="modal-icon">🔥</div>
-            <div class="modal-title success">In-Situ Burning</div>
-            <div class="step-item">
-                <div class="step-num fire">1</div>
-                <div class="step-content">
-                    <div class="step-title">Melokalisir Minyak</div>
-                    <div class="step-desc">Oil booms isolate spill.</div>
-                </div>
-            </div>
-            <div class="step-item">
-                <div class="step-num fire">2</div>
-                <div class="step-content">
-                    <div class="step-title">Penyalaan</div>
-                    <div class="step-desc">Ignition at localized oil.</div>
-                </div>
-            </div>
-            <div class="step-item">
-                <div class="step-num fire">3</div>
-                <div class="step-content">
-                    <div class="step-title">Pembakaran</div>
-                    <div class="step-desc">Burn hydrocarbons in situ.</div>
-                </div>
-            </div>
-            <div class="mt-20"><button class="modal-btn" id="btn-burning-done">✓ Complete</button></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay steps-modal" id="modal-chemical-steps">
-        <div class="modal-box">
-            <div class="modal-icon">⚗️</div>
-            <div class="modal-title">Corexit Application</div>
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <div class="step-content">
-                    <div class="step-title">Penyemprotan Permukaan</div>
-                    <div class="step-desc">Spray dispersant from vessel.</div>
-                </div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <div class="step-content">
-                    <div class="step-title">Injeksi Bawah Laut</div>
-                    <div class="step-desc">Inject at subsea leak point.</div>
-                </div>
-            </div>
-            <div class="mt-20"><button class="modal-btn" id="btn-chemical-done">✓ Complete</button></div>
         </div>
     </div>
 

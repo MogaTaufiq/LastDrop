@@ -1114,117 +1114,360 @@ function initTask3() {
 // ============================================
 function initTask4() {
     if (GameState.phase !== 'task4') return;
-    const oilSpill = document.getElementById('oil-spill-clickable');
+    
+    const stepIndicator = document.getElementById('t4-step-indicator');
+    const instruction = document.getElementById('t4-instruction');
+    const methodSelection = document.getElementById('t4-method-selection');
+    const btnMethodA = document.getElementById('btn-method-a');
+    const btnMethodB = document.getElementById('btn-method-b');
+    const oilBlob = document.getElementById('t4-oil-blob');
+    const oceanContainer = document.getElementById('t4-ocean-container');
+    const resultCard = document.getElementById('t4-result-card');
 
-    oilSpill.addEventListener('click', () => {
-        Modal.show('modal-decision');
-    });
+    btnMethodA.onclick = () => startMethodA();
+    btnMethodB.onclick = () => startMethodB();
 
-    // Decision: In-Situ Burning
-    document.getElementById('btn-burning').addEventListener('click', () => {
-        Modal.hide('modal-decision');
+    // ==========================================
+    // METHOD A: IN-SITU BURNING
+    // ==========================================
+    function startMethodA() {
+        methodSelection.classList.add('hidden');
         GameState.task4Choice = 'burning';
-        showBurningSteps();
-    });
+        
+        // Step 1: Localize
+        stepIndicator.textContent = 'Task 4: Step 1/3 — Containment';
+        instruction.textContent = 'Draw a containment boom around the oil spill!';
+        
+        const canvas = document.getElementById('t4-boom-canvas');
+        canvas.classList.remove('hidden');
+        canvas.width = oceanContainer.clientWidth;
+        canvas.height = oceanContainer.clientHeight;
+        const ctx = canvas.getContext('2d');
+        
+        let isDrawing = false;
+        let points = [];
+        
+        canvas.onmousedown = (e) => {
+            isDrawing = true;
+            points = [{x: e.offsetX, y: e.offsetY}];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+        
+        canvas.onmousemove = (e) => {
+            if (!isDrawing) return;
+            points.push({x: e.offsetX, y: e.offsetY});
+            drawPath(ctx, points, true);
+        };
+        
+        canvas.onmouseup = () => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            checkBoomSuccess(ctx, points);
+        };
 
-    // Decision: Corexit
-    document.getElementById('btn-chemical').addEventListener('click', () => {
-        Modal.hide('modal-decision');
+        // For touch support
+        canvas.ontouchstart = (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            isDrawing = true;
+            points = [{x: touch.clientX - rect.left, y: touch.clientY - rect.top}];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+        canvas.ontouchmove = (e) => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            points.push({x: touch.clientX - rect.left, y: touch.clientY - rect.top});
+            drawPath(ctx, points, true);
+        };
+        canvas.ontouchend = (e) => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            isDrawing = false;
+            checkBoomSuccess(ctx, points);
+        };
+    }
+
+    function drawPath(ctx, points, isDashed) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for(let i=1; i<points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.strokeStyle = '#ff9800';
+        ctx.lineWidth = 4;
+        ctx.setLineDash(isDashed ? [10, 10] : []);
+        ctx.stroke();
+    }
+
+    function checkBoomSuccess(ctx, points) {
+        if (points.length < 10) return;
+        const first = points[0];
+        const last = points[points.length-1];
+        const dist = Math.hypot(last.x - first.x, last.y - first.y);
+        
+        // Check if enclosed around center
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            if(p.x < minX) minX = p.x;
+            if(p.x > maxX) maxX = p.x;
+            if(p.y < minY) minY = p.y;
+            if(p.y > maxY) maxY = p.y;
+        });
+        
+        const cx = ctx.canvas.width/2;
+        const cy = ctx.canvas.height/2;
+        
+        if (dist < 60 && minX < cx && maxX > cx && minY < cy && maxY > cy) {
+            // Success
+            drawPath(ctx, points, false); // Solid line
+            canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = null;
+            canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
+            
+            instruction.textContent = 'Boom deployed! Oil contained.';
+            setTimeout(() => methodA_Step2(), 1000);
+        } else {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            instruction.textContent = 'Incomplete loop or missed oil. Try again!';
+        }
+    }
+
+    function methodA_Step2() {
+        stepIndicator.textContent = 'Task 4: Step 2/3 — Ignition';
+        instruction.textContent = 'The oil is contained. Click IGNITE to start controlled burning!';
+        
+        const igniteBtn = document.getElementById('btn-t4-ignite');
+        igniteBtn.classList.remove('hidden');
+        
+        igniteBtn.onclick = () => {
+            igniteBtn.classList.add('hidden');
+            instruction.textContent = 'Burning...';
+            
+            // Fire particles
+            Particles.burst(oceanContainer.clientWidth/2, oceanContainer.clientHeight/2, 20, ['🔥', '💨']);
+            Audio.play('fire_burning', { volume: 0.5 });
+            
+            // Shrink oil
+            oilBlob.style.transform = 'translate(-50%, -50%) scale(0.1)';
+            oilBlob.style.opacity = '0';
+            
+            // Progress Bar
+            const progContainer = document.getElementById('t4-action-progress-container');
+            const progBar = document.getElementById('t4-action-progress-bar');
+            progContainer.classList.remove('hidden');
+            
+            let prog = 0;
+            const interval = setInterval(() => {
+                prog += 4; // 2.5s total = 2500ms -> 25 iterations of 100ms -> 100/25 = 4
+                progBar.style.width = prog + '%';
+                
+                // Random smoke
+                if(Math.random() > 0.5) {
+                    Particles.burst(oceanContainer.clientWidth/2 + (Math.random()*40-20), oceanContainer.clientHeight/2 - 20, 1, ['💨']);
+                }
+
+                if (prog >= 100) {
+                    clearInterval(interval);
+                    progContainer.classList.add('hidden');
+                    methodA_Step3();
+                }
+            }, 100);
+        };
+    }
+
+    function methodA_Step3() {
+        stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
+        instruction.textContent = 'Cleanup complete.';
+        oceanContainer.style.background = 'linear-gradient(180deg, #0a4f7a 0%, #0d3a5c 100%)';
+        
+        resultCard.classList.remove('hidden');
+        document.getElementById('t4-result-icon').textContent = '✅';
+        document.getElementById('t4-result-title').textContent = 'Oil successfully removed by combustion.';
+        document.getElementById('t4-r-water').textContent = '+25';
+        document.getElementById('t4-r-bio').textContent = '+5';
+        document.getElementById('t4-result-info').textContent = 'In-situ burning physically removes oil from the water surface. Some air pollution occurs but marine ecosystem impact is minimal.';
+        
+        document.getElementById('btn-t4-complete').onclick = () => finishTask4('burning');
+    }
+
+    // ==========================================
+    // METHOD B: COREXIT DISPERSANT
+    // ==========================================
+    function startMethodB() {
+        methodSelection.classList.add('hidden');
         GameState.task4Choice = 'chemical';
-        showChemicalSteps();
-    });
+        
+        stepIndicator.textContent = 'Task 4: Step 1/3 — Surface Spraying';
+        instruction.textContent = 'Drag the boat across the oil spill to spray dispersant!';
+        
+        const boat = document.getElementById('t4-boat');
+        const canvas = document.getElementById('t4-spray-canvas');
+        boat.classList.remove('hidden');
+        canvas.classList.remove('hidden');
+        
+        canvas.width = oceanContainer.clientWidth;
+        canvas.height = oceanContainer.clientHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // Reset boat pos
+        let boatX = canvas.width / 2;
+        let boatY = canvas.height / 2 + 100;
+        boat.style.left = boatX + 'px';
+        boat.style.top = boatY + 'px';
+        
+        let isDragging = false;
+        let coverage = 0;
+        
+        const progContainer = document.getElementById('t4-action-progress-container');
+        const progBar = document.getElementById('t4-action-progress-bar');
+        progContainer.classList.remove('hidden');
+        
+        boat.onmousedown = (e) => { isDragging = true; };
+        document.onmousemove = (e) => {
+            if (!isDragging) return;
+            const rect = oceanContainer.getBoundingClientRect();
+            boatX = e.clientX - rect.left;
+            boatY = e.clientY - rect.top;
+            boat.style.left = boatX + 'px';
+            boat.style.top = boatY + 'px';
+            
+            // Spray
+            ctx.fillStyle = 'rgba(156, 39, 176, 0.2)';
+            ctx.beginPath();
+            ctx.arc(boatX, boatY, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Check if near center
+            const distFromCenter = Math.hypot(boatX - canvas.width/2, boatY - canvas.height/2);
+            if(distFromCenter < 120) {
+                coverage += 0.5;
+                progBar.style.width = Math.min(coverage, 100) + '%';
+                if(coverage >= 100) {
+                    isDragging = false;
+                    document.onmousemove = document.onmouseup = null;
+                    boat.ontouchmove = boat.ontouchend = null;
+                    instruction.textContent = 'Surface spraying complete!';
+                    progContainer.classList.add('hidden');
+                    setTimeout(() => methodB_Step2(), 1000);
+                }
+            }
+        };
+        document.onmouseup = () => { isDragging = false; };
 
-    // Hover warning for chemical
-    document.getElementById('btn-chemical').addEventListener('mouseenter', () => {
-        document.getElementById('chemical-warning').style.display = 'block';
-    });
-    document.getElementById('btn-chemical').addEventListener('mouseleave', () => {
-        document.getElementById('chemical-warning').style.display = 'none';
-    });
-}
-
-function showBurningSteps() {
-    const modal = document.getElementById('modal-burning-steps');
-    Modal.show('modal-burning-steps');
-
-    const steps = modal.querySelectorAll('.step-item');
-    steps.forEach((step, i) => {
-        setTimeout(() => {
-            step.classList.add('revealed');
-        }, i * 600);
-    });
-
-    Audio.play('fire_burning', { volume: 0.5 });
-
-    // Animate oil spill changing
-    animateOilCleanup('burning');
-
-    document.getElementById('btn-burning-done').addEventListener('click', () => {
-        Modal.hide('modal-burning-steps');
-        applyTask4Effects('burning');
-    }, { once: true });
-}
-
-function showChemicalSteps() {
-    const modal = document.getElementById('modal-chemical-steps');
-    Modal.show('modal-chemical-steps');
-
-    const steps = modal.querySelectorAll('.step-item');
-    steps.forEach((step, i) => {
-        setTimeout(() => {
-            step.classList.add('revealed');
-        }, i * 600);
-    });
-
-    Audio.play('chemical_spray', { volume: 0.5 });
-    animateOilCleanup('chemical');
-
-    document.getElementById('btn-chemical-done').addEventListener('click', () => {
-        Modal.hide('modal-chemical-steps');
-        applyTask4Effects('chemical');
-    }, { once: true });
-}
-
-function animateOilCleanup(method) {
-    const oilSpill = document.getElementById('oil-spill-svg');
-    if (!oilSpill) return;
-
-    if (method === 'burning') {
-        // Fire effect - orange glow
-        oilSpill.style.transition = 'filter 2s ease, opacity 3s ease';
-        oilSpill.style.filter = 'drop-shadow(0 0 30px rgba(255, 100, 0, 0.9)) hue-rotate(30deg)';
-        setTimeout(() => {
-            oilSpill.style.opacity = '0.2';
-        }, 2000);
-    } else {
-        // Chemical - fade to dispersed
-        oilSpill.style.transition = 'filter 2s ease, opacity 3s ease';
-        oilSpill.style.filter = 'drop-shadow(0 0 20px rgba(0, 180, 216, 0.6)) blur(4px)';
-        setTimeout(() => {
-            oilSpill.style.opacity = '0.3';
-        }, 2000);
+        // Touch support
+        boat.ontouchstart = (e) => { e.preventDefault(); isDragging = true; };
+        boat.ontouchmove = (e) => {
+            e.preventDefault();
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const rect = oceanContainer.getBoundingClientRect();
+            boatX = touch.clientX - rect.left;
+            boatY = touch.clientY - rect.top;
+            boat.style.left = boatX + 'px';
+            boat.style.top = boatY + 'px';
+            
+            ctx.fillStyle = 'rgba(156, 39, 176, 0.2)';
+            ctx.beginPath();
+            ctx.arc(boatX, boatY, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const distFromCenter = Math.hypot(boatX - canvas.width/2, boatY - canvas.height/2);
+            if(distFromCenter < 120) {
+                coverage += 1;
+                progBar.style.width = Math.min(coverage, 100) + '%';
+                if(coverage >= 100) {
+                    isDragging = false;
+                    document.onmousemove = document.onmouseup = null;
+                    boat.ontouchmove = boat.ontouchend = null;
+                    instruction.textContent = 'Surface spraying complete!';
+                    progContainer.classList.add('hidden');
+                    setTimeout(() => methodB_Step2(), 1000);
+                }
+            }
+        };
+        boat.ontouchend = () => { isDragging = false; };
     }
-}
 
-function applyTask4Effects(method) {
-    if (method === 'burning') {
-        GameState.updateWater(25);
-        GameState.updateBio(5);
-        Toast.show('Physical methods contain and remove oil directly.', '💧 Water Quality +25  🦋 Biodiversity +5', 4000);
-        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🔥', '✨', '💧', '🌊']);
-    } else {
-        GameState.updateWater(20);
-        GameState.updateBio(-15);
-        Toast.show('Chemical dispersants break down oil quickly.', '💧 Water Quality +20  ⚠️ Biodiversity -15', 4000);
-        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 10, ['⚗️', '💧', '⚠️']);
+    function methodB_Step2() {
+        stepIndicator.textContent = 'Task 4: Step 2/3 — Submarine Injection';
+        instruction.textContent = 'Click the injection point 3 times to inject dispersant into the leak source!';
+        
+        document.getElementById('t4-boat').classList.add('hidden');
+        document.getElementById('t4-spray-canvas').classList.add('hidden');
+        document.getElementById('t4-oil-blob').classList.add('hidden');
+        
+        const uwScene = document.getElementById('t4-underwater-scene');
+        uwScene.classList.remove('hidden');
+        
+        const injectTarget = document.getElementById('t4-inject-target');
+        const counter = document.getElementById('t4-inject-counter');
+        
+        let clicks = 0;
+        injectTarget.onclick = () => {
+            clicks++;
+            counter.textContent = `Injections: ${clicks}/3`;
+            
+            // Bubbles
+            Particles.burst(oceanContainer.clientWidth/2, oceanContainer.clientHeight - 80, 5, ['🫧', '💧']);
+            Audio.play('chemical_spray', { volume: 0.5 });
+            
+            if (clicks >= 3) {
+                injectTarget.onclick = null;
+                instruction.textContent = 'Injection complete.';
+                setTimeout(() => methodB_Step3(), 1000);
+            }
+        };
     }
 
-    GameState.completeTask(3);
-    Audio.play('task_complete', { volume: 0.8 });
+    function methodB_Step3() {
+        stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
+        instruction.textContent = 'Cleanup complete.';
+        
+        // Show sick fish
+        const fishContainer = document.getElementById('t4-fish-container');
+        fishContainer.classList.remove('hidden');
+        fishContainer.innerHTML = `
+            <div class="fish-sick" style="top: 30%; left: 30%;">🐟</div>
+            <div class="fish-sick" style="top: 50%; left: 70%; animation-delay: 0.5s;">🐠</div>
+            <div class="fish-sick" style="top: 70%; left: 40%; animation-delay: 1s;">🐡</div>
+        `;
+        
+        resultCard.classList.remove('hidden');
+        document.getElementById('t4-result-icon').textContent = '⚠️';
+        document.getElementById('t4-result-title').textContent = 'Oil dispersed — but not removed.';
+        
+        document.getElementById('t4-r-water').textContent = '+20';
+        
+        const bioSpan = document.getElementById('t4-r-bio');
+        bioSpan.textContent = '−15';
+        bioSpan.classList.add('negative');
+        
+        const warning = document.getElementById('t4-result-warning');
+        warning.classList.remove('hidden');
+        warning.innerHTML = 'Chemical dispersants break oil into tiny droplets that remain in the water column, making them more accessible to marine life. Toxic to fish, coral, and plankton.';
+        
+        document.getElementById('t4-result-info').textContent = 'Used in Deepwater Horizon (2010) — still debated by scientists.';
+        
+        document.getElementById('btn-t4-complete').onclick = () => finishTask4('chemical');
+    }
 
-    setTimeout(() => {
+    function finishTask4(method) {
+        if (method === 'burning') {
+            GameState.updateWater(25);
+            GameState.updateBio(5);
+            Audio.play('task_complete', { volume: 0.8 });
+        } else {
+            GameState.updateWater(20);
+            GameState.updateBio(-15);
+            Audio.play('task_complete', { volume: 0.8 });
+        }
+        
+        GameState.completeTask(3);
         showCompletion();
-    }, 4500);
+    }
 }
 
 // ============================================
@@ -1239,6 +1482,16 @@ function showCompletion() {
         // Update final stats
         document.getElementById('final-water').textContent = GameState.waterQuality + '%';
         document.getElementById('final-bio').textContent = GameState.biodiversity + '%';
+
+        // Set choice badge
+        const badge = document.getElementById('complete-choice-badge');
+        if (GameState.task4Choice === 'burning') {
+            badge.textContent = '✓ Eco-Friendly Choice (In-Situ Burning)';
+            badge.className = 'badge eco';
+        } else if (GameState.task4Choice === 'chemical') {
+            badge.textContent = '⚠ Effective but Costly (Corexit)';
+            badge.className = 'badge costly';
+        }
 
         // Confetti burst
         setTimeout(() => {
@@ -1260,9 +1513,9 @@ function showCompletion() {
     });
 
     // Restart button
-    document.getElementById('btn-restart').addEventListener('click', () => {
+    document.getElementById('btn-restart').onclick = () => {
         location.reload();
-    });
+    };
 }
 
 // ============================================
