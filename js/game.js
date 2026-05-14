@@ -1140,26 +1140,38 @@ function initTask4() {
         
         const canvas = document.getElementById('t4-boom-canvas');
         canvas.classList.remove('hidden');
-        canvas.width = oceanContainer.clientWidth;
-        canvas.height = oceanContainer.clientHeight;
+        // Use getBoundingClientRect for accurate sizing after layout
+        const rect = oceanContainer.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
         const ctx = canvas.getContext('2d');
         
         let isDrawing = false;
         let points = [];
         
         canvas.onmousedown = (e) => {
+            e.preventDefault();
             isDrawing = true;
-            points = [{x: e.offsetX, y: e.offsetY}];
+            const cr = canvas.getBoundingClientRect();
+            points = [{x: e.clientX - cr.left, y: e.clientY - cr.top}];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
         
         canvas.onmousemove = (e) => {
             if (!isDrawing) return;
-            points.push({x: e.offsetX, y: e.offsetY});
+            const cr = canvas.getBoundingClientRect();
+            points.push({x: e.clientX - cr.left, y: e.clientY - cr.top});
             drawPath(ctx, points, true);
         };
         
-        canvas.onmouseup = () => {
+        canvas.onmouseup = (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            checkBoomSuccess(ctx, points);
+        };
+
+        // Also handle mouse leaving canvas while drawing
+        canvas.onmouseleave = (e) => {
             if (!isDrawing) return;
             isDrawing = false;
             checkBoomSuccess(ctx, points);
@@ -1169,17 +1181,17 @@ function initTask4() {
         canvas.ontouchstart = (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
+            const cr = canvas.getBoundingClientRect();
             isDrawing = true;
-            points = [{x: touch.clientX - rect.left, y: touch.clientY - rect.top}];
+            points = [{x: touch.clientX - cr.left, y: touch.clientY - cr.top}];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
         canvas.ontouchmove = (e) => {
             e.preventDefault();
             if (!isDrawing) return;
             const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            points.push({x: touch.clientX - rect.left, y: touch.clientY - rect.top});
+            const cr = canvas.getBoundingClientRect();
+            points.push({x: touch.clientX - cr.left, y: touch.clientY - cr.top});
             drawPath(ctx, points, true);
         };
         canvas.ontouchend = (e) => {
@@ -1204,12 +1216,12 @@ function initTask4() {
     }
 
     function checkBoomSuccess(ctx, points) {
-        if (points.length < 10) return;
+        if (points.length < 8) return;
         const first = points[0];
         const last = points[points.length-1];
         const dist = Math.hypot(last.x - first.x, last.y - first.y);
         
-        // Check if enclosed around center
+        // Bounding box of drawn path
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         points.forEach(p => {
             if(p.x < minX) minX = p.x;
@@ -1218,20 +1230,42 @@ function initTask4() {
             if(p.y > maxY) maxY = p.y;
         });
         
-        const cx = ctx.canvas.width/2;
-        const cy = ctx.canvas.height/2;
+        const cw = ctx.canvas.width;
+        const ch = ctx.canvas.height;
+        // Oil blob center is at 50%,50% of ocean container
+        const cx = cw / 2;
+        const cy = ch / 2;
+        // Loop must: be closed (start~end within 80px), span must enclose blob center
+        const spanX = maxX - minX;
+        const spanY = maxY - minY;
+        const closed = dist < 80;
+        const enclosesOil = minX < cx && maxX > cx && minY < cy && maxY > cy;
+        const bigEnough = spanX > 60 && spanY > 40;
         
-        if (dist < 60 && minX < cx && maxX > cx && minY < cy && maxY > cy) {
-            // Success
-            drawPath(ctx, points, false); // Solid line
-            canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = null;
+        if (closed && enclosesOil && bigEnough) {
+            // Success — draw solid boom
+            drawPath(ctx, points, false);
+            // Draw success checkmark text
+            ctx.fillStyle = '#ff9800';
+            ctx.font = 'bold 18px Exo 2, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✔ Boom Deployed!', cx, cy - 90);
+            
+            const canvas = document.getElementById('t4-boom-canvas');
+            canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
             canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
             
-            instruction.textContent = 'Boom deployed! Oil contained.';
-            setTimeout(() => methodA_Step2(), 1000);
+            instruction.textContent = '✔ Boom deployed! Oil contained.';
+            setTimeout(() => methodA_Step2(), 1200);
         } else {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            instruction.textContent = 'Incomplete loop or missed oil. Try again!';
+            if (!closed) {
+                instruction.textContent = 'Loop not closed! Bring the line back to start. Try again!';
+            } else if (!enclosesOil) {
+                instruction.textContent = 'Loop missed the oil spill! Draw around the dark blob. Try again!';
+            } else {
+                instruction.textContent = 'Loop too small! Draw a bigger circle. Try again!';
+            }
         }
     }
 
@@ -1244,29 +1278,43 @@ function initTask4() {
         
         igniteBtn.onclick = () => {
             igniteBtn.classList.add('hidden');
-            instruction.textContent = 'Burning...';
+            instruction.textContent = '🔥 Burning in progress...';
             
-            // Fire particles
-            Particles.burst(oceanContainer.clientWidth/2, oceanContainer.clientHeight/2, 20, ['🔥', '💨']);
+            // Get viewport coords of ocean container center for particles
+            const rect = oceanContainer.getBoundingClientRect();
+            const vcx = rect.left + rect.width / 2;
+            const vcy = rect.top + rect.height / 2;
+            
+            // Fire particles at correct viewport coordinates
+            Particles.burst(vcx, vcy, 20, ['🔥', '💨', '🔥']);
             Audio.play('fire_burning', { volume: 0.5 });
             
-            // Shrink oil
-            oilBlob.style.transform = 'translate(-50%, -50%) scale(0.1)';
-            oilBlob.style.opacity = '0';
+            // Stop CSS animation then shrink oil blob
+            oilBlob.style.animation = 'none';
+            oilBlob.style.transition = 'transform 2.5s ease-out, opacity 2.5s ease-out';
+            // Small delay so transition kicks in after animation:none
+            setTimeout(() => {
+                oilBlob.style.transform = 'translate(-50%, -50%) scale(0.05)';
+                oilBlob.style.opacity = '0';
+            }, 30);
             
             // Progress Bar
             const progContainer = document.getElementById('t4-action-progress-container');
             const progBar = document.getElementById('t4-action-progress-bar');
+            progBar.style.width = '0%';
+            progBar.style.background = 'linear-gradient(90deg, #ff9800, #ffeb3b)';
             progContainer.classList.remove('hidden');
             
             let prog = 0;
             const interval = setInterval(() => {
-                prog += 4; // 2.5s total = 2500ms -> 25 iterations of 100ms -> 100/25 = 4
+                prog += 4;
                 progBar.style.width = prog + '%';
                 
-                // Random smoke
-                if(Math.random() > 0.5) {
-                    Particles.burst(oceanContainer.clientWidth/2 + (Math.random()*40-20), oceanContainer.clientHeight/2 - 20, 1, ['💨']);
+                // Random fire/smoke bursts at viewport coords
+                if (Math.random() > 0.6) {
+                    const offsetX = (Math.random() * 80) - 40;
+                    const offsetY = (Math.random() * 40) - 60;
+                    Particles.burst(vcx + offsetX, vcy + offsetY, 2, ['🔥', '💨']);
                 }
 
                 if (prog >= 100) {
@@ -1308,85 +1356,92 @@ function initTask4() {
         boat.classList.remove('hidden');
         canvas.classList.remove('hidden');
         
-        canvas.width = oceanContainer.clientWidth;
-        canvas.height = oceanContainer.clientHeight;
+        // Use getBoundingClientRect for accurate sizing
+        const rect = oceanContainer.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
         const ctx = canvas.getContext('2d');
         
-        // Reset boat pos
+        // Reset boat pos — use left/top without transform offset
+        // Boat CSS has transform: translate(-50%,-50%) so left/top is its center
         let boatX = canvas.width / 2;
-        let boatY = canvas.height / 2 + 100;
+        let boatY = canvas.height * 0.7;
         boat.style.left = boatX + 'px';
         boat.style.top = boatY + 'px';
         
         let isDragging = false;
         let coverage = 0;
+        let done = false;
         
         const progContainer = document.getElementById('t4-action-progress-container');
         const progBar = document.getElementById('t4-action-progress-bar');
+        progBar.style.width = '0%';
+        progBar.style.background = 'linear-gradient(90deg, #9c27b0, #ce93d8)';
         progContainer.classList.remove('hidden');
-        
-        boat.onmousedown = (e) => { isDragging = true; };
-        document.onmousemove = (e) => {
-            if (!isDragging) return;
-            const rect = oceanContainer.getBoundingClientRect();
-            boatX = e.clientX - rect.left;
-            boatY = e.clientY - rect.top;
-            boat.style.left = boatX + 'px';
-            boat.style.top = boatY + 'px';
-            
-            // Spray
-            ctx.fillStyle = 'rgba(156, 39, 176, 0.2)';
+
+        function stopB1() {
+            done = true;
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            boat.ontouchstart = boat.ontouchmove = boat.ontouchend = null;
+            boat.onmousedown = null;
+            instruction.textContent = '✔ Surface spraying complete!';
+            progContainer.classList.add('hidden');
+            setTimeout(() => methodB_Step2(), 1000);
+        }
+
+        function updateCoverage(bx, by) {
+            // Draw spray circle on canvas
+            ctx.fillStyle = 'rgba(156, 39, 176, 0.18)';
             ctx.beginPath();
-            ctx.arc(boatX, boatY, 20, 0, Math.PI * 2);
+            ctx.arc(bx, by, 25, 0, Math.PI * 2);
+            ctx.fill();
+            // Add a bright center dot
+            ctx.fillStyle = 'rgba(206, 147, 216, 0.4)';
+            ctx.beginPath();
+            ctx.arc(bx, by, 8, 0, Math.PI * 2);
             ctx.fill();
             
-            // Check if near center
-            const distFromCenter = Math.hypot(boatX - canvas.width/2, boatY - canvas.height/2);
-            if(distFromCenter < 120) {
-                coverage += 0.5;
+            // Coverage increases when dragging near the oil (center area)
+            const distFromCenter = Math.hypot(bx - canvas.width / 2, by - canvas.height / 2);
+            if (distFromCenter < 130) {
+                coverage += 0.8;
                 progBar.style.width = Math.min(coverage, 100) + '%';
-                if(coverage >= 100) {
-                    isDragging = false;
-                    document.onmousemove = document.onmouseup = null;
-                    boat.ontouchmove = boat.ontouchend = null;
-                    instruction.textContent = 'Surface spraying complete!';
-                    progContainer.classList.add('hidden');
-                    setTimeout(() => methodB_Step2(), 1000);
-                }
+                if (coverage >= 100 && !done) stopB1();
             }
-        };
-        document.onmouseup = () => { isDragging = false; };
+        }
+
+        function onMouseMove(e) {
+            if (!isDragging || done) return;
+            const r = oceanContainer.getBoundingClientRect();
+            boatX = e.clientX - r.left;
+            boatY = e.clientY - r.top;
+            // Clamp inside container
+            boatX = Math.max(0, Math.min(canvas.width, boatX));
+            boatY = Math.max(0, Math.min(canvas.height, boatY));
+            boat.style.left = boatX + 'px';
+            boat.style.top = boatY + 'px';
+            updateCoverage(boatX, boatY);
+        }
+        function onMouseUp() { isDragging = false; }
+
+        boat.onmousedown = (e) => { e.preventDefault(); isDragging = true; };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
 
         // Touch support
         boat.ontouchstart = (e) => { e.preventDefault(); isDragging = true; };
         boat.ontouchmove = (e) => {
             e.preventDefault();
-            if (!isDragging) return;
+            if (!isDragging || done) return;
             const touch = e.touches[0];
-            const rect = oceanContainer.getBoundingClientRect();
-            boatX = touch.clientX - rect.left;
-            boatY = touch.clientY - rect.top;
+            const r = oceanContainer.getBoundingClientRect();
+            boatX = Math.max(0, Math.min(canvas.width, touch.clientX - r.left));
+            boatY = Math.max(0, Math.min(canvas.height, touch.clientY - r.top));
             boat.style.left = boatX + 'px';
             boat.style.top = boatY + 'px';
-            
-            ctx.fillStyle = 'rgba(156, 39, 176, 0.2)';
-            ctx.beginPath();
-            ctx.arc(boatX, boatY, 20, 0, Math.PI * 2);
-            ctx.fill();
-            
-            const distFromCenter = Math.hypot(boatX - canvas.width/2, boatY - canvas.height/2);
-            if(distFromCenter < 120) {
-                coverage += 1;
-                progBar.style.width = Math.min(coverage, 100) + '%';
-                if(coverage >= 100) {
-                    isDragging = false;
-                    document.onmousemove = document.onmouseup = null;
-                    boat.ontouchmove = boat.ontouchend = null;
-                    instruction.textContent = 'Surface spraying complete!';
-                    progContainer.classList.add('hidden');
-                    setTimeout(() => methodB_Step2(), 1000);
-                }
-            }
+            updateCoverage(boatX, boatY);
         };
         boat.ontouchend = () => { isDragging = false; };
     }
@@ -1397,27 +1452,44 @@ function initTask4() {
         
         document.getElementById('t4-boat').classList.add('hidden');
         document.getElementById('t4-spray-canvas').classList.add('hidden');
-        document.getElementById('t4-oil-blob').classList.add('hidden');
+        // Hide surface oil blob — transitioning to underwater view
+        oilBlob.classList.add('hidden');
+        
+        // Hide & reset progress bar from step 1
+        const progContainer = document.getElementById('t4-action-progress-container');
+        const progBar = document.getElementById('t4-action-progress-bar');
+        progContainer.classList.add('hidden');
+        progBar.style.width = '0%';
         
         const uwScene = document.getElementById('t4-underwater-scene');
         uwScene.classList.remove('hidden');
         
         const injectTarget = document.getElementById('t4-inject-target');
         const counter = document.getElementById('t4-inject-counter');
+        counter.textContent = 'Injections: 0/3';
         
         let clicks = 0;
         injectTarget.onclick = () => {
             clicks++;
             counter.textContent = `Injections: ${clicks}/3`;
             
-            // Bubbles
-            Particles.burst(oceanContainer.clientWidth/2, oceanContainer.clientHeight - 80, 5, ['🫧', '💧']);
+            // Animate inject target briefly
+            injectTarget.style.background = 'rgba(156,39,176,0.4)';
+            setTimeout(() => { injectTarget.style.background = ''; }, 300);
+            
+            // Particles at viewport coords of the inject target
+            const r = injectTarget.getBoundingClientRect();
+            const vx = r.left + r.width / 2;
+            const vy = r.top + r.height / 2;
+            Particles.burst(vx, vy, 6, ['🫧', '💧', '🟣']);
             Audio.play('chemical_spray', { volume: 0.5 });
             
             if (clicks >= 3) {
                 injectTarget.onclick = null;
-                instruction.textContent = 'Injection complete.';
-                setTimeout(() => methodB_Step3(), 1000);
+                injectTarget.style.animation = 'none';
+                injectTarget.style.borderColor = '#4caf50';
+                instruction.textContent = '✔ Injection complete. Dispersant deployed!';
+                setTimeout(() => methodB_Step3(), 1200);
             }
         };
     }
