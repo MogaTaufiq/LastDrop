@@ -95,10 +95,12 @@ The single source of truth for game progression.
 |---|---|---|---|
 | `waterQuality` | number | 60 | 0–100, displayed in HUD |
 | `biodiversity` | number | 50 | 0–100, displayed in HUD |
-| `tasksCompleted` | boolean[4] | `[false,false,false,false]` | Index 0–3 maps to Task 1–4 |
+| `tasksCompleted` | boolean[4] | `[false,false,false,false]` | Index 0–3 maps to Coastal Task 1–4 |
+| `agriCompleted` | boolean | `false` | True when Agricultural tasks are done |
+| `indCompleted` | boolean | `false` | True when Industrial tasks are done |
 | `currentScene` | string | `'landing'` | Active scene ID |
 | `task4Choice` | string\|null | null | `'burning'` or `'chemical'` |
-| `phase` | string | `'landing'` | Flow guard: `'landing'` → `'cinematic'` → `'map'` → `'task1'` → `'task2'` → `'task3'` → `'task4'` → `'complete'` |
+| `phase` | string | `'landing'` | Flow guard string to prevent duplicate inits |
 | `currentArea` | string | undefined | Set when player enters a map area (`enterArea()`) |
 
 **Methods:**
@@ -220,18 +222,27 @@ All scenes are `<div class="scene" id="...">`. Only one has `.active` at a time.
 |---|---|---|
 | `scene-landing` | `'landing'` | Title screen — animated stars, waves, "LAST DROP" logo, tap-to-start |
 | `scene-cinematic` | `'cinematic'` | 12-slide story intro — inline SVG illustrations + nav dots + Next button |
-| `scene-map` | `'map'` | Top-down island map — WASD movement, press E to enter area |
+| `scene-residential` | `'residential'` | New 2D Base World — Player spawn point after cinematic. WASD movement |
 | `scene-task1` | `'task1'` | Save trapped turtle — click to free, progress bar |
 | `scene-task2` | `'task2'` | Clean beach plastic — click 8 trash items |
 | `scene-task3` | `'task3'` | Stop oil leak — click pipe, progress bar |
 | `scene-task4` | `'task4'` | Clean oil spill — **decision point** (Method A or B), 3-step mini-game |
-| `scene-complete` | `'complete'` | Completion screen — final stats, choice badge, confetti |
+| `scene-agri-task1` | `'agri1'` | Agricultural Task 1 — Click red pulse to identify pollution source, typing text effect |
+| `scene-agri-task2` | `'agri2'` | Agricultural Task 2 — Plant buffer strips (8 slots), reduces river opacity |
+| `scene-ind-task1`  | `'ind1'`  | Industrial Task 1 — Locate waste source |
+| `scene-ind-task2`  | `'ind2'`  | Industrial Task 2 — Stop direct discharge by dragging missing bolts and tightening with a wrench |
+| `scene-ind-task3`  | `'ind3'`  | Industrial Task 3 — Treat wastewater with 3 methods (Filtration, Chemical, Bacteria) |
+| `scene-reflection` | `'reflection'` | Reflection scene — Beautiful island background with typing key messages |
 
 **Static overlay elements** (always in DOM, not scene-based):
 - `#feedback-toast` — bottom toast notification
-- `#game-hud` — top-left HUD bars (shown after map entry)
-- `#todo-panel` — top-right mission checklist (shown after map entry)
-- `#modal-map-alert` — initial crisis modal on map
+- `#game-hud` — top-left HUD bars (Water Quality & Biodiversity)
+- `#mini-map-container` — top-right minimap for fast travel between areas
+- `#todo-panel` — bottom-right mission checklist (shown only inside task areas)
+- `#areas-counter` — top-left counter for remaining areas
+- `#modal-map-alert` — crisis modal alert overlay
+- `#modal-mission-intro` — mission intro modal for each area
+- `#modal-you-survived` — final completion modal
 - `.modal-overlay` (dynamic) — created by `showContinueModal()`
 
 ---
@@ -249,17 +260,20 @@ Landing Click (once)
      phase = 'cinematic'
 
 12x Next → / click
-  └─ [last slide] → phase = 'map'
+  └─ [last slide] → phase = 'residential'
      stop cinematic_bg, play ambient_ocean (loop)
-     └─ SceneManager.show('scene-map') → initMap()
+     └─ SceneManager.show('scene-residential') → initResidential()
 
-initMap()
-  └─ HUD.show(), TodoPanel.show() (shown on task entry)
-  └─ WASD player movement, collision detection with .map-area
-  └─ Press E on any area → enterArea(areaName)
-     └─ ALL areas → scene-task1 (all 4 areas currently route to Task 1)
-     phase = 'task1'
-     └─ SceneManager.show('scene-task1') → initTask1()
+initResidential()
+  └─ HUD.show(), showMiniMap(), TodoPanel.hide()
+  └─ WASD player movement in Residential base
+  └─ Triggers Coastal Alert → click "Start Mission" → enterArea('coastal')
+  └─ Or click directly on the Minimap to fast travel.
+
+enterArea(areaName)
+  └─ routes to respective area (e.g., 'coastal' or 'agricultural')
+  └─ checks completion prerequisites (e.g. Agricultural needs Coastal done)
+  └─ Shows TodoPanel, SceneManager.show('scene-task1') -> initTask1()
 
 initTask1() — Save Turtle
   └─ Click turtle → progress fills → completeTask1()
@@ -324,16 +338,20 @@ showCompletion()
 | `modal-map-alert` | div | Initial crisis modal overlay |
 | `btn-start-mission` | button | Dismisses crisis modal |
 
-### Scene: Map
+### Scene: Minimap (Top-Right Overlay)
 | ID | Purpose |
 |---|---|
-| `map-bounds` | Constrains player movement |
-| `player-char` | 🧍 emoji, moved via `transform: translate(x,y)` |
-| `interact-prompt` | "Press [E]" prompt, toggled via `.hidden` |
-| `map-industrial` | Map area — Industrial (data-area="industrial") |
-| `map-agricultural` | Map area — Agricultural |
-| `map-residential` | Map area — Residential |
-| `map-coastal` | Map area — Coastal (has pulse animation + crisis badge) |
+| `mini-map-container` | Container for the Minimap UI (`.visible` toggles display) |
+| `map-industrial` | Map area — click to travel to Industrial (data-area="industrial") |
+| `map-agricultural` | Map area — click to travel to Agricultural |
+| `map-residential` | Map area — click to travel to Residential |
+| `map-coastal` | Map area — click to travel to Coastal (has pulse animation + crisis badge) |
+
+### Scene: Residential Base World
+| ID | Purpose |
+|---|---|
+| `residential-player` | 🧍 emoji, moved via `transform: translate(x,y)` with WASD keys |
+| `areas-counter` | "X areas left to solve" HUD counter |
 
 ### Scene: Task 1
 | ID | Purpose |
@@ -399,17 +417,36 @@ showCompletion()
 | `final-bio` | Final Biodiversity % |
 | `btn-restart` | Reload page |
 
+### Scene: Industrial (Tasks 1-3)
+| ID | Purpose |
+|---|---|
+| `ind-pipe-area` | Clickable area to identify pollution source in Task 1 |
+| `ind1-typing-text` | Educational typing text in Task 1 |
+| `ind2-bolts-container` | Container for draggable bolts and slots |
+| `ind2-toolbox` | Toolbox holding missing bolts |
+| `ind2-wrench` | Clickable wrench tool |
+| `ind3-pool-water` | Wastewater pool SVG rect, changes color based on treatment |
+| `ind3-method-selection` | Buttons for wastewater treatment choice |
+| `ind3-typing-text` | Result text after treatment |
+
+### Scene: Reflection
+| ID | Purpose |
+|---|---|
+| `reflection-text-container` | Types key messages |
+| `modal-you-survived` | Final "YOU SURVIVED" modal |
+
 ---
 
-## 9. Map Area Collision & Movement
+## 9. Navigation & Minimap Logic
 
-- **Player movement:** WASD keys; handled in `gameLoop()` via `requestAnimationFrame`
-- **Position tracking:** `x`, `y` local vars in `initMap()` scope; applied via `transform: translate(x,y)` on `#player-char`
-- **Bounds:** clamped to `(0, maxX)` × `(0, maxY)` where max = `bounds.clientWidth/Height - 40`
-- **Collision detection:** `getBoundingClientRect()` AABB check in `checkCollisions()` against all `.map-area` elements
-- **Interaction:** Press `E` while `activeZone` is set → `enterArea(areaName)` → all areas currently route to Task 1
-- **`window.keys`:** `{ w, a, s, d, e: boolean }` — set on `window` to survive re-init. Guard: `mapControllerActive` flag prevents duplicate event listener registration.
-- **`activeZone`:** string (area name) or null — tracks which area the player is currently overlapping
+- **World Navigation:** Player can move around the 2D Residential Base (`scene-residential`) using WASD keys.
+- **Minimap Fast Travel:** The map is now a permanent UI element in the top-right corner. WASD movement inside the map was removed. 
+- **Interaction:** Players simply click on a `.map-area` in the Minimap to trigger `enterArea(areaName)`.
+- **Area Routing:** `enterArea()` contains the logic to route the player:
+  - `coastal` → goes to Task 1
+  - `agricultural` → goes to Agri Task 1 (requires Coastal to be completed first)
+  - `residential` → returns to base world
+- **Todo Panel Visibility:** The `#todo-panel` is positioned at the bottom-right and is hidden via `TodoPanel.hide()` when returning to `residential`, ensuring a clean base world UI.
 
 ---
 
@@ -468,15 +505,17 @@ All audio files are expected in `assets/audio/` but the directory is currently *
 
 | Event | Water Quality | Biodiversity |
 |---|---|---|
-| Task 1 complete (save turtle) | — | +10 |
-| Task 2 complete (clean beach) | +10 | +5 |
-| Task 3 complete (stop leak) | — | — |
-| Task 4 Method A (burning) | +25 | +5 |
-| Task 4 Method B (Corexit) | +20 | -15 |
-| **Best ending total** | 95% | 70% |
-| **Worst ending total** | 90% | 50% |
+| Coastal Task 1 (save turtle) | — | +10 |
+| Coastal Task 2 (clean beach) | +10 | +5 |
+| Coastal Task 3 (stop leak) | — | — |
+| Coastal Task 4 Method A (burning) | +25 | +5 |
+| Coastal Task 4 Method B (Corexit) | +20 | -15 |
+| Agricultural Task 2 (buffer strips) | +15 | +10 |
+| Industrial Task 3 (Bacteria - Best) | +15 | +15 |
+| Industrial Task 3 (Chemical) | +20 | — |
+| Industrial Task 3 (Filtration) | +15 | — |
 
-Starting values: Water Quality 60, Biodiversity 50.
+Starting values: Water Quality 60, Biodiversity 50. (Values clamp at 0 and 100).
 
 ---
 
@@ -484,7 +523,8 @@ Starting values: Water Quality 60, Biodiversity 50.
 
 | Date | Change | Session/Agent |
 |---|---|---|
-| 2026-05-14 | Created `AGENTS.md` — full project documentation | Antigravity |
+| 2026-05-16 | Industrial Task 3 Complete Redesign: Fixed text box responsiveness in Tasks 1-3, redesigned Task 3 with SVG wastewater treatment pools visual, implemented 3 interactive game mechanics (Filtration: click 3 filter layers; Chemical: drag bottle to pool; Bacteria: feed 3 times). Each method has unique gameplay interaction. | GitHub Copilot |
+| 2026-05-16 | Fixed mini-map z-index from 200 to 1000 and added pointer-events:auto on visible state to prevent overlay obstruction | GitHub Copilot |
 | 2026-05-13 | Fixed Task 4 — boom canvas sizing, boat drag event cleanup, Corexit progress tracking | Session `62f4ea7c` |
 | 2026-05-09–13 | Implemented Task 4 (both methods), completion screen choice badge | Session `fccc00f4` |
 | Earlier | Core game engine, Tasks 1–3, cinematic, map | — |
@@ -494,7 +534,6 @@ Starting values: Water Quality 60, Biodiversity 50.
 ## 16. What To Do Next / Open Items
 
 - [ ] Add audio files to `assets/audio/` for full experience
-- [ ] Map currently routes ALL 4 areas → Task 1. Each area could eventually get a unique task set.
 - [ ] Mobile touch support is partially implemented but needs end-to-end QA on real devices
 - [ ] `assets/images/` is empty — illustrations could be replaced with real images if added here
 

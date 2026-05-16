@@ -12,6 +12,12 @@ const GameState = {
     waterQuality: 60,
     biodiversity: 50,
     tasksCompleted: [false, false, false, false],
+    agriCompleted: false,
+    indCompleted: false,
+    coastalAlertShown: false,
+    agriAlertShown: false,
+    isMapOpen: false,
+    mapPos: null,
     currentScene: 'landing',
     task4Choice: null, // 'burning' or 'chemical'
     phase: 'landing',
@@ -24,8 +30,10 @@ const GameState = {
         this.biodiversity = Math.max(0, Math.min(100, this.biodiversity + delta));
         HUD.update();
     },
-    completeTask(index) {
-        this.tasksCompleted[index] = true;
+    completeTask(index, isAgri = false) {
+        if (!isAgri) {
+            this.tasksCompleted[index] = true;
+        }
         TodoPanel.checkTask(index);
     },
     allTasksDone() {
@@ -81,6 +89,28 @@ const Audio = {
         this.load('chemical_spray', 'assets/audio/chemical_spray.mp3');
     }
 };
+
+
+// ============================================
+// UTILITIES
+// ============================================
+function typeWriter(element, text, speed = 50, callback) {
+    if (element.typewriterInterval) {
+        clearInterval(element.typewriterInterval);
+    }
+    let i = 0;
+    element.textContent = '';
+    element.typewriterInterval = setInterval(() => {
+        if (i < text.length) {
+            element.textContent += text[i];
+            i++;
+        } else {
+            clearInterval(element.typewriterInterval);
+            element.typewriterInterval = null;
+            if (callback) callback();
+        }
+    }, speed);
+}
 
 // ============================================
 // SCENE MANAGER
@@ -175,6 +205,9 @@ const HUD = {
 const TodoPanel = {
     show() {
         document.getElementById('todo-panel').classList.add('visible');
+    },
+    hide() {
+        document.getElementById('todo-panel').classList.remove('visible');
     },
 
     checkTask(index) {
@@ -309,77 +342,65 @@ function initLanding() {
 const cinematicSlides = [
     // Scene 1: Cinematic Opening
     {
-        scene: 'Scene 1 — Cinematic Opening',
-        text: '<em>Water is essential for life.</em>',
+        text: 'Water is essential for life.',
         bg: 'oil-spill-sea',
         type: 'oil-sea'
     },
     {
-        scene: 'Scene 1',
-        text: 'Yet today, it is <em>under threat.</em>',
+        text: 'Yet today, it is under threat.',
         bg: 'industrial-pipe',
         type: 'pipe'
     },
     {
-        scene: 'Scene 1',
-        text: 'Coastal ecosystems are increasingly <em>polluted by human activities.</em>',
+        text: 'Coastal ecosystems are increasingly polluted by human activities.',
         bg: 'algae-water',
         type: 'algae'
     },
     // Scene 2: Problem Escalation
     {
-        scene: 'Scene 2 — Problem Escalation',
-        text: '<em>Oil spills</em> spread across oceans, destroying marine habitats.',
+        text: 'Oil spills spread across oceans, destroying marine habitats.',
         bg: 'oil-spill-sea',
         type: 'oil-sea'
     },
     {
-        scene: 'Scene 2',
-        text: '<em>Agricultural runoff</em> carries fertilizers and chemicals into water…',
+        text: 'Agricultural runoff carries fertilizers and chemicals into water…',
         bg: 'algae-water',
         type: 'algae'
     },
     {
-        scene: 'Scene 2',
-        text: '<em>Industrial waste</em> releases toxic substances into rivers and seas.',
+        text: 'Industrial waste releases toxic substances into rivers and seas.',
         bg: 'industrial-pipe',
         type: 'pipe'
     },
     // Scene 3: Impact
     {
-        scene: 'Scene 3 — Impact',
-        text: '<em>The consequences are severe.</em>',
+        text: 'The consequences are severe.',
         bg: 'dead-sea',
         type: 'dead'
     },
     {
-        scene: 'Scene 3',
-        text: 'Marine life <em>dies</em>. Ecosystems <em>collapse.</em>',
+        text: 'Marine life dies. Ecosystems collapse.',
         bg: 'dead-sea',
         type: 'dead'
     },
     {
-        scene: 'Scene 3',
-        text: 'Water becomes <em>unsafe for human use.</em>',
+        text: 'Water becomes unsafe for human use.',
         bg: 'dirty-water',
         type: 'dirty'
     },
     // Scene 4: Player Hook
     {
-        scene: 'Scene 4 — Your Mission',
-        text: 'In a small coastal town, water quality continues to <em>decline</em> under constant pressure from pollution.',
+        text: 'In a small coastal town, water quality continues to decline under constant pressure from pollution.',
         bg: 'coastal-town',
         type: 'town'
     },
     {
-        scene: 'Scene 4',
-        text: 'As environmental conditions worsen, maintaining water quality becomes <em>increasingly difficult.</em>',
+        text: 'As environmental conditions worsen, maintaining water quality becomes increasingly difficult.',
         bg: 'coastal-town',
         type: 'town'
     },
     {
-        scene: 'Scene 4',
-        text: 'Your actions will determine whether the system can <em>recover…</em> or <em>collapse.</em>',
+        text: 'Your actions will determine whether the system can recover… or collapse.',
         bg: 'coastal-town',
         type: 'town',
         isLast: true
@@ -663,11 +684,12 @@ function renderSlide(index) {
         <div class="cin-illustration">${getCinematicBg(slide.type)}</div>
         <div class="cinematic-overlay"></div>
         <div class="cinematic-text">
-            <div class="cinematic-scene-label">${slide.scene}</div>
-            <h2>${slide.text}</h2>
+            <h2 id="slide-text"></h2>
         </div>
     `;
     container.appendChild(div);
+
+    typeWriter(document.getElementById('slide-text'), slide.text, 50);
 
     // Update next button
     const btn = document.getElementById('cin-next-btn');
@@ -689,172 +711,230 @@ function nextSlide() {
         renderSlide(currentSlide);
         updateDots();
     } else {
-        GameState.phase = 'map';
+        GameState.phase = 'residential';
         // fully disable cinematic click handlers once mission starts
         const cinBtn = document.getElementById('cin-next-btn');
         const cinScene = document.getElementById('scene-cinematic');
         if (cinBtn) cinBtn.onclick = null;
         if (cinScene) cinScene.onclick = null;
 
-        // Go to map
+        // Go to residential world
         Audio.stopBg();
         Audio.play('ambient_ocean', { volume: 0.3, loop: true });
-        SceneManager.show('scene-map', () => {
-            initMap();
+        SceneManager.show('scene-residential', () => {
+            initResidential();
         });
     }
 }
 
 // ============================================
-// SCENE: WORLD MAP
+// SCENE: RESIDENTIAL WORLD & MINIMAP
 // ============================================
-let mapControllerActive = false;
+let residentialControllerActive = false;
+let resX = 150;
+let resY = 400;
 
-function initMap() {
-    if (GameState.phase !== 'map' && GameState.phase !== 'landing') return;
+function showMiniMap() {
+    const mapContainer = document.getElementById('mini-map-container');
+    if (mapContainer) mapContainer.classList.add('visible');
+    initMap(); // ensure listeners are bound
+}
+
+function hideMiniMap() {
+    const mapContainer = document.getElementById('mini-map-container');
+    if (mapContainer) mapContainer.classList.remove('visible');
+}
+
+function initResidential() {
+    if (GameState.phase !== 'residential') return;
     HUD.show();
     HUD.update();
-
-    const bounds = document.getElementById('map-bounds');
-    const player = document.getElementById('player-char');
-    const prompt = document.getElementById('interact-prompt');
-    const areas = document.querySelectorAll('.map-area');
-
-    // Init player position (start near residential)
-    let x = bounds.clientWidth * 0.1;
-    let y = bounds.clientHeight * 0.2;
-    const speed = 4;
+    showMiniMap(); 
+    TodoPanel.hide(); 
     
-    // Simpan status tombol yang ditekan
-    if (!window.keys) {
-        window.keys = { w: false, a: false, s: false, d: false, e: false };
+    // update areas counter if coastal is done
+    if (GameState.allTasksDone()) {
+        const counter = document.getElementById('areas-counter');
+        counter.classList.remove('hidden');
+        if (GameState.agriCompleted) {
+            counter.textContent = '1 area left to solve';
+        } else {
+            counter.textContent = '2 areas left to solve';
+        }
     }
 
-    function updatePlayerDOM() {
-        player.style.transform = `translate(${x}px, ${y}px)`;
-    }
-    updatePlayerDOM();
+    const player = document.getElementById('residential-player');
+    const speed = 5;
 
-    if (!mapControllerActive) {
-        mapControllerActive = true;
-        
+    function updatePlayer() {
+        player.style.transform = `translate(${resX}px, ${resY}px)`;
+    }
+    updatePlayer();
+
+    if (!residentialControllerActive) {
+        residentialControllerActive = true;
+        if (!window.keys) window.keys = { w: false, a: false, s: false, d: false, e: false };
+
         window.addEventListener('keydown', (e) => {
-            if(GameState.phase !== 'map') return;
+            if(GameState.phase !== 'residential') return;
             const key = e.key.toLowerCase();
             if (window.keys.hasOwnProperty(key)) window.keys[key] = true;
-            
-            // Cek interaksi (Tekan E)
-            if (key === 'e' && activeZone) {
-                enterArea(activeZone);
-            }
         });
 
         window.addEventListener('keyup', (e) => {
-            if(GameState.phase !== 'map') return;
+            if(GameState.phase !== 'residential') return;
             const key = e.key.toLowerCase();
             if (window.keys.hasOwnProperty(key)) window.keys[key] = false;
         });
 
-        requestAnimationFrame(gameLoop);
-    }
+        function resLoop() {
+            if (GameState.phase === 'residential') {
+                let dx = 0; let dy = 0;
+                if (window.keys.w) dy -= speed;
+                if (window.keys.s) dy += speed;
+                if (window.keys.a) dx -= speed;
+                if (window.keys.d) dx += speed;
 
-    let activeZone = null;
-
-    function checkCollisions() {
-        const pRect = player.getBoundingClientRect();
-        let touchingAny = false;
-
-        areas.forEach(area => {
-            const aRect = area.getBoundingClientRect();
-            // AABB Collision (Cek tabrakan kotak)
-            if (pRect.left < aRect.right &&
-                pRect.right > aRect.left &&
-                pRect.top < aRect.bottom &&
-                pRect.bottom > aRect.top) {
-                
-                touchingAny = true;
-                if (activeZone !== area.dataset.area) {
-                    activeZone = area.dataset.area;
-                    prompt.classList.remove('hidden');
-                    prompt.innerHTML = `Area <strong>${area.dataset.area.toUpperCase()}</strong><br>Tekan [E] untuk masuk`;
-                    
-                    // Efek Hover
-                    area.style.transform = 'scale(1.05)';
-                    area.style.borderColor = 'rgba(0, 180, 216, 0.8)';
-                    area.style.background = 'rgba(0, 180, 216, 0.2)';
-                }
-            } else {
-                if (activeZone === area.dataset.area) {
-                    area.style.transform = '';
-                    area.style.borderColor = 'transparent';
-                    area.style.background = ''; // reset ke CSS awal
+                if (dx !== 0 || dy !== 0) {
+                    resX += dx; resY += dy;
+                    resX = Math.max(0, Math.min(resX, 750));
+                    resY = Math.max(300, Math.min(resY, 550));
+                    updatePlayer();
                 }
             }
-        });
-
-        if (!touchingAny && activeZone) {
-            activeZone = null;
-            prompt.classList.add('hidden');
+            requestAnimationFrame(resLoop);
         }
+        requestAnimationFrame(resLoop);
     }
-
-    function gameLoop() {
-        if (GameState.phase === 'map') {
-            let dx = 0;
-            let dy = 0;
-            if (window.keys.w) dy -= speed;
-            if (window.keys.s) dy += speed;
-            if (window.keys.a) dx -= speed;
-            if (window.keys.d) dx += speed;
-
-            if (dx !== 0 || dy !== 0) {
-                x += dx;
-                y += dy;
-                
-                // Batasan peta
-                const maxX = bounds.clientWidth - 40; 
-                const maxY = bounds.clientHeight - 40; 
-                
-                x = Math.max(0, Math.min(x, maxX));
-                y = Math.max(0, Math.min(y, maxY));
-
-                updatePlayerDOM();
-                checkCollisions();
-            }
-        }
-        requestAnimationFrame(gameLoop);
-    }
-
-    function enterArea(areaName) {
-        Modal.hide('modal-map-alert');
-        
-        // Reset keys agar karakter tidak bablas gerak saat kembali
-        window.keys.w = window.keys.a = window.keys.s = window.keys.d = window.keys.e = false;
-        
-        // --- Sesuai request: Untuk sementara SEMUA area memakai tugas Coastal ---
-        GameState.currentArea = areaName;
-        TodoPanel.show();
-        GameState.phase = 'task1';
-        SceneManager.show('scene-task1', () => {
-            initTask1();
-        });
-    }
-
-    // Trigger initial crisis modal
-    setTimeout(() => {
-        if(GameState.phase === 'map' && !GameState.allTasksDone()) {
-            triggerAlarm();
-            setTimeout(() => {
-                Modal.show('modal-map-alert');
-            }, 2000);
-        }
-    }, 1500);
 
     // Modal start button
     const btnStart = document.getElementById('btn-start-mission');
     if (btnStart) {
         btnStart.onclick = () => {
             Modal.hide('modal-map-alert');
+            initMap();
+            document.getElementById('map-coastal').click();
+        };
+    }
+
+    // Trigger crisis alerts
+    if (!GameState.coastalAlertShown && !GameState.allTasksDone()) {
+        GameState.coastalAlertShown = true;
+        setTimeout(() => {
+            if (GameState.phase === 'residential') {
+                triggerAlarm();
+                setTimeout(() => Modal.show('modal-map-alert'), 2000);
+            }
+        }, 2000);
+    } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
+        GameState.agriAlertShown = true;
+        setTimeout(() => {
+            if (GameState.phase === 'residential') {
+                triggerAlarm();
+                setTimeout(() => {
+                    const alertModal = document.getElementById('modal-map-alert');
+                    alertModal.querySelector('.modal-body').innerHTML = `Pollution detected in the <strong>Agricultural Area</strong> and <strong>Industrial Area</strong>.<br>Resolve these to restore environmental balance.`;
+                    Modal.show('modal-map-alert');
+                }, 2000);
+            }
+        }, 2000);
+    }
+}
+
+let mapControllerActive = false;
+
+function initMap() {
+    if (mapControllerActive) return;
+    mapControllerActive = true;
+    
+    const areas = document.querySelectorAll('.mini-map-content .map-area');
+    areas.forEach(area => {
+        area.onclick = () => {
+            enterArea(area.dataset.area);
+        };
+    });
+
+    function enterArea(areaName) {
+        if (areaName === 'coastal') {
+            if (!GameState.allTasksDone()) {
+                showMissionIntro('Coastal Area', 
+                    'A pollution crisis has been detected in the Coastal Area! Complete all tasks to restore environmental balance.',
+                    () => {
+                        GameState.currentArea = areaName;
+                        TodoPanel.show();
+                        GameState.phase = 'task1';
+                        SceneManager.show('scene-task1', () => initTask1());
+                    }
+                );
+            } else {
+                Toast.show('Coastal Area is already safe!', '✅', 2000);
+            }
+        } else if (areaName === 'agricultural') {
+            if (GameState.allTasksDone() && !GameState.agriCompleted) {
+                showMissionIntro('Agricultural Area',
+                    'Pollution detected in the Agricultural Area. Excess nutrients are affecting water quality.',
+                    () => {
+                        GameState.currentArea = areaName;
+                        TodoPanel.show();
+                        document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>Identify pollution source`;
+                        document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>Apply buffer strips`;
+                        document.getElementById('todo-2').style.display = 'none';
+                        document.getElementById('todo-3').style.display = 'none';
+                        document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
+                        document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
+
+                        GameState.phase = 'agri1';
+                        SceneManager.show('scene-agri-task1', () => initAgriTask1());
+                    }
+                );
+            } else if (GameState.agriCompleted) {
+                Toast.show('Agricultural Area is already safe!', '✅', 2000);
+            } else {
+                Toast.show('Solve Coastal Area first!', '🔒', 2000);
+            }
+        } else if (areaName === 'industrial') {
+            if (GameState.allTasksDone() && !GameState.indCompleted) {
+                showMissionIntro('Industrial Area',
+                    'Pollution detected in the Industrial Area. Untreated wastewater is being released into the river.',
+                    () => {
+                        GameState.currentArea = areaName;
+                        TodoPanel.show();
+                        document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>Identify pollution source`;
+                        document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>Stop direct discharge`;
+                        document.getElementById('todo-2').innerHTML = `<span class="todo-check"></span>Treat wastewater before release`;
+                        document.getElementById('todo-2').style.display = 'flex';
+                        document.getElementById('todo-3').style.display = 'none';
+                        document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
+                        document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
+
+                        GameState.phase = 'ind1';
+                        SceneManager.show('scene-ind-task1', () => initIndTask1());
+                    }
+                );
+            } else if (GameState.indCompleted) {
+                Toast.show('Industrial Area is already safe!', '✅', 2000);
+            } else {
+                Toast.show('Solve Coastal Area first!', '🔒', 2000);
+            }
+        } else if (areaName === 'residential') {
+            GameState.phase = 'residential';
+            SceneManager.show('scene-residential', () => {
+                initResidential();
+                checkAllAreasDone();
+            });
+        } else {
+            Toast.show('Area is locked.', '🔒', 2000);
+        }
+    }
+
+    function showMissionIntro(title, body, onStart) {
+        document.getElementById('mission-intro-title').textContent = title;
+        document.getElementById('mission-intro-body').innerHTML = body;
+        Modal.show('modal-mission-intro');
+        const btn = document.getElementById('btn-mission-start');
+        btn.onclick = () => {
+            Modal.hide('modal-mission-intro');
+            onStart();
         };
     }
 }
@@ -864,6 +944,8 @@ function initMap() {
 // ============================================
 function initTask1() {
     if (GameState.phase !== 'task1') return;
+    const instructionEl = document.getElementById('t1-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Click the turtle to free it from plastic entanglement', 40);
     let isHelping = false;
     let progressInterval = null;
 
@@ -898,17 +980,25 @@ function initTask1() {
     function completeTask1() {
         // Animate turtle freed
         const turtleSvg = document.getElementById('turtle-svg-main');
-        if (turtleSvg) {
-            turtleSvg.style.transition = 'transform 1s ease, filter 1s ease';
-            turtleSvg.style.transform = 'translateY(-30px) scale(1.1)';
-            turtleSvg.style.filter = 'drop-shadow(0 0 20px rgba(82, 201, 122, 0.8))';
-        }
-
-        // Remove plastic net
         const net = document.getElementById('plastic-net-overlay');
+        const eyesSad = document.getElementById('turtle-eyes-sad');
+        const eyesHappy = document.getElementById('turtle-eyes-happy');
+        
+        if (turtleSvg) {
+            turtleSvg.classList.add('turtle-free');
+            turtleSvg.style.transition = 'transform 1.5s ease, filter 1.5s ease';
+            turtleSvg.style.transform = 'translateY(-40px) scale(1.1)';
+            turtleSvg.style.filter = 'drop-shadow(0 15px 30px rgba(82, 201, 122, 0.8))';
+        }
+        
         if (net) {
-            net.style.transition = 'opacity 0.8s ease';
             net.style.opacity = '0';
+            net.style.transform = 'translateY(50px) rotate(20deg)';
+        }
+        
+        if (eyesSad && eyesHappy) {
+            eyesSad.classList.add('hidden');
+            eyesHappy.classList.remove('hidden');
         }
 
         document.getElementById('help-label').textContent = '🐢 Animal freed!';
@@ -942,15 +1032,17 @@ function initTask1() {
 // ============================================
 function initTask2() {
     if (GameState.phase !== 'task2') return;
+    const instructionEl = document.getElementById('t2-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Click each trash item to collect it', 40);
     const trashItems = [
-        { emoji: '🧴', x: 15, y: 45 },
-        { emoji: '🥤', x: 25, y: 60 },
-        { emoji: '🛍️', x: 40, y: 50 },
-        { emoji: '🧃', x: 55, y: 65 },
-        { emoji: '🍶', x: 65, y: 48 },
-        { emoji: '🥡', x: 30, y: 72 },
-        { emoji: '🧹', x: 70, y: 62 },
-        { emoji: '🪣', x: 48, y: 40 }
+        { emoji: '🧴', x: 6,  y: 52 },
+        { emoji: '🥤', x: 18, y: 75 },
+        { emoji: '🛍️', x: 30, y: 58 },
+        { emoji: '🧃', x: 46, y: 82 },
+        { emoji: '🍶', x: 60, y: 55 },
+        { emoji: '🥡', x: 72, y: 70 },
+        { emoji: '🧴', x: 84, y: 62 },
+        { emoji: '🪣', x: 38, y: 68 }
     ];
 
     let collected = 0;
@@ -1033,87 +1125,187 @@ function initTask2() {
 // ============================================
 function initTask3() {
     if (GameState.phase !== 'task3') return;
-    // Create bubbles
-    const scene = document.getElementById('underwater-scene-content');
-    for (let i = 0; i < 15; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        const size = Math.random() * 20 + 8;
-        bubble.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            left: ${Math.random() * 100}%;
-            bottom: ${Math.random() * 30}%;
-            animation-duration: ${Math.random() * 4 + 3}s;
-            animation-delay: ${Math.random() * 3}s;
-        `;
-        scene.appendChild(bubble);
-    }
 
-    let isFixing = false;
-    let fixProgress = 0;
-    let fixInterval = null;
+    const instructionEl = document.getElementById('t3-instruction');
+    if (instructionEl) typeWriter(instructionEl, 'Apply glue on all 4 edges of the patch plate, then drag it to the crack!', 35);
 
-    const pipeContainer = document.getElementById('pipe-container');
-    const progressBar = document.getElementById('fix-progress');
-    const progressFill = document.getElementById('fix-progress-fill');
+    // ── STEP 1: Glue all 4 edges ──────────────────────────────────────
+    const edges = ['top', 'right', 'bottom', 'left'];
+    const glued = new Set();
+    const hintEl = document.getElementById('t3-glue-hint');
 
-    pipeContainer.addEventListener('click', (e) => {
-        if (isFixing) return;
-        isFixing = true;
+    edges.forEach(edgeName => {
+        const el = document.getElementById(`t3-edge-${edgeName}`);
+        if (!el) return;
+        el.addEventListener('click', () => {
+            if (glued.has(edgeName)) return;
+            glued.add(edgeName);
+            el.classList.add('glued');
+            el.textContent = '✔ GLUED';
+            Audio.play('click_success', { volume: 0.5 });
+            Particles.burst(el.getBoundingClientRect().left + 12, el.getBoundingClientRect().top + 12, 4, ['✨', '🟡']);
 
-        progressBar.style.display = 'block';
-        Audio.play('click_success', { volume: 0.5 });
-        Particles.burst(e.clientX, e.clientY, 6, ['🔧', '⚙️', '✨']);
+            if (hintEl) hintEl.textContent = `Apply glue (${glued.size}/4)`;
 
-        fixInterval = setInterval(() => {
-            fixProgress += 15;
-            progressFill.style.width = fixProgress + '%';
-
-            if (fixProgress >= 100) {
-                clearInterval(fixInterval);
-                completeTask3();
+            if (glued.size === 4) {
+                setTimeout(startStep2, 600);
             }
-        }, 250);
+        });
     });
 
+    // ── STEP 2: Drag glued plate to crack ────────────────────────────
+    function startStep2() {
+        const gluePanel = document.getElementById('t3-glue-panel');
+        if (gluePanel) gluePanel.classList.add('hidden');
+
+        const plate = document.getElementById('t3-draggable-plate');
+        if (!plate) return;
+        plate.classList.remove('hidden');
+
+        if (instructionEl) typeWriter(instructionEl, 'Now drag the patch plate to the crack on the pipe!', 40);
+
+        // Drag logic
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        plate.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = plate.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            plate.style.transition = 'none';
+            plate.style.right = 'unset';
+            plate.style.transform = 'none';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        // Touch support
+        plate.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            const rect = plate.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+            plate.style.transition = 'none';
+            plate.style.right = 'unset';
+            plate.style.transform = 'none';
+            e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend', onTouchEnd);
+
+        function movePlateTo(clientX, clientY) {
+            if (!isDragging) return;
+            plate.style.left = (clientX - offsetX) + 'px';
+            plate.style.top  = (clientY - offsetY) + 'px';
+        }
+
+        function onMouseMove(e) { movePlateTo(e.clientX, e.clientY); }
+        function onTouchMove(e) {
+            e.preventDefault();
+            movePlateTo(e.touches[0].clientX, e.touches[0].clientY);
+        }
+
+        function checkDrop(clientX, clientY) {
+            isDragging = false;
+            const dropzone = document.getElementById('t3-dropzone');
+            if (!dropzone) return;
+            const dz = dropzone.getBoundingClientRect();
+            const px = clientX;
+            const py = clientY;
+            // Did the plate's center land inside/near the dropzone?
+            if (px > dz.left - 30 && px < dz.right + 30 && py > dz.top - 30 && py < dz.bottom + 30) {
+                // Snap plate to dropzone
+                plate.style.transition = 'all 0.4s ease';
+                plate.style.left = dz.left + 'px';
+                plate.style.top  = dz.top + 'px';
+                plate.style.width = dz.width + 'px';
+                plate.style.height = dz.height + 'px';
+                cleanup();
+                setTimeout(sealPipe, 500);
+            }
+        }
+
+        function onMouseUp(e) { checkDrop(e.clientX, e.clientY); }
+        function onTouchEnd(e) {
+            const touch = e.changedTouches[0];
+            checkDrop(touch.clientX, touch.clientY);
+        }
+
+        function cleanup() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+            plate.onmousedown = null;
+            plate.ontouchstart = null;
+        }
+    }
+
+    // ── Seal pipe animation & complete ───────────────────────────────
+    function sealPipe() {
+        // Stop oil plume
+        const plume = document.getElementById('oil-drop-anim');
+        if (plume) plume.style.display = 'none';
+
+        // Hide dropzone
+        const dz = document.getElementById('t3-dropzone');
+        if (dz) dz.style.display = 'none';
+
+        // Show fixed indicator
+        const fixed = document.getElementById('pipe-fixed-indicator');
+        if (fixed) fixed.classList.remove('hidden');
+
+        // Progress bar animation
+        const bar = document.getElementById('fix-progress');
+        const fill = document.getElementById('fix-progress-fill');
+        if (bar && fill) {
+            bar.classList.remove('hidden');
+            let p = 0;
+            const iv = setInterval(() => {
+                p += 20;
+                fill.style.width = p + '%';
+                if (p >= 100) {
+                    clearInterval(iv);
+                    completeTask3();
+                }
+            }, 180);
+        } else {
+            completeTask3();
+        }
+    }
+
     function completeTask3() {
-        // Stop oil drip animation
-        const oilDrop = document.getElementById('oil-drop-anim');
-        if (oilDrop) {
-            oilDrop.style.display = 'none';
-        }
-
-        // Show fixed pipe
-        const pipeFixed = document.getElementById('pipe-fixed-indicator');
-        if (pipeFixed) {
-            pipeFixed.style.display = 'block';
-        }
-
         GameState.completeTask(2);
         Audio.play('task_complete', { volume: 0.8 });
-        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 10, ['🔧', '✅', '✨']);
+        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 12, ['🔧', '✅', '✨', '🌊']);
         Toast.show('Leak successfully contained!', '🔧 Oil leak stopped', 3000);
+        if (instructionEl) instructionEl.textContent = '✅ Pipe sealed successfully!';
 
         showContinueModal(
             'Task 3 Completed',
-            'Leak successfully contained. Continue to Task 4: Clean oil spill.',
+            'Great work! The oil leak has been patched. Continue to Task 4: Clean the oil spill.',
             'Next Task →',
             () => {
                 GameState.phase = 'task4';
-                SceneManager.show('scene-task4', () => {
-                    initTask4();
-                });
+                SceneManager.show('scene-task4', () => { initTask4(); });
             }
         );
     }
 }
+
+
 
 // ============================================
 // SCENE: TASK 4 — CLEAN OIL SPILL (DECISION)
 // ============================================
 function initTask4() {
     if (GameState.phase !== 'task4') return;
+    const instructionEl = document.getElementById('t4-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Choose a method to clean up the oil spill', 40);
     
     const stepIndicator = document.getElementById('t4-step-indicator');
     const instruction = document.getElementById('t4-instruction');
@@ -1135,8 +1327,8 @@ function initTask4() {
         GameState.task4Choice = 'burning';
         
         // Step 1: Localize
-        stepIndicator.textContent = 'Task 4: Step 1/3 — Containment';
-        instruction.textContent = 'Draw a containment boom around the oil spill!';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Containment';
+        typeWriter(instruction, 'Draw a containment boom around the oil spill!', 30);
         
         const canvas = document.getElementById('t4-boom-canvas');
         canvas.classList.remove('hidden');
@@ -1255,30 +1447,30 @@ function initTask4() {
             canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
             canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
             
-            instruction.textContent = '✔ Boom deployed! Oil contained.';
+            typeWriter(instruction, '✔ Boom deployed! Oil contained.', 30);
             setTimeout(() => methodA_Step2(), 1200);
         } else {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             if (!closed) {
-                instruction.textContent = 'Loop not closed! Bring the line back to start. Try again!';
+                typeWriter(instruction, 'Loop not closed! Bring the line back to start. Try again!', 30);
             } else if (!enclosesOil) {
-                instruction.textContent = 'Loop missed the oil spill! Draw around the dark blob. Try again!';
+                typeWriter(instruction, 'Loop missed the oil spill! Draw around the dark blob. Try again!', 30);
             } else {
-                instruction.textContent = 'Loop too small! Draw a bigger circle. Try again!';
+                typeWriter(instruction, 'Loop too small! Draw a bigger circle. Try again!', 30);
             }
         }
     }
 
     function methodA_Step2() {
-        stepIndicator.textContent = 'Task 4: Step 2/3 — Ignition';
-        instruction.textContent = 'The oil is contained. Click IGNITE to start controlled burning!';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Ignition';
+        typeWriter(instruction, 'The oil is contained. Click IGNITE to start controlled burning!', 30);
         
         const igniteBtn = document.getElementById('btn-t4-ignite');
         igniteBtn.classList.remove('hidden');
         
         igniteBtn.onclick = () => {
             igniteBtn.classList.add('hidden');
-            instruction.textContent = '🔥 Burning in progress...';
+            typeWriter(instruction, '🔥 Burning in progress...', 30);
             
             // Get viewport coords of ocean container center for particles
             const rect = oceanContainer.getBoundingClientRect();
@@ -1327,8 +1519,8 @@ function initTask4() {
     }
 
     function methodA_Step3() {
-        stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
-        instruction.textContent = 'Cleanup complete.';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
+        typeWriter(instruction, 'Cleanup complete.', 30);
         oceanContainer.style.background = 'linear-gradient(180deg, #0a4f7a 0%, #0d3a5c 100%)';
         
         resultCard.classList.remove('hidden');
@@ -1348,8 +1540,8 @@ function initTask4() {
         methodSelection.classList.add('hidden');
         GameState.task4Choice = 'chemical';
         
-        stepIndicator.textContent = 'Task 4: Step 1/3 — Surface Spraying';
-        instruction.textContent = 'Drag the boat across the oil spill to spray dispersant!';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Surface Spraying';
+        typeWriter(instruction, 'Drag the boat across the oil spill to spray dispersant!', 30);
         
         const boat = document.getElementById('t4-boat');
         const canvas = document.getElementById('t4-spray-canvas');
@@ -1386,7 +1578,7 @@ function initTask4() {
             document.removeEventListener('mouseup', onMouseUp);
             boat.ontouchstart = boat.ontouchmove = boat.ontouchend = null;
             boat.onmousedown = null;
-            instruction.textContent = '✔ Surface spraying complete!';
+            typeWriter(instruction, '✔ Surface spraying complete!', 30);
             progContainer.classList.add('hidden');
             setTimeout(() => methodB_Step2(), 1000);
         }
@@ -1447,8 +1639,8 @@ function initTask4() {
     }
 
     function methodB_Step2() {
-        stepIndicator.textContent = 'Task 4: Step 2/3 — Submarine Injection';
-        instruction.textContent = 'Click the injection point 3 times to inject dispersant into the leak source!';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Submarine Injection';
+        typeWriter(instruction, 'Click the injection point 3 times to inject dispersant into the leak source!', 30);
         
         document.getElementById('t4-boat').classList.add('hidden');
         document.getElementById('t4-spray-canvas').classList.add('hidden');
@@ -1488,15 +1680,15 @@ function initTask4() {
                 injectTarget.onclick = null;
                 injectTarget.style.animation = 'none';
                 injectTarget.style.borderColor = '#4caf50';
-                instruction.textContent = '✔ Injection complete. Dispersant deployed!';
+                typeWriter(instruction, '✔ Injection complete. Dispersant deployed!', 30);
                 setTimeout(() => methodB_Step3(), 1200);
             }
         };
     }
 
     function methodB_Step3() {
-        stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
-        instruction.textContent = 'Cleanup complete.';
+        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
+        typeWriter(instruction, 'Cleanup complete.', 30);
         
         // Show sick fish
         const fishContainer = document.getElementById('t4-fish-container');
@@ -1538,56 +1730,641 @@ function initTask4() {
         }
         
         GameState.completeTask(3);
-        showCompletion();
+        
+        showContinueModal(
+            'Coastal Area Saved',
+            'You have completed all tasks in the Coastal Area! Return to the Residential Area.',
+            'Return to World',
+            () => {
+                GameState.phase = 'residential';
+                SceneManager.show('scene-residential', () => initResidential());
+            }
+        );
     }
 }
 
 // ============================================
-// COMPLETION SCREEN
+// SCENE: AGRICULTURAL TASK 1
 // ============================================
-function showCompletion() {
-    GameState.phase = 'complete';
-    Audio.stopBg();
-    Audio.play('task_complete', { volume: 1.0 });
-
-    SceneManager.show('scene-complete', () => {
-        // Update final stats
-        document.getElementById('final-water').textContent = GameState.waterQuality + '%';
-        document.getElementById('final-bio').textContent = GameState.biodiversity + '%';
-
-        // Set choice badge
-        const badge = document.getElementById('complete-choice-badge');
-        if (GameState.task4Choice === 'burning') {
-            badge.textContent = '✓ Eco-Friendly Choice (In-Situ Burning)';
-            badge.className = 'badge eco';
-        } else if (GameState.task4Choice === 'chemical') {
-            badge.textContent = '⚠ Effective but Costly (Corexit)';
-            badge.className = 'badge costly';
-        }
-
-        // Confetti burst
-        setTimeout(() => {
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    Particles.burst(
-                        Math.random() * window.innerWidth,
-                        Math.random() * window.innerHeight * 0.5,
-                        8, ['🌊', '✨', '💧', '🌿', '🐢', '🌍']
-                    );
-                }, i * 300);
+function initAgriTask1() {
+    if (GameState.phase !== 'agri1') return;
+    const instructionEl = document.getElementById('agri1-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Scan the farm area to find the source of pollution.', 40);
+    
+    const scanArea = document.getElementById('farm-scan-area');
+    const progBar = document.getElementById('scan-progress');
+    const progFill = document.getElementById('scan-progress-fill');
+    const typingText = document.getElementById('agri-typing-text');
+    const nextBtn = document.getElementById('btn-agri1-next');
+    const runoffAnim = document.getElementById('runoff-anim-layer');
+    
+    let isScanning = false;
+    let scanProgress = 0;
+    
+    scanArea.onclick = (e) => {
+        if (isScanning) return;
+        isScanning = true;
+        scanArea.classList.remove('alert-pulse');
+        scanArea.style.borderColor = 'var(--teal)';
+        
+        progBar.style.display = 'block';
+        Particles.burst(e.clientX, e.clientY, 5, ['🔎', '✨']);
+        Audio.play('click_success', { volume: 0.5 });
+        
+        runoffAnim.classList.remove('hidden');
+        
+        const interval = setInterval(() => {
+            scanProgress += 20;
+            progFill.style.width = scanProgress + '%';
+            
+            if (scanProgress >= 100) {
+                clearInterval(interval);
+                completeAgri1();
             }
-        }, 500);
-
-        // Play ambient ocean
-        setTimeout(() => {
-            Audio.play('ambient_ocean', { volume: 0.3, loop: true });
-        }, 1000);
-    });
-
-    // Restart button
-    document.getElementById('btn-restart').onclick = () => {
-        location.reload();
+        }, 400);
     };
+    
+    function completeAgri1() {
+        progBar.style.display = 'none';
+        scanArea.style.display = 'none';
+        
+        typingText.classList.remove('hidden');
+        typingText.innerHTML = '';
+        const msg = "Fertilizers from farms are flowing into the water. These nutrients can pollute water and harm the ecosystem.";
+        
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            typingText.innerHTML += msg.charAt(i);
+            i++;
+            if (i >= msg.length) {
+                clearInterval(typeInterval);
+                setTimeout(() => {
+                    Toast.show('Source identified.', '☑', 3000);
+                    Audio.play('task_complete', { volume: 0.8 });
+                    GameState.completeTask(0, true);
+                    nextBtn.classList.remove('hidden');
+                }, 1000);
+            }
+        }, 50);
+    }
+    
+    nextBtn.onclick = () => {
+        GameState.phase = 'agri2';
+        SceneManager.show('scene-agri-task2', () => initAgriTask2());
+    };
+}
+
+// ============================================
+// SCENE: AGRICULTURAL TASK 2
+// ============================================
+function initAgriTask2() {
+    if (GameState.phase !== 'agri2') return;
+    const instructionEl = document.getElementById('agri2-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Plant vegetation along the river to filter runoff.', 40);
+    
+    const slotsContainer = document.getElementById('plant-slots-container');
+    const riverDirty = document.getElementById('agri2-river-dirty');
+    const counter = document.getElementById('plant-counter');
+    
+    slotsContainer.innerHTML = '';
+    const totalSlots = 8;
+    let plantedCount = 0;
+    
+    const positions = [
+        {x: 350, y: 150, type: '🌱'}, {x: 380, y: 220, type: '🌱'}, {x: 320, y: 280, type: '🌱'},
+        {x: 420, y: 350, type: '🌿'}, {x: 390, y: 420, type: '🌿'}, {x: 450, y: 480, type: '🌿'},
+        {x: 480, y: 550, type: '🌳'}, {x: 520, y: 580, type: '🌳'}
+    ];
+    
+    positions.forEach((pos, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'plant-slot';
+        slot.style.left = pos.x + 'px';
+        slot.style.top = pos.y + 'px';
+        
+        slot.onclick = (e) => {
+            if (slot.classList.contains('planted')) return;
+            slot.classList.add('planted');
+            slot.textContent = pos.type;
+            
+            Particles.burst(e.clientX, e.clientY, 4, ['✨', '💚', pos.type]);
+            Audio.play('click_success', { volume: 0.5 });
+            
+            plantedCount++;
+            counter.textContent = `🌱 ${plantedCount} / ${totalSlots} planted`;
+            
+            const opacity = 0.8 - (plantedCount / totalSlots) * 0.8;
+            riverDirty.style.opacity = opacity;
+            
+            if (plantedCount >= totalSlots) {
+                setTimeout(completeAgri2, 800);
+            }
+        };
+        slotsContainer.appendChild(slot);
+    });
+    
+    function completeAgri2() {
+        GameState.updateWater(15);
+        GameState.updateBio(10);
+        GameState.agriCompleted = true;
+        GameState.completeTask(1, true);
+        
+        Audio.play('task_complete', { volume: 0.8 });
+        Particles.burst(window.innerWidth/2, window.innerHeight/2, 15, ['🌱', '🌊', '🦋']);
+        Toast.show('Runoff successfully reduced.', '💧+15 🦋+10', 3500);
+        
+        showContinueModal(
+            'Mission Complete',
+            'Runoff successfully reduced. Return to the residential area.',
+            'Return to World',
+            () => {
+                GameState.phase = 'residential';
+                SceneManager.show('scene-residential', () => initResidential());
+            }
+        );
+    }
+}
+
+// ============================================
+// SCENE: INDUSTRIAL TASK 1
+// ============================================
+function initIndTask1() {
+    if (GameState.phase !== 'ind1') return;
+    const instructionEl = document.getElementById('ind1-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Locate the source of industrial wastewater.', 40);
+    
+    const pipeArea = document.getElementById('ind-pipe-area');
+    const typingText = document.getElementById('ind1-typing-text');
+    const nextBtn = document.getElementById('btn-ind1-next');
+    
+    let isIdentified = false;
+    
+    pipeArea.onclick = (e) => {
+        if (isIdentified) return;
+        isIdentified = true;
+        pipeArea.classList.remove('alert-pulse');
+        pipeArea.style.borderColor = 'var(--teal)';
+        
+        Particles.burst(e.clientX, e.clientY, 5, ['🔎', '✨']);
+        Audio.play('click_success', { volume: 0.5 });
+        
+        Toast.show('Source identified.', '☑', 3000);
+        GameState.completeTask(0, true);
+        
+        typingText.classList.remove('hidden');
+        typingText.innerHTML = '';
+        
+        const msg1 = "Factories are releasing untreated waste into the water.";
+        const msg2 = " Industrial waste may contain toxic chemicals and heavy metals.";
+        const fullMsg = msg1 + msg2;
+        
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            typingText.innerHTML += fullMsg.charAt(i);
+            i++;
+            if (i >= fullMsg.length) {
+                clearInterval(typeInterval);
+                setTimeout(() => {
+                    nextBtn.classList.remove('hidden');
+                }, 500);
+            }
+        }, 40);
+    };
+    
+    nextBtn.onclick = () => {
+        GameState.phase = 'ind2';
+        SceneManager.show('scene-ind-task2', () => initIndTask2());
+    };
+}
+
+// ============================================
+// SCENE: INDUSTRIAL TASK 2
+// ============================================
+function initIndTask2() {
+    if (GameState.phase !== 'ind2') return;
+    const instructionEl = document.getElementById('ind2-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Fix the leaking pipe joint. Drag missing bolts and tighten all.', 40);
+    
+    const container = document.getElementById('ind2-bolts-container');
+    const toolbox = document.getElementById('ind2-toolbox');
+    const wrench = document.getElementById('ind2-wrench');
+    const successMsg = document.getElementById('ind2-success-msg');
+    const leakAnim = document.getElementById('ind2-leak-anim');
+    
+    container.innerHTML = '';
+    toolbox.innerHTML = '';
+    successMsg.classList.add('hidden');
+    
+    const slotPositions = [
+        {x: 370, y: 240, hasBolt: true}, {x: 430, y: 240, hasBolt: false},
+        {x: 370, y: 280, hasBolt: false}, {x: 430, y: 280, hasBolt: true},
+        {x: 370, y: 320, hasBolt: true}, {x: 430, y: 320, hasBolt: false},
+        {x: 370, y: 360, hasBolt: false}, {x: 430, y: 360, hasBolt: true}
+    ];
+    
+    let boltsTightened = 0;
+    
+    // Create missing bolts in toolbox
+    for (let i = 0; i < 4; i++) {
+        const toolBolt = document.createElement('div');
+        toolBolt.className = 'ind-bolt';
+        toolBolt.textContent = '🔩';
+        toolBolt.draggable = true;
+        toolBolt.dataset.tool = 'true';
+        
+        toolBolt.ondragstart = (e) => {
+            e.dataTransfer.setData('text/plain', 'bolt');
+            setTimeout(() => toolBolt.style.opacity = '0.5', 0);
+        };
+        toolBolt.ondragend = () => {
+            toolBolt.style.opacity = '1';
+        };
+        toolbox.appendChild(toolBolt);
+    }
+    
+    // Create slots and pre-existing bolts
+    slotPositions.forEach((pos, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'bolt-slot' + (pos.hasBolt ? ' filled' : '');
+        slot.style.left = pos.x + 'px';
+        slot.style.top = pos.y + 'px';
+        
+        if (pos.hasBolt) {
+            const bolt = document.createElement('div');
+            bolt.className = 'ind-bolt';
+            bolt.textContent = '🔩';
+            slot.appendChild(bolt);
+        }
+        
+        slot.ondragover = (e) => {
+            e.preventDefault();
+        };
+        slot.ondrop = (e) => {
+            e.preventDefault();
+            if (slot.children.length > 0) return;
+            const data = e.dataTransfer.getData('text/plain');
+            if (data === 'bolt') {
+                const availableBolts = toolbox.querySelectorAll('.ind-bolt');
+                if (availableBolts.length > 0) {
+                    availableBolts[0].remove();
+                    const bolt = document.createElement('div');
+                    bolt.className = 'ind-bolt';
+                    bolt.textContent = '🔩';
+                    slot.appendChild(bolt);
+                    slot.classList.add('filled');
+                    Audio.play('click_success', { volume: 0.5 });
+                }
+            }
+        };
+        
+        container.appendChild(slot);
+    });
+    
+    let selectedWrench = false;
+    wrench.onclick = () => {
+        selectedWrench = !selectedWrench;
+        wrench.style.background = selectedWrench ? '#2980b9' : '#222';
+    };
+    
+    container.onclick = (e) => {
+        if (!selectedWrench) return;
+        const target = e.target;
+        if (target.classList.contains('ind-bolt') && !target.classList.contains('tight')) {
+            target.classList.add('tight');
+            target.textContent = '✅';
+            Audio.play('click_success', { volume: 0.5 });
+            Particles.burst(e.clientX, e.clientY, 4, ['🔧', '✨']);
+            
+            boltsTightened++;
+            if (boltsTightened === 8) {
+                completeInd2();
+            }
+        }
+    };
+    
+    function completeInd2() {
+        leakAnim.style.display = 'none';
+        GameState.completeTask(1, true);
+        Audio.play('task_complete', { volume: 0.8 });
+        
+        successMsg.classList.remove('hidden');
+        successMsg.innerHTML = '';
+        
+        const msg = "Discharge successfully stopped.";
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            successMsg.innerHTML += msg.charAt(i);
+            i++;
+            if (i >= msg.length) {
+                clearInterval(typeInterval);
+                setTimeout(() => {
+                    GameState.phase = 'ind3';
+                    SceneManager.show('scene-ind-task3', () => initIndTask3());
+                }, 2000);
+            }
+        }, 50);
+    }
+}
+
+// ============================================
+// SCENE: INDUSTRIAL TASK 3 - WASTEWATER TREATMENT WITH INTERACTIVE MECHANICS
+// ============================================
+function initIndTask3() {
+    if (GameState.phase !== 'ind3') return;
+    const instructionEl = document.getElementById('ind3-instruction');
+    if(instructionEl) typeWriter(instructionEl, 'Choose a method to treat the remaining wastewater.', 40);
+    
+    const btn1 = document.getElementById('btn-ind-method1');
+    const btn2 = document.getElementById('btn-ind-method2');
+    const btn3 = document.getElementById('btn-ind-method3');
+    const methodSelection = document.getElementById('ind3-method-selection');
+    const gameplayArea = document.getElementById('ind3-gameplay-area');
+    const typingText = document.getElementById('ind3-typing-text');
+    const nextBtn = document.getElementById('btn-ind3-next');
+    const poolMain = document.getElementById('ind3-pool-main');
+    const poolClean = document.getElementById('ind3-pool-clean');
+    
+    let methodChosen = false;
+    
+    function showGameplay(method) {
+        if (methodChosen) return;
+        methodChosen = true;
+        methodSelection.style.display = 'none';
+        gameplayArea.classList.remove('hidden');
+        gameplayArea.style.display = 'flex';
+        
+        if (method === 'filtration') initFiltrationGame();
+        else if (method === 'chemical') initChemicalGame();
+        else if (method === 'bacteria') initBacteriaGame();
+    }
+    
+    // -------- FILTRATION MECHANIC --------
+    function initFiltrationGame() {
+        const filtrationArea = document.getElementById('ind3-filtration-area');
+        filtrationArea.classList.remove('hidden');
+        filtrationArea.style.display = 'flex';
+        
+        const layers = document.querySelectorAll('#ind3-filtration-area .ind-filter-layer');
+        let clickedLayers = 0;
+        
+        layers.forEach((layer, idx) => {
+            if (idx === 0) {
+                layer.style.display = 'flex';
+            }
+            layer.onclick = () => {
+                if (layer.classList.contains('completed')) return;
+                layer.classList.add('completed');
+                layer.style.opacity = '0.5';
+                clickedLayers++;
+                
+                Audio.play('click_success', { volume: 0.5 });
+                Particles.burst(layer.getBoundingClientRect().left + 35, layer.getBoundingClientRect().top + 45, 8, ['✨', '💧']);
+                
+                if (idx < layers.length - 1) {
+                    setTimeout(() => {
+                        layers[idx + 1].style.display = 'flex';
+                    }, 600);
+                }
+                
+                // Update pool color gradually
+                const progress = clickedLayers / 3;
+                poolMain.style.fill = `rgb(${Math.round(139 - (139 - 46) * progress)}, ${Math.round(69 - (69 - 180) * progress)}, ${Math.round(19 + (180 - 19) * progress)})`;
+                
+                if (clickedLayers === 3) {
+                    completeTreatment('filtration', 15, 0);
+                }
+            };
+        });
+    }
+    
+    // -------- CHEMICAL MECHANIC --------
+    function initChemicalGame() {
+        const chemicalArea = document.getElementById('ind3-chemical-area');
+        chemicalArea.classList.remove('hidden');
+        chemicalArea.style.display = 'flex';
+        
+        const bottle = document.getElementById('ind3-chemical-bottle');
+        const poolMainRect = poolMain.getBoundingClientRect();
+        const poolMainCenterX = poolMainRect.left + poolMainRect.width / 2;
+        const poolMainCenterY = poolMainRect.top + poolMainRect.height / 2;
+        
+        let isDragging = false;
+        let isDropped = false;
+        
+        bottle.ondragstart = (e) => {
+            isDragging = true;
+            e.dataTransfer.effectAllowed = 'move';
+            bottle.style.opacity = '0.6';
+        };
+        
+        bottle.ondragend = () => {
+            isDragging = false;
+            bottle.style.opacity = '1';
+        };
+        
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('drop', (e) => {
+            if (!isDragging || isDropped) return;
+            isDropped = true;
+            
+            const dropX = e.clientX;
+            const dropY = e.clientY;
+            const distance = Math.sqrt(
+                Math.pow(dropX - poolMainCenterX, 2) + 
+                Math.pow(dropY - poolMainCenterY, 2)
+            );
+            
+            if (distance < 120) {
+                Audio.play('chemical_spray', { volume: 0.7 });
+                Particles.burst(poolMainCenterX, poolMainCenterY, 20, ['🧪', '✨', '💧']);
+                
+                // Animate pool clearing
+                poolMain.style.fill = '#2ecc71';
+                setTimeout(() => {
+                    poolClean.style.fill = '#2ecc71';
+                    completeTreatment('chemical', 20, 0);
+                }, 1000);
+            } else {
+                isDropped = false;
+                Toast.show('Drag the bottle to the treatment pool!', '🧪', 2000);
+            }
+        });
+    }
+    
+    // -------- BACTERIA MECHANIC --------
+    function initBacteriaGame() {
+        const bacteriaArea = document.getElementById('ind3-bacteria-area');
+        bacteriaArea.classList.remove('hidden');
+        bacteriaArea.style.display = 'flex';
+        
+        const feedBtn = document.getElementById('ind3-bacteria-feed-btn');
+        const bacteriaDisplay = document.getElementById('ind3-bacteria-display');
+        const countSpan = document.getElementById('bacteria-feed-count');
+        
+        let feedCount = 0;
+        const maxFeeds = 3;
+        let feedInProgress = false;
+        
+        feedBtn.onclick = () => {
+            if (feedInProgress || feedCount >= maxFeeds) return;
+            feedInProgress = true;
+            feedCount++;
+            countSpan.textContent = maxFeeds - feedCount;
+            
+            Audio.play('click_success', { volume: 0.5 });
+            
+            // Add bacteria emoji
+            bacteriaDisplay.innerHTML += '🦠';
+            Particles.burst(bacteriaDisplay.getBoundingClientRect().left + 50, bacteriaDisplay.getBoundingClientRect().top + 40, 5, ['🦠', '✨']);
+            
+            // Update pool color
+            const progress = feedCount / maxFeeds;
+            poolMain.style.fill = `rgb(${Math.round(74 - (74 - 46) * progress)}, ${Math.round(124 - (124 - 180) * progress)}, ${Math.round(89 + (180 - 89) * progress)})`;
+            
+            setTimeout(() => {
+                feedInProgress = false;
+                if (feedCount === maxFeeds) {
+                    feedBtn.disabled = true;
+                    feedBtn.style.opacity = '0.5';
+                    
+                    setTimeout(() => {
+                        poolClean.style.fill = '#2ecc71';
+                        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🦠', '✨', '🌿']);
+                        completeTreatment('bacteria', 15, 15);
+                    }, 1500);
+                }
+            }, 800);
+        };
+    }
+    
+    function completeTreatment(method, waterVal, bioVal) {
+        gameplayArea.classList.add('hidden');
+        GameState.updateWater(waterVal);
+        GameState.updateBio(bioVal);
+        
+        if (bioVal > 0) {
+            Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 25, ['🦠', '✨', '💧', '🌿', '🌱']);
+        } else {
+            Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['✨', '💧', '💙']);
+        }
+        
+        const resultCard = document.getElementById('ind3-result-card');
+        if (resultCard) resultCard.classList.remove('hidden');
+        
+        typingText.classList.remove('hidden');
+        typingText.innerHTML = '';
+        
+        const methodNames = { 'filtration': 'Filtration', 'chemical': 'Chemical Coagulation', 'bacteria': 'Bacterial Treatment' };
+        const msg1 = `${methodNames[method]} complete. Water quality restored.`;
+        const msg2 = bioVal > 0 ? ' Biodiversity improved!' : '';
+        const fullMsg = msg1 + msg2;
+        
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            typingText.innerHTML += fullMsg.charAt(i);
+            i++;
+            if (i >= fullMsg.length) {
+                clearInterval(typeInterval);
+                GameState.completeTask(2, true);
+                GameState.indCompleted = true;
+                nextBtn.classList.remove('hidden');
+            }
+        }, 40);
+    }
+    
+    btn1.onclick = () => showGameplay('filtration');
+    btn2.onclick = () => showGameplay('chemical');
+    btn3.onclick = () => showGameplay('bacteria');
+    
+    nextBtn.onclick = () => {
+        GameState.phase = 'residential';
+        SceneManager.show('scene-residential', () => {
+            initResidential();
+            checkAllAreasDone();
+        });
+    };
+}
+
+function checkAllAreasDone() {
+    if (GameState.allTasksDone() && GameState.agriCompleted && GameState.indCompleted) {
+        setTimeout(() => {
+            const resSvg = document.querySelector('.residential-bg-svg');
+            if (resSvg) {
+                const grass = resSvg.querySelector('path[fill="#2d9e4f"]');
+                if (grass) grass.setAttribute('fill', '#2ecc71');
+                const sky = resSvg.querySelector('rect[fill="#8ecae6"]');
+                if (sky) sky.setAttribute('fill', '#3498db');
+            }
+            
+            Toast.show('All pollution sources have been successfully managed.', '✅', 4000);
+            
+            setTimeout(() => {
+                GameState.phase = 'reflection';
+                SceneManager.show('scene-reflection', () => initReflection());
+            }, 4000);
+        }, 1000);
+    }
+}
+
+// ============================================
+// SCENE: REFLECTION
+// ============================================
+function initReflection() {
+    if (GameState.phase !== 'reflection') return;
+    
+    Audio.stopBg();
+    Audio.play('ambient_ocean', { volume: 0.6, loop: true });
+    
+    const bgSvg = document.querySelector('.reflection-bg-svg');
+    bgSvg.style.transform = 'scale(1.2)';
+    
+    const textContainer = document.getElementById('reflection-text-container');
+    
+    const lines = [
+        "Protecting water resources is a shared responsibility.",
+        "Every action has an impact on the environment.",
+        "The future of the ecosystem depends on the choices we make today."
+    ];
+    
+    let currentLine = 0;
+    
+    function typeLine() {
+        if (currentLine >= lines.length) {
+            setTimeout(() => {
+                Modal.show('modal-you-survived');
+                
+                document.getElementById('btn-final-play-again').onclick = () => {
+                    location.reload();
+                };
+                document.getElementById('btn-final-exit').onclick = () => {
+                    location.href = 'about:blank';
+                };
+            }, 2000);
+            return;
+        }
+        
+        textContainer.innerHTML = '';
+        const msg = lines[currentLine];
+        let i = 0;
+        
+        const typeInterval = setInterval(() => {
+            textContainer.innerHTML += msg.charAt(i);
+            i++;
+            if (i >= msg.length) {
+                clearInterval(typeInterval);
+                currentLine++;
+                if (currentLine === 1) bgSvg.style.transform = 'scale(1.05) translate(-20px, 10px)';
+                if (currentLine === 2) bgSvg.style.transform = 'scale(1.1) translate(20px, -10px)';
+                
+                setTimeout(typeLine, 3000);
+            }
+        }, 50);
+    }
+    
+    typeLine();
 }
 
 // ============================================
