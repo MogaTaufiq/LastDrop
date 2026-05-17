@@ -605,12 +605,30 @@ body {
     opacity: 0.7;
 }
 
+.map-area.crisis {
+    background: rgba(230, 57, 70, 0.15);
+    border-color: var(--red);
+    color: var(--white);
+    animation: areaPulse 1.5s ease-in-out infinite;
+}
+
+/* Keep .coastal for backward compat */
 .map-area.coastal {
     background: rgba(230, 57, 70, 0.15);
     border-color: var(--red);
     color: var(--white);
     animation: areaPulse 1.5s ease-in-out infinite;
 }
+
+/* Completed area style */
+.map-area.done {
+    background: rgba(45, 158, 79, 0.15);
+    border-color: var(--green);
+    color: var(--white);
+    animation: none;
+    cursor: default;
+}
+
 
 .map-area.locked {
     background: rgba(255, 255, 255, 0.05);

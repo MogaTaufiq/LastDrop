@@ -483,9 +483,57 @@ showCompletion()
 
 ---
 
-## 12. Audio Notes
+## 12. Audio System & Asset Needs
 
-All audio files are expected in `assets/audio/` but the directory is currently **empty**. The game degrades gracefully (try/catch around `.play()`). Add `.mp3` files with the exact names in section 5 to enable audio.
+The audio engine (`Audio` object in `game.js`) wraps HTML5 `<audio>` and manages background loops and overlapping sound effects via `cloneNode()`. 
+
+The `assets/audio/` directory is currently empty. The game handles this gracefully by wrapping `.play()` in a `try/catch` block. To bring the game to life, the following `.mp3` files should be added:
+
+### Background Music (BGM)
+| ID | File | Vibe / Emotion | Scene Usage |
+|---|---|---|---|
+| `cinematic_bg` | `cinematic_bg.mp3` | Dramatic, urgent, but educational | Landing, Cinematic Intro |
+| `ambient_ocean` | `ambient_ocean.mp3` | Calming ocean waves, seagulls | Base World, Reflection Scene |
+| `ambient_underwater` | `ambient_underwater.mp3` | Deep, muffled, bubbling ambiance | Coastal Task 3 (Underwater) |
+| `ambient_factory` | `ambient_factory.mp3` | Low hum, mechanical drone | Industrial Area Tasks |
+
+### UI & System Sounds
+| ID | File | Description | Usage |
+|---|---|---|---|
+| `click_success` | `click_success.mp3` | Bright, satisfying high-pitch pop/ding | Generic correct action, task step |
+| `click_error` | `click_error.mp3` | Soft buzz or low-pitch dull thud | Wrong click, miss |
+| `task_complete` | `task_complete.mp3` | Rewarding chime or short fanfare | Completing any main task |
+| `alarm` | `alarm.mp3` | Klaxon / siren, urgent but not deafening | Coastal Crisis trigger |
+| `ui_hover` | `ui_hover.mp3` | Very soft futuristic click/blip | Button hovers, minimap clicks |
+
+### Coastal Area SFX
+| ID | File | Description | Usage |
+|---|---|---|---|
+| `net_cut` | `net_cut.mp3` | Scissors snipping rope/plastic | Task 1: Saving turtle |
+| `trash_pickup` | `trash_pickup.mp3` | Crinkling plastic bag / rustle | Task 2: Cleaning beach |
+| `glue_squish` | `glue_squish.mp3` | Wet, sticky application sound | Task 3: Applying glue to patch |
+| `metal_snap` | `metal_snap.mp3` | Heavy metallic clank | Task 3: Patch snapping to pipe |
+| `fire_burning` | `fire_burning.mp3` | Roaring flames, crackling | Task 4: In-situ burning |
+| `chemical_spray` | `chemical_spray.mp3` | Aerosol hiss / spray | Task 4: Corexit dispersant |
+| `helicopter_loop` | `helicopter_loop.mp3` | Chopper blades (looping) | Task 4: Overhead scene bg |
+
+### Agricultural Area SFX
+| ID | File | Description | Usage |
+|---|---|---|---|
+| `radar_ping` | `radar_ping.mp3` | Sonar-like blip | Task 1: Scanning pollution |
+| `shovel_dig` | `shovel_dig.mp3` | Shovel hitting dirt | Task 2: Planting buffer strips |
+
+### Industrial Area SFX
+| ID | File | Description | Usage |
+|---|---|---|---|
+| `metal_drag` | `metal_drag.mp3` | Screech/slide of heavy metal | Task 2: Dragging bolts |
+| `wrench_ratchet` | `wrench_ratchet.mp3` | Mechanical clicking/tightening | Task 2: Tightening bolts |
+| `stone_grind` | `stone_grind.mp3` | Heavy rock impact | Task 3: Filtration (layer 1) |
+| `sand_pour` | `sand_pour.mp3` | Pouring granular material | Task 3: Filtration (layer 2 & 3) |
+| `liquid_splash` | `liquid_splash.mp3` | Chemical dropping into pool | Task 3: Chemical method |
+| `bacteria_bubble` | `bacteria_bubble.mp3` | Organic bubbling / fizzing | Task 3: Bacteria method |
+
+*To implement these, simply add them to `Audio.init()` in `game.js` and call `Audio.play('id')` at the respective interaction points.*
 
 ---
 

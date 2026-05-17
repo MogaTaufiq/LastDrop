@@ -119,13 +119,17 @@
 
             <!-- Clickable Map Areas overlaying the SVG -->
             <div class="map-area" id="map-agricultural" data-area="agricultural" style="top: 15%; left: 15%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
+                <span class="map-alert-dot" style="display:none;"></span>
                 <span class="area-icon" style="font-size:1rem;">🌾</span>
                 <span class="area-name" style="font-size:0.7rem;">Agricultural</span>
+                <span class="area-status" id="map-agri-status" style="font-size:0.6rem;"></span>
             </div>
             
             <div class="map-area" id="map-industrial" data-area="industrial" style="top: 15%; left: 55%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
+                <span class="map-alert-dot" style="display:none;"></span>
                 <span class="area-icon" style="font-size:1rem;">🏭</span>
                 <span class="area-name" style="font-size:0.7rem;">Industrial</span>
+                <span class="area-status" id="map-ind-status" style="font-size:0.6rem;"></span>
             </div>
             
             <div class="map-area" id="map-residential" data-area="residential" style="top: 50%; left: 45%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
@@ -133,11 +137,11 @@
                 <span class="area-name" style="font-size:0.7rem; text-align:center;">Residential<br>(Spawn)</span>
             </div>
             
-            <div class="map-area coastal" id="map-coastal" data-area="coastal" style="top: 65%; left: 20%; width: 30%; height: 30%; z-index:10; border-radius: 50%;">
+            <div class="map-area" id="map-coastal" data-area="coastal" style="top: 65%; left: 20%; width: 30%; height: 30%; z-index:10; border-radius: 50%;">
                 <span class="map-alert-dot"></span>
                 <span class="area-icon" style="font-size:1rem;">🌊</span>
                 <span class="area-name" style="font-size:0.7rem;">Coastal</span>
-                <span class="area-status" style="font-size:0.6rem;">🚨 CRISIS</span>
+                <span class="area-status" id="map-coastal-status" style="font-size:0.6rem;">🚨 CRISIS</span>
             </div>
         </div>
     </div>

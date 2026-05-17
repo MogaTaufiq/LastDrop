@@ -46,14 +46,17 @@ const GameState = {
 // ============================================
 const Audio = {
     sounds: {},
+    offsets: {},
     bgMusic: null,
     muted: false,
 
-    load(id, src) {
+    // Added startOffset (in seconds) to skip silence at the beginning of audio files
+    load(id, src, startOffset = 0) {
         const audio = new window.Audio();
         audio.src = src;
         audio.preload = 'auto';
         this.sounds[id] = audio;
+        this.offsets[id] = startOffset;
         return audio;
     },
 
@@ -62,13 +65,34 @@ const Audio = {
         const snd = this.sounds[id];
         if (!snd) return;
         try {
-            const clone = snd.cloneNode();
-            clone.volume = options.volume !== undefined ? options.volume : 0.7;
-            clone.loop = options.loop || false;
-            clone.play().catch(() => { });
-            if (options.loop) this.bgMusic = clone;
-            return clone;
-        } catch (e) { }
+            const player = options.loop ? snd : snd.cloneNode();
+
+            player.volume = options.volume !== undefined ? options.volume : 0.7;
+            player.loop = options.loop || false;
+
+            // We must call play() first to ensure it attaches to the user gesture.
+            const playPromise = player.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Playback started! Now we can safely skip silence
+                    const offset = this.offsets[id] || 0;
+                    if (offset > 0 && player.currentTime < offset) {
+                        player.currentTime = offset;
+                    }
+                    if (options.loop) this.bgMusic = player;
+                }).catch(e => console.warn('Audio play error:', id, e));
+            } else {
+                // Fallback
+                const offset = this.offsets[id] || 0;
+                if (offset > 0) player.currentTime = offset;
+                if (options.loop) this.bgMusic = player;
+            }
+
+            return player;
+        } catch (e) {
+            console.error('Audio exception:', e);
+        }
     },
 
     stopBg() {
@@ -79,14 +103,37 @@ const Audio = {
     },
 
     init() {
-        // Load all audio files - place these in assets/audio/
-        this.load('cinematic_bg', 'assets/audio/cinematic_bg.mp3');
-        this.load('ambient_ocean', 'assets/audio/ambient_ocean.mp3');
-        this.load('alarm', 'assets/audio/alarm.mp3');
-        this.load('click_success', 'assets/audio/click_success.mp3');
-        this.load('task_complete', 'assets/audio/task_complete.mp3');
-        this.load('fire_burning', 'assets/audio/fire_burning.mp3');
-        this.load('chemical_spray', 'assets/audio/chemical_spray.mp3');
+        // --- BACKGROUND MUSIC & AMBIENCE ---
+        this.load('cinematic_bg', 'assets/audio/cinematic_bg.mp3', 120);
+        this.load('ambient_ocean', 'assets/audio/ambient_ocean.mp3', 0);
+        this.load('ambient_underwater', 'assets/audio/ambient_underwater.mp3', 0);
+        this.load('ambient_factory', 'assets/audio/ambient_factory.mp3', 0);
+
+        // --- UI & SYSTEM SOUNDS ---
+        this.load('alarm', 'assets/audio/alarm.mp3', 0);
+        // If "click_success.mp3" has 0.5s of silence at the start, change the 0 below to 0.5
+        this.load('click_success', 'assets/audio/click_success.mp3', 3);
+        this.load('click_error', 'assets/audio/click_error.mp3', 0);
+        this.load('task_complete', 'assets/audio/task_complete.mp3', 0);
+
+        // --- COASTAL SFX ---
+        this.load('net_cut', 'assets/audio/net_cut.mp3', 0);
+        this.load('trash_pickup', 'assets/audio/trash_pickup.mp3', 0);
+        // Using "metap_snap.mp3" because of the typo in the downloaded file name
+        this.load('metal_snap', 'assets/audio/metap_snap.mp3', 0);
+        this.load('fire_burning', 'assets/audio/fire_burning.mp3', 0);
+        this.load('chemical_spray', 'assets/audio/chemical_spray.mp3', 0);
+
+        // --- AGRICULTURAL SFX ---
+        this.load('shovel_dig', 'assets/audio/shovel_dig.mp3', 0);
+
+        // --- INDUSTRIAL SFX ---
+        this.load('metal_drag', 'assets/audio/metal_drag.mp3', 0);
+        this.load('wrench_ratchet', 'assets/audio/wrench_ratchet.mp3', 0);
+        this.load('stone_grind', 'assets/audio/stone_grind.mp3', 0);
+        this.load('sand_pour', 'assets/audio/sand_pour.mp3', 0);
+        this.load('liquid_splash', 'assets/audio/liquid_splash.mp3', 0);
+        this.load('bacteria_bubble', 'assets/audio/bacteria_bubble.mp3', 0);
     }
 };
 
@@ -328,7 +375,6 @@ function initLanding() {
 
     // Click to start
     document.getElementById('scene-landing').addEventListener('click', () => {
-        Audio.init();
         Audio.play('cinematic_bg', { volume: 0.4, loop: true });
         SceneManager.show('scene-cinematic', () => {
             initCinematic();
@@ -745,18 +791,85 @@ function hideMiniMap() {
     if (mapContainer) mapContainer.classList.remove('visible');
 }
 
+// ============================================
+// MAP CRISIS INDICATOR — updates the red pulse
+// dot on the minimap based on current game state
+// ============================================
+function updateMapCrisis() {
+    const coastal    = document.getElementById('map-coastal');
+    const agri       = document.getElementById('map-agricultural');
+    const industrial = document.getElementById('map-industrial');
+
+    if (!coastal) return;
+
+    const coastalStatus = document.getElementById('map-coastal-status');
+    const agriStatus    = document.getElementById('map-agri-status');
+    const indStatus     = document.getElementById('map-ind-status');
+
+    // Helper: set area state
+    function setAreaState(el, statusEl, state, label) {
+        el.classList.remove('crisis', 'done');
+        const dot = el.querySelector('.map-alert-dot');
+        if (dot) dot.style.display = 'none';
+        if (state === 'crisis') {
+            el.classList.add('crisis');
+            if (dot) dot.style.display = '';
+            if (statusEl) statusEl.textContent = label || '🚨 CRISIS';
+        } else if (state === 'done') {
+            el.classList.add('done');
+            if (statusEl) statusEl.textContent = label || '✅ SAFE';
+        } else {
+            // neutral / locked
+            if (statusEl) statusEl.textContent = label || '';
+        }
+    }
+
+    // --- Coastal ---
+    if (GameState.allTasksDone()) {
+        setAreaState(coastal, coastalStatus, 'done', '✅ SAFE');
+    } else {
+        setAreaState(coastal, coastalStatus, 'crisis', '🚨 CRISIS');
+    }
+
+    // --- Agricultural (only active after Coastal done) ---
+    if (GameState.agriCompleted) {
+        setAreaState(agri, agriStatus, 'done', '✅ SAFE');
+    } else if (GameState.allTasksDone()) {
+        setAreaState(agri, agriStatus, 'crisis', '🚨 CRISIS');
+    } else {
+        setAreaState(agri, agriStatus, 'neutral', '🔒 LOCKED');
+    }
+
+    // --- Industrial (only active after Coastal done) ---
+    if (GameState.indCompleted) {
+        setAreaState(industrial, indStatus, 'done', '✅ SAFE');
+    } else if (GameState.allTasksDone()) {
+        setAreaState(industrial, indStatus, 'crisis', '🚨 CRISIS');
+    } else {
+        setAreaState(industrial, indStatus, 'neutral', '🔒 LOCKED');
+    }
+}
+
+
 function initResidential() {
     if (GameState.phase !== 'residential') return;
     HUD.show();
     HUD.update();
-    showMiniMap(); 
-    TodoPanel.hide(); 
-    
-    // update areas counter if coastal is done
+    showMiniMap();
+    TodoPanel.hide();
+    // Stop any area-specific ambience when returning to base
+    Audio.stopBg();
+
+    // Update minimap crisis / done / locked indicators
+    updateMapCrisis();
+
+    // update areas counter
     if (GameState.allTasksDone()) {
         const counter = document.getElementById('areas-counter');
         counter.classList.remove('hidden');
-        if (GameState.agriCompleted) {
+        if (GameState.agriCompleted && GameState.indCompleted) {
+            counter.textContent = 'All areas resolved! ✅';
+        } else if (GameState.agriCompleted || GameState.indCompleted) {
             counter.textContent = '1 area left to solve';
         } else {
             counter.textContent = '2 areas left to solve';
@@ -776,13 +889,13 @@ function initResidential() {
         if (!window.keys) window.keys = { w: false, a: false, s: false, d: false, e: false };
 
         window.addEventListener('keydown', (e) => {
-            if(GameState.phase !== 'residential') return;
+            if (GameState.phase !== 'residential') return;
             const key = e.key.toLowerCase();
             if (window.keys.hasOwnProperty(key)) window.keys[key] = true;
         });
 
         window.addEventListener('keyup', (e) => {
-            if(GameState.phase !== 'residential') return;
+            if (GameState.phase !== 'residential') return;
             const key = e.key.toLowerCase();
             if (window.keys.hasOwnProperty(key)) window.keys[key] = false;
         });
@@ -807,7 +920,7 @@ function initResidential() {
         requestAnimationFrame(resLoop);
     }
 
-    // Modal start button
+    // Modal start button — only for first coastal crisis popup
     const btnStart = document.getElementById('btn-start-mission');
     if (btnStart) {
         btnStart.onclick = () => {
@@ -817,7 +930,7 @@ function initResidential() {
         };
     }
 
-    // Trigger crisis alerts
+    // Trigger crisis alert ONCE — only for first entry (Coastal area)
     if (!GameState.coastalAlertShown && !GameState.allTasksDone()) {
         GameState.coastalAlertShown = true;
         setTimeout(() => {
@@ -827,17 +940,13 @@ function initResidential() {
             }
         }, 2000);
     } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
+        // After coastal done — use a Toast (no second modal popup)
         GameState.agriAlertShown = true;
         setTimeout(() => {
             if (GameState.phase === 'residential') {
-                triggerAlarm();
-                setTimeout(() => {
-                    const alertModal = document.getElementById('modal-map-alert');
-                    alertModal.querySelector('.modal-body').innerHTML = `Pollution detected in the <strong>Agricultural Area</strong> and <strong>Industrial Area</strong>.<br>Resolve these to restore environmental balance.`;
-                    Modal.show('modal-map-alert');
-                }, 2000);
+                Toast.show('🚨 New crisis zones detected! Check Agricultural & Industrial areas on the map.', '', 5000);
             }
-        }, 2000);
+        }, 1200);
     }
 }
 
@@ -846,7 +955,7 @@ let mapControllerActive = false;
 function initMap() {
     if (mapControllerActive) return;
     mapControllerActive = true;
-    
+
     const areas = document.querySelectorAll('.mini-map-content .map-area');
     areas.forEach(area => {
         area.onclick = () => {
@@ -857,7 +966,7 @@ function initMap() {
     function enterArea(areaName) {
         if (areaName === 'coastal') {
             if (!GameState.allTasksDone()) {
-                showMissionIntro('Coastal Area', 
+                showMissionIntro('Coastal Area',
                     'A pollution crisis has been detected in the Coastal Area! Complete all tasks to restore environmental balance.',
                     () => {
                         GameState.currentArea = areaName;
@@ -898,6 +1007,9 @@ function initMap() {
                     'Pollution detected in the Industrial Area. Untreated wastewater is being released into the river.',
                     () => {
                         GameState.currentArea = areaName;
+                        // Switch to factory ambience for Industrial area
+                        Audio.stopBg();
+                        Audio.play('ambient_factory', { volume: 0.4, loop: true });
                         TodoPanel.show();
                         document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>Identify pollution source`;
                         document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>Stop direct discharge`;
@@ -945,7 +1057,7 @@ function initMap() {
 function initTask1() {
     if (GameState.phase !== 'task1') return;
     const instructionEl = document.getElementById('t1-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Click the turtle to free it from plastic entanglement', 40);
+    if (instructionEl) typeWriter(instructionEl, 'Click the turtle to free it from plastic entanglement', 40);
     let isHelping = false;
     let progressInterval = null;
 
@@ -964,6 +1076,8 @@ function initTask1() {
 
         // Particle effect
         Particles.burst(e.clientX, e.clientY, 6, ['🤲', '💚', '✨']);
+        // Play net cutting SFX
+        Audio.play('net_cut', { volume: 0.7 });
 
         let progress = 0;
         progressInterval = setInterval(() => {
@@ -983,19 +1097,19 @@ function initTask1() {
         const net = document.getElementById('plastic-net-overlay');
         const eyesSad = document.getElementById('turtle-eyes-sad');
         const eyesHappy = document.getElementById('turtle-eyes-happy');
-        
+
         if (turtleSvg) {
             turtleSvg.classList.add('turtle-free');
             turtleSvg.style.transition = 'transform 1.5s ease, filter 1.5s ease';
             turtleSvg.style.transform = 'translateY(-40px) scale(1.1)';
             turtleSvg.style.filter = 'drop-shadow(0 15px 30px rgba(82, 201, 122, 0.8))';
         }
-        
+
         if (net) {
             net.style.opacity = '0';
             net.style.transform = 'translateY(50px) rotate(20deg)';
         }
-        
+
         if (eyesSad && eyesHappy) {
             eyesSad.classList.add('hidden');
             eyesHappy.classList.remove('hidden');
@@ -1033,9 +1147,9 @@ function initTask1() {
 function initTask2() {
     if (GameState.phase !== 'task2') return;
     const instructionEl = document.getElementById('t2-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Click each trash item to collect it', 40);
+    if (instructionEl) typeWriter(instructionEl, 'Click each trash item to collect it', 40);
     const trashItems = [
-        { emoji: '🧴', x: 6,  y: 52 },
+        { emoji: '🧴', x: 6, y: 52 },
         { emoji: '🥤', x: 18, y: 75 },
         { emoji: '🛍️', x: 30, y: 58 },
         { emoji: '🧃', x: 46, y: 82 },
@@ -1074,7 +1188,8 @@ function initTask2() {
     function collectTrash(el, index) {
         if (el.classList.contains('collected')) return;
         el.classList.add('collected');
-        Audio.play('click_success', { volume: 0.6 });
+        // Trash pickup SFX instead of generic click_success
+        Audio.play('trash_pickup', { volume: 0.7 });
         Particles.burst(
             el.getBoundingClientRect().left + 20,
             el.getBoundingClientRect().top + 20,
@@ -1126,6 +1241,10 @@ function initTask2() {
 function initTask3() {
     if (GameState.phase !== 'task3') return;
 
+    // Start underwater ambience for this scene
+    Audio.stopBg();
+    Audio.play('ambient_underwater', { volume: 0.5, loop: true });
+
     const instructionEl = document.getElementById('t3-instruction');
     if (instructionEl) typeWriter(instructionEl, 'Apply glue on all 4 edges of the patch plate, then drag it to the crack!', 35);
 
@@ -1142,6 +1261,7 @@ function initTask3() {
             glued.add(edgeName);
             el.classList.add('glued');
             el.textContent = '✔ GLUED';
+            // Glue squish SFX would be ideal; use metal_snap as close alternative since no glue_squish in assets
             Audio.play('click_success', { volume: 0.5 });
             Particles.burst(el.getBoundingClientRect().left + 12, el.getBoundingClientRect().top + 12, 4, ['✨', '🟡']);
 
@@ -1200,7 +1320,7 @@ function initTask3() {
         function movePlateTo(clientX, clientY) {
             if (!isDragging) return;
             plate.style.left = (clientX - offsetX) + 'px';
-            plate.style.top  = (clientY - offsetY) + 'px';
+            plate.style.top = (clientY - offsetY) + 'px';
         }
 
         function onMouseMove(e) { movePlateTo(e.clientX, e.clientY); }
@@ -1221,7 +1341,7 @@ function initTask3() {
                 // Snap plate to dropzone
                 plate.style.transition = 'all 0.4s ease';
                 plate.style.left = dz.left + 'px';
-                plate.style.top  = dz.top + 'px';
+                plate.style.top = dz.top + 'px';
                 plate.style.width = dz.width + 'px';
                 plate.style.height = dz.height + 'px';
                 cleanup();
@@ -1279,8 +1399,12 @@ function initTask3() {
     }
 
     function completeTask3() {
+        // Stop underwater ambience when leaving this scene
+        Audio.stopBg();
         GameState.completeTask(2);
         Audio.play('task_complete', { volume: 0.8 });
+        // Play metal_snap for the satisfying pipe-sealed moment
+        Audio.play('metal_snap', { volume: 0.7 });
         Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 12, ['🔧', '✅', '✨', '🌊']);
         Toast.show('Leak successfully contained!', '🔧 Oil leak stopped', 3000);
         if (instructionEl) instructionEl.textContent = '✅ Pipe sealed successfully!';
@@ -1305,8 +1429,8 @@ function initTask3() {
 function initTask4() {
     if (GameState.phase !== 'task4') return;
     const instructionEl = document.getElementById('t4-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Choose a method to clean up the oil spill', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Choose a method to clean up the oil spill', 40);
+
     const stepIndicator = document.getElementById('t4-step-indicator');
     const instruction = document.getElementById('t4-instruction');
     const methodSelection = document.getElementById('t4-method-selection');
@@ -1325,11 +1449,11 @@ function initTask4() {
     function startMethodA() {
         methodSelection.classList.add('hidden');
         GameState.task4Choice = 'burning';
-        
+
         // Step 1: Localize
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Containment';
         typeWriter(instruction, 'Draw a containment boom around the oil spill!', 30);
-        
+
         const canvas = document.getElementById('t4-boom-canvas');
         canvas.classList.remove('hidden');
         // Use getBoundingClientRect for accurate sizing after layout
@@ -1337,25 +1461,25 @@ function initTask4() {
         canvas.width = rect.width;
         canvas.height = rect.height;
         const ctx = canvas.getContext('2d');
-        
+
         let isDrawing = false;
         let points = [];
-        
+
         canvas.onmousedown = (e) => {
             e.preventDefault();
             isDrawing = true;
             const cr = canvas.getBoundingClientRect();
-            points = [{x: e.clientX - cr.left, y: e.clientY - cr.top}];
+            points = [{ x: e.clientX - cr.left, y: e.clientY - cr.top }];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
-        
+
         canvas.onmousemove = (e) => {
             if (!isDrawing) return;
             const cr = canvas.getBoundingClientRect();
-            points.push({x: e.clientX - cr.left, y: e.clientY - cr.top});
+            points.push({ x: e.clientX - cr.left, y: e.clientY - cr.top });
             drawPath(ctx, points, true);
         };
-        
+
         canvas.onmouseup = (e) => {
             if (!isDrawing) return;
             isDrawing = false;
@@ -1375,7 +1499,7 @@ function initTask4() {
             const touch = e.touches[0];
             const cr = canvas.getBoundingClientRect();
             isDrawing = true;
-            points = [{x: touch.clientX - cr.left, y: touch.clientY - cr.top}];
+            points = [{ x: touch.clientX - cr.left, y: touch.clientY - cr.top }];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
         canvas.ontouchmove = (e) => {
@@ -1383,7 +1507,7 @@ function initTask4() {
             if (!isDrawing) return;
             const touch = e.touches[0];
             const cr = canvas.getBoundingClientRect();
-            points.push({x: touch.clientX - cr.left, y: touch.clientY - cr.top});
+            points.push({ x: touch.clientX - cr.left, y: touch.clientY - cr.top });
             drawPath(ctx, points, true);
         };
         canvas.ontouchend = (e) => {
@@ -1398,7 +1522,7 @@ function initTask4() {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
-        for(let i=1; i<points.length; i++) {
+        for (let i = 1; i < points.length; i++) {
             ctx.lineTo(points[i].x, points[i].y);
         }
         ctx.strokeStyle = '#ff9800';
@@ -1410,18 +1534,18 @@ function initTask4() {
     function checkBoomSuccess(ctx, points) {
         if (points.length < 8) return;
         const first = points[0];
-        const last = points[points.length-1];
+        const last = points[points.length - 1];
         const dist = Math.hypot(last.x - first.x, last.y - first.y);
-        
+
         // Bounding box of drawn path
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         points.forEach(p => {
-            if(p.x < minX) minX = p.x;
-            if(p.x > maxX) maxX = p.x;
-            if(p.y < minY) minY = p.y;
-            if(p.y > maxY) maxY = p.y;
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
         });
-        
+
         const cw = ctx.canvas.width;
         const ch = ctx.canvas.height;
         // Oil blob center is at 50%,50% of ocean container
@@ -1433,7 +1557,7 @@ function initTask4() {
         const closed = dist < 80;
         const enclosesOil = minX < cx && maxX > cx && minY < cy && maxY > cy;
         const bigEnough = spanX > 60 && spanY > 40;
-        
+
         if (closed && enclosesOil && bigEnough) {
             // Success — draw solid boom
             drawPath(ctx, points, false);
@@ -1442,11 +1566,11 @@ function initTask4() {
             ctx.font = 'bold 18px Exo 2, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('✔ Boom Deployed!', cx, cy - 90);
-            
+
             const canvas = document.getElementById('t4-boom-canvas');
             canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
             canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
-            
+
             typeWriter(instruction, '✔ Boom deployed! Oil contained.', 30);
             setTimeout(() => methodA_Step2(), 1200);
         } else {
@@ -1464,23 +1588,24 @@ function initTask4() {
     function methodA_Step2() {
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Ignition';
         typeWriter(instruction, 'The oil is contained. Click IGNITE to start controlled burning!', 30);
-        
+
         const igniteBtn = document.getElementById('btn-t4-ignite');
         igniteBtn.classList.remove('hidden');
-        
+
         igniteBtn.onclick = () => {
             igniteBtn.classList.add('hidden');
             typeWriter(instruction, '🔥 Burning in progress...', 30);
-            
+
             // Get viewport coords of ocean container center for particles
             const rect = oceanContainer.getBoundingClientRect();
             const vcx = rect.left + rect.width / 2;
             const vcy = rect.top + rect.height / 2;
-            
+
             // Fire particles at correct viewport coordinates
             Particles.burst(vcx, vcy, 20, ['🔥', '💨', '🔥']);
-            Audio.play('fire_burning', { volume: 0.5 });
-            
+            // Start fire burning sound and keep reference to stop it later
+            const fireSfx = Audio.play('fire_burning', { volume: 0.6, loop: true });
+
             // Stop CSS animation then shrink oil blob
             oilBlob.style.animation = 'none';
             oilBlob.style.transition = 'transform 2.5s ease-out, opacity 2.5s ease-out';
@@ -1489,19 +1614,19 @@ function initTask4() {
                 oilBlob.style.transform = 'translate(-50%, -50%) scale(0.05)';
                 oilBlob.style.opacity = '0';
             }, 30);
-            
+
             // Progress Bar
             const progContainer = document.getElementById('t4-action-progress-container');
             const progBar = document.getElementById('t4-action-progress-bar');
             progBar.style.width = '0%';
             progBar.style.background = 'linear-gradient(90deg, #ff9800, #ffeb3b)';
             progContainer.classList.remove('hidden');
-            
+
             let prog = 0;
             const interval = setInterval(() => {
                 prog += 4;
                 progBar.style.width = prog + '%';
-                
+
                 // Random fire/smoke bursts at viewport coords
                 if (Math.random() > 0.6) {
                     const offsetX = (Math.random() * 80) - 40;
@@ -1511,6 +1636,8 @@ function initTask4() {
 
                 if (prog >= 100) {
                     clearInterval(interval);
+                    // Stop fire looping sound when burning is done
+                    if (fireSfx) { fireSfx.pause(); fireSfx.currentTime = 0; }
                     progContainer.classList.add('hidden');
                     methodA_Step3();
                 }
@@ -1522,14 +1649,14 @@ function initTask4() {
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
         typeWriter(instruction, 'Cleanup complete.', 30);
         oceanContainer.style.background = 'linear-gradient(180deg, #0a4f7a 0%, #0d3a5c 100%)';
-        
+
         resultCard.classList.remove('hidden');
         document.getElementById('t4-result-icon').textContent = '✅';
         document.getElementById('t4-result-title').textContent = 'Oil successfully removed by combustion.';
         document.getElementById('t4-r-water').textContent = '+25';
         document.getElementById('t4-r-bio').textContent = '+5';
         document.getElementById('t4-result-info').textContent = 'In-situ burning physically removes oil from the water surface. Some air pollution occurs but marine ecosystem impact is minimal.';
-        
+
         document.getElementById('btn-t4-complete').onclick = () => finishTask4('burning');
     }
 
@@ -1539,32 +1666,32 @@ function initTask4() {
     function startMethodB() {
         methodSelection.classList.add('hidden');
         GameState.task4Choice = 'chemical';
-        
+
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Surface Spraying';
         typeWriter(instruction, 'Drag the boat across the oil spill to spray dispersant!', 30);
-        
+
         const boat = document.getElementById('t4-boat');
         const canvas = document.getElementById('t4-spray-canvas');
         boat.classList.remove('hidden');
         canvas.classList.remove('hidden');
-        
+
         // Use getBoundingClientRect for accurate sizing
         const rect = oceanContainer.getBoundingClientRect();
         canvas.width = rect.width;
         canvas.height = rect.height;
         const ctx = canvas.getContext('2d');
-        
+
         // Reset boat pos — use left/top without transform offset
         // Boat CSS has transform: translate(-50%,-50%) so left/top is its center
         let boatX = canvas.width / 2;
         let boatY = canvas.height * 0.7;
         boat.style.left = boatX + 'px';
         boat.style.top = boatY + 'px';
-        
+
         let isDragging = false;
         let coverage = 0;
         let done = false;
-        
+
         const progContainer = document.getElementById('t4-action-progress-container');
         const progBar = document.getElementById('t4-action-progress-bar');
         progBar.style.width = '0%';
@@ -1594,7 +1721,7 @@ function initTask4() {
             ctx.beginPath();
             ctx.arc(bx, by, 8, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Coverage increases when dragging near the oil (center area)
             const distFromCenter = Math.hypot(bx - canvas.width / 2, by - canvas.height / 2);
             if (distFromCenter < 130) {
@@ -1641,41 +1768,41 @@ function initTask4() {
     function methodB_Step2() {
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Submarine Injection';
         typeWriter(instruction, 'Click the injection point 3 times to inject dispersant into the leak source!', 30);
-        
+
         document.getElementById('t4-boat').classList.add('hidden');
         document.getElementById('t4-spray-canvas').classList.add('hidden');
         // Hide surface oil blob — transitioning to underwater view
         oilBlob.classList.add('hidden');
-        
+
         // Hide & reset progress bar from step 1
         const progContainer = document.getElementById('t4-action-progress-container');
         const progBar = document.getElementById('t4-action-progress-bar');
         progContainer.classList.add('hidden');
         progBar.style.width = '0%';
-        
+
         const uwScene = document.getElementById('t4-underwater-scene');
         uwScene.classList.remove('hidden');
-        
+
         const injectTarget = document.getElementById('t4-inject-target');
         const counter = document.getElementById('t4-inject-counter');
         counter.textContent = 'Injections: 0/3';
-        
+
         let clicks = 0;
         injectTarget.onclick = () => {
             clicks++;
             counter.textContent = `Injections: ${clicks}/3`;
-            
+
             // Animate inject target briefly
             injectTarget.style.background = 'rgba(156,39,176,0.4)';
             setTimeout(() => { injectTarget.style.background = ''; }, 300);
-            
+
             // Particles at viewport coords of the inject target
             const r = injectTarget.getBoundingClientRect();
             const vx = r.left + r.width / 2;
             const vy = r.top + r.height / 2;
             Particles.burst(vx, vy, 6, ['🫧', '💧', '🟣']);
             Audio.play('chemical_spray', { volume: 0.5 });
-            
+
             if (clicks >= 3) {
                 injectTarget.onclick = null;
                 injectTarget.style.animation = 'none';
@@ -1689,7 +1816,7 @@ function initTask4() {
     function methodB_Step3() {
         if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
         typeWriter(instruction, 'Cleanup complete.', 30);
-        
+
         // Show sick fish
         const fishContainer = document.getElementById('t4-fish-container');
         fishContainer.classList.remove('hidden');
@@ -1698,23 +1825,23 @@ function initTask4() {
             <div class="fish-sick" style="top: 50%; left: 70%; animation-delay: 0.5s;">🐠</div>
             <div class="fish-sick" style="top: 70%; left: 40%; animation-delay: 1s;">🐡</div>
         `;
-        
+
         resultCard.classList.remove('hidden');
         document.getElementById('t4-result-icon').textContent = '⚠️';
         document.getElementById('t4-result-title').textContent = 'Oil dispersed — but not removed.';
-        
+
         document.getElementById('t4-r-water').textContent = '+20';
-        
+
         const bioSpan = document.getElementById('t4-r-bio');
         bioSpan.textContent = '−15';
         bioSpan.classList.add('negative');
-        
+
         const warning = document.getElementById('t4-result-warning');
         warning.classList.remove('hidden');
         warning.innerHTML = 'Chemical dispersants break oil into tiny droplets that remain in the water column, making them more accessible to marine life. Toxic to fish, coral, and plankton.';
-        
+
         document.getElementById('t4-result-info').textContent = 'Used in Deepwater Horizon (2010) — still debated by scientists.';
-        
+
         document.getElementById('btn-t4-complete').onclick = () => finishTask4('chemical');
     }
 
@@ -1728,9 +1855,9 @@ function initTask4() {
             GameState.updateBio(-15);
             Audio.play('task_complete', { volume: 0.8 });
         }
-        
+
         GameState.completeTask(3);
-        
+
         showContinueModal(
             'Coastal Area Saved',
             'You have completed all tasks in the Coastal Area! Return to the Residential Area.',
@@ -1749,49 +1876,49 @@ function initTask4() {
 function initAgriTask1() {
     if (GameState.phase !== 'agri1') return;
     const instructionEl = document.getElementById('agri1-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Scan the farm area to find the source of pollution.', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Scan the farm area to find the source of pollution.', 40);
+
     const scanArea = document.getElementById('farm-scan-area');
     const progBar = document.getElementById('scan-progress');
     const progFill = document.getElementById('scan-progress-fill');
     const typingText = document.getElementById('agri-typing-text');
     const nextBtn = document.getElementById('btn-agri1-next');
     const runoffAnim = document.getElementById('runoff-anim-layer');
-    
+
     let isScanning = false;
     let scanProgress = 0;
-    
+
     scanArea.onclick = (e) => {
         if (isScanning) return;
         isScanning = true;
         scanArea.classList.remove('alert-pulse');
         scanArea.style.borderColor = 'var(--teal)';
-        
+
         progBar.style.display = 'block';
         Particles.burst(e.clientX, e.clientY, 5, ['🔎', '✨']);
         Audio.play('click_success', { volume: 0.5 });
-        
+
         runoffAnim.classList.remove('hidden');
-        
+
         const interval = setInterval(() => {
             scanProgress += 20;
             progFill.style.width = scanProgress + '%';
-            
+
             if (scanProgress >= 100) {
                 clearInterval(interval);
                 completeAgri1();
             }
         }, 400);
     };
-    
+
     function completeAgri1() {
         progBar.style.display = 'none';
         scanArea.style.display = 'none';
-        
+
         typingText.classList.remove('hidden');
         typingText.innerHTML = '';
         const msg = "Fertilizers from farms are flowing into the water. These nutrients can pollute water and harm the ecosystem.";
-        
+
         let i = 0;
         const typeInterval = setInterval(() => {
             typingText.innerHTML += msg.charAt(i);
@@ -1807,7 +1934,7 @@ function initAgriTask1() {
             }
         }, 50);
     }
-    
+
     nextBtn.onclick = () => {
         GameState.phase = 'agri2';
         SceneManager.show('scene-agri-task2', () => initAgriTask2());
@@ -1820,59 +1947,59 @@ function initAgriTask1() {
 function initAgriTask2() {
     if (GameState.phase !== 'agri2') return;
     const instructionEl = document.getElementById('agri2-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Plant vegetation along the river to filter runoff.', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Plant vegetation along the river to filter runoff.', 40);
+
     const slotsContainer = document.getElementById('plant-slots-container');
     const riverDirty = document.getElementById('agri2-river-dirty');
     const counter = document.getElementById('plant-counter');
-    
+
     slotsContainer.innerHTML = '';
     const totalSlots = 8;
     let plantedCount = 0;
-    
+
     const positions = [
-        {x: 350, y: 150, type: '🌱'}, {x: 380, y: 220, type: '🌱'}, {x: 320, y: 280, type: '🌱'},
-        {x: 420, y: 350, type: '🌿'}, {x: 390, y: 420, type: '🌿'}, {x: 450, y: 480, type: '🌿'},
-        {x: 480, y: 550, type: '🌳'}, {x: 520, y: 580, type: '🌳'}
+        { x: 350, y: 150, type: '🌱' }, { x: 380, y: 220, type: '🌱' }, { x: 320, y: 280, type: '🌱' },
+        { x: 420, y: 350, type: '🌿' }, { x: 390, y: 420, type: '🌿' }, { x: 450, y: 480, type: '🌿' },
+        { x: 480, y: 550, type: '🌳' }, { x: 520, y: 580, type: '🌳' }
     ];
-    
+
     positions.forEach((pos, idx) => {
         const slot = document.createElement('div');
         slot.className = 'plant-slot';
         slot.style.left = pos.x + 'px';
         slot.style.top = pos.y + 'px';
-        
+
         slot.onclick = (e) => {
             if (slot.classList.contains('planted')) return;
             slot.classList.add('planted');
             slot.textContent = pos.type;
-            
+
             Particles.burst(e.clientX, e.clientY, 4, ['✨', '💚', pos.type]);
-            Audio.play('click_success', { volume: 0.5 });
-            
+            Audio.play('shovel_dig', { volume: 0.6 });
+
             plantedCount++;
             counter.textContent = `🌱 ${plantedCount} / ${totalSlots} planted`;
-            
+
             const opacity = 0.8 - (plantedCount / totalSlots) * 0.8;
             riverDirty.style.opacity = opacity;
-            
+
             if (plantedCount >= totalSlots) {
                 setTimeout(completeAgri2, 800);
             }
         };
         slotsContainer.appendChild(slot);
     });
-    
+
     function completeAgri2() {
         GameState.updateWater(15);
         GameState.updateBio(10);
         GameState.agriCompleted = true;
         GameState.completeTask(1, true);
-        
+
         Audio.play('task_complete', { volume: 0.8 });
-        Particles.burst(window.innerWidth/2, window.innerHeight/2, 15, ['🌱', '🌊', '🦋']);
+        Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🌱', '🌊', '🦋']);
         Toast.show('Runoff successfully reduced.', '💧+15 🦋+10', 3500);
-        
+
         showContinueModal(
             'Mission Complete',
             'Runoff successfully reduced. Return to the residential area.',
@@ -1891,33 +2018,34 @@ function initAgriTask2() {
 function initIndTask1() {
     if (GameState.phase !== 'ind1') return;
     const instructionEl = document.getElementById('ind1-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Locate the source of industrial wastewater.', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Locate the source of industrial wastewater.', 40);
+    // ambient_factory is already playing (started by enterArea())
+
     const pipeArea = document.getElementById('ind-pipe-area');
     const typingText = document.getElementById('ind1-typing-text');
     const nextBtn = document.getElementById('btn-ind1-next');
-    
+
     let isIdentified = false;
-    
+
     pipeArea.onclick = (e) => {
         if (isIdentified) return;
         isIdentified = true;
         pipeArea.classList.remove('alert-pulse');
         pipeArea.style.borderColor = 'var(--teal)';
-        
+
         Particles.burst(e.clientX, e.clientY, 5, ['🔎', '✨']);
         Audio.play('click_success', { volume: 0.5 });
-        
+
         Toast.show('Source identified.', '☑', 3000);
         GameState.completeTask(0, true);
-        
+
         typingText.classList.remove('hidden');
         typingText.innerHTML = '';
-        
+
         const msg1 = "Factories are releasing untreated waste into the water.";
         const msg2 = " Industrial waste may contain toxic chemicals and heavy metals.";
         const fullMsg = msg1 + msg2;
-        
+
         let i = 0;
         const typeInterval = setInterval(() => {
             typingText.innerHTML += fullMsg.charAt(i);
@@ -1930,7 +2058,7 @@ function initIndTask1() {
             }
         }, 40);
     };
-    
+
     nextBtn.onclick = () => {
         GameState.phase = 'ind2';
         SceneManager.show('scene-ind-task2', () => initIndTask2());
@@ -1943,27 +2071,27 @@ function initIndTask1() {
 function initIndTask2() {
     if (GameState.phase !== 'ind2') return;
     const instructionEl = document.getElementById('ind2-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Fix the leaking pipe joint. Drag missing bolts and tighten all.', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Fix the leaking pipe joint. Drag missing bolts and tighten all.', 40);
+
     const container = document.getElementById('ind2-bolts-container');
     const toolbox = document.getElementById('ind2-toolbox');
     const wrench = document.getElementById('ind2-wrench');
     const successMsg = document.getElementById('ind2-success-msg');
     const leakAnim = document.getElementById('ind2-leak-anim');
-    
+
     container.innerHTML = '';
     toolbox.innerHTML = '';
     successMsg.classList.add('hidden');
-    
+
     const slotPositions = [
-        {x: 370, y: 240, hasBolt: true}, {x: 430, y: 240, hasBolt: false},
-        {x: 370, y: 280, hasBolt: false}, {x: 430, y: 280, hasBolt: true},
-        {x: 370, y: 320, hasBolt: true}, {x: 430, y: 320, hasBolt: false},
-        {x: 370, y: 360, hasBolt: false}, {x: 430, y: 360, hasBolt: true}
+        { x: 370, y: 240, hasBolt: true }, { x: 430, y: 240, hasBolt: false },
+        { x: 370, y: 280, hasBolt: false }, { x: 430, y: 280, hasBolt: true },
+        { x: 370, y: 320, hasBolt: true }, { x: 430, y: 320, hasBolt: false },
+        { x: 370, y: 360, hasBolt: false }, { x: 430, y: 360, hasBolt: true }
     ];
-    
+
     let boltsTightened = 0;
-    
+
     // Create missing bolts in toolbox
     for (let i = 0; i < 4; i++) {
         const toolBolt = document.createElement('div');
@@ -1971,7 +2099,7 @@ function initIndTask2() {
         toolBolt.textContent = '🔩';
         toolBolt.draggable = true;
         toolBolt.dataset.tool = 'true';
-        
+
         toolBolt.ondragstart = (e) => {
             e.dataTransfer.setData('text/plain', 'bolt');
             setTimeout(() => toolBolt.style.opacity = '0.5', 0);
@@ -1981,21 +2109,21 @@ function initIndTask2() {
         };
         toolbox.appendChild(toolBolt);
     }
-    
+
     // Create slots and pre-existing bolts
     slotPositions.forEach((pos, idx) => {
         const slot = document.createElement('div');
         slot.className = 'bolt-slot' + (pos.hasBolt ? ' filled' : '');
         slot.style.left = pos.x + 'px';
         slot.style.top = pos.y + 'px';
-        
+
         if (pos.hasBolt) {
             const bolt = document.createElement('div');
             bolt.className = 'ind-bolt';
             bolt.textContent = '🔩';
             slot.appendChild(bolt);
         }
-        
+
         slot.ondragover = (e) => {
             e.preventDefault();
         };
@@ -2016,40 +2144,40 @@ function initIndTask2() {
                 }
             }
         };
-        
+
         container.appendChild(slot);
     });
-    
+
     let selectedWrench = false;
     wrench.onclick = () => {
         selectedWrench = !selectedWrench;
         wrench.style.background = selectedWrench ? '#2980b9' : '#222';
     };
-    
+
     container.onclick = (e) => {
         if (!selectedWrench) return;
         const target = e.target;
-        if (target.classList.contains('ind-bolt') && !target.classList.contains('tight')) {
-            target.classList.add('tight');
+        if (target.classList.contains('ind-bolt') && !target.classList.contains('tightened')) {
+            target.classList.add('tightened');
             target.textContent = '✅';
-            Audio.play('click_success', { volume: 0.5 });
+            Audio.play('wrench_ratchet', { volume: 0.7 });
             Particles.burst(e.clientX, e.clientY, 4, ['🔧', '✨']);
-            
+
             boltsTightened++;
             if (boltsTightened === 8) {
                 completeInd2();
             }
         }
     };
-    
+
     function completeInd2() {
         leakAnim.style.display = 'none';
         GameState.completeTask(1, true);
         Audio.play('task_complete', { volume: 0.8 });
-        
+
         successMsg.classList.remove('hidden');
         successMsg.innerHTML = '';
-        
+
         const msg = "Discharge successfully stopped.";
         let i = 0;
         const typeInterval = setInterval(() => {
@@ -2072,8 +2200,8 @@ function initIndTask2() {
 function initIndTask3() {
     if (GameState.phase !== 'ind3') return;
     const instructionEl = document.getElementById('ind3-instruction');
-    if(instructionEl) typeWriter(instructionEl, 'Choose a method to treat the remaining wastewater.', 40);
-    
+    if (instructionEl) typeWriter(instructionEl, 'Choose a method to treat the remaining wastewater.', 40);
+
     const btn1 = document.getElementById('btn-ind-method1');
     const btn2 = document.getElementById('btn-ind-method2');
     const btn3 = document.getElementById('btn-ind-method3');
@@ -2083,30 +2211,30 @@ function initIndTask3() {
     const nextBtn = document.getElementById('btn-ind3-next');
     const poolMain = document.getElementById('ind3-pool-main');
     const poolClean = document.getElementById('ind3-pool-clean');
-    
+
     let methodChosen = false;
-    
+
     function showGameplay(method) {
         if (methodChosen) return;
         methodChosen = true;
         methodSelection.style.display = 'none';
         gameplayArea.classList.remove('hidden');
         gameplayArea.style.display = 'flex';
-        
+
         if (method === 'filtration') initFiltrationGame();
         else if (method === 'chemical') initChemicalGame();
         else if (method === 'bacteria') initBacteriaGame();
     }
-    
+
     // -------- FILTRATION MECHANIC --------
     function initFiltrationGame() {
         const filtrationArea = document.getElementById('ind3-filtration-area');
         filtrationArea.classList.remove('hidden');
         filtrationArea.style.display = 'flex';
-        
+
         const layers = document.querySelectorAll('#ind3-filtration-area .ind-filter-layer');
         let clickedLayers = 0;
-        
+
         layers.forEach((layer, idx) => {
             if (idx === 0) {
                 layer.style.display = 'flex';
@@ -2116,71 +2244,78 @@ function initIndTask3() {
                 layer.classList.add('completed');
                 layer.style.opacity = '0.5';
                 clickedLayers++;
-                
-                Audio.play('click_success', { volume: 0.5 });
+
+                // Layer 1 = gravel (stone_grind), layer 2 = sand (sand_pour), layer 3 = charcoal (stone_grind)
+                if (idx === 0 || idx === 2) {
+                    Audio.play('stone_grind', { volume: 0.6 });
+                } else {
+                    Audio.play('sand_pour', { volume: 0.6 });
+                }
                 Particles.burst(layer.getBoundingClientRect().left + 35, layer.getBoundingClientRect().top + 45, 8, ['✨', '💧']);
-                
+
                 if (idx < layers.length - 1) {
                     setTimeout(() => {
                         layers[idx + 1].style.display = 'flex';
                     }, 600);
                 }
-                
+
                 // Update pool color gradually
                 const progress = clickedLayers / 3;
                 poolMain.style.fill = `rgb(${Math.round(139 - (139 - 46) * progress)}, ${Math.round(69 - (69 - 180) * progress)}, ${Math.round(19 + (180 - 19) * progress)})`;
-                
+
                 if (clickedLayers === 3) {
                     completeTreatment('filtration', 15, 0);
                 }
             };
         });
     }
-    
+
     // -------- CHEMICAL MECHANIC --------
     function initChemicalGame() {
         const chemicalArea = document.getElementById('ind3-chemical-area');
         chemicalArea.classList.remove('hidden');
         chemicalArea.style.display = 'flex';
-        
+
         const bottle = document.getElementById('ind3-chemical-bottle');
         const poolMainRect = poolMain.getBoundingClientRect();
         const poolMainCenterX = poolMainRect.left + poolMainRect.width / 2;
         const poolMainCenterY = poolMainRect.top + poolMainRect.height / 2;
-        
+
         let isDragging = false;
         let isDropped = false;
-        
+
         bottle.ondragstart = (e) => {
             isDragging = true;
             e.dataTransfer.effectAllowed = 'move';
             bottle.style.opacity = '0.6';
         };
-        
+
         bottle.ondragend = () => {
             isDragging = false;
             bottle.style.opacity = '1';
         };
-        
+
         document.addEventListener('dragover', (e) => {
             e.preventDefault();
         });
-        
+
         document.addEventListener('drop', (e) => {
             if (!isDragging || isDropped) return;
             isDropped = true;
-            
+
             const dropX = e.clientX;
             const dropY = e.clientY;
             const distance = Math.sqrt(
-                Math.pow(dropX - poolMainCenterX, 2) + 
+                Math.pow(dropX - poolMainCenterX, 2) +
                 Math.pow(dropY - poolMainCenterY, 2)
             );
-            
+
             if (distance < 120) {
                 Audio.play('chemical_spray', { volume: 0.7 });
+                // Liquid splash SFX when chemical hits pool
+                Audio.play('liquid_splash', { volume: 0.6 });
                 Particles.burst(poolMainCenterX, poolMainCenterY, 20, ['🧪', '✨', '💧']);
-                
+
                 // Animate pool clearing
                 poolMain.style.fill = '#2ecc71';
                 setTimeout(() => {
@@ -2193,43 +2328,44 @@ function initIndTask3() {
             }
         });
     }
-    
+
     // -------- BACTERIA MECHANIC --------
     function initBacteriaGame() {
         const bacteriaArea = document.getElementById('ind3-bacteria-area');
         bacteriaArea.classList.remove('hidden');
         bacteriaArea.style.display = 'flex';
-        
+
         const feedBtn = document.getElementById('ind3-bacteria-feed-btn');
         const bacteriaDisplay = document.getElementById('ind3-bacteria-display');
         const countSpan = document.getElementById('bacteria-feed-count');
-        
+
         let feedCount = 0;
         const maxFeeds = 3;
         let feedInProgress = false;
-        
+
         feedBtn.onclick = () => {
             if (feedInProgress || feedCount >= maxFeeds) return;
             feedInProgress = true;
             feedCount++;
             countSpan.textContent = maxFeeds - feedCount;
-            
-            Audio.play('click_success', { volume: 0.5 });
-            
+
+            // Bacteria bubble SFX when releasing cultures
+            Audio.play('bacteria_bubble', { volume: 0.7 });
+
             // Add bacteria emoji
             bacteriaDisplay.innerHTML += '🦠';
             Particles.burst(bacteriaDisplay.getBoundingClientRect().left + 50, bacteriaDisplay.getBoundingClientRect().top + 40, 5, ['🦠', '✨']);
-            
+
             // Update pool color
             const progress = feedCount / maxFeeds;
             poolMain.style.fill = `rgb(${Math.round(74 - (74 - 46) * progress)}, ${Math.round(124 - (124 - 180) * progress)}, ${Math.round(89 + (180 - 89) * progress)})`;
-            
+
             setTimeout(() => {
                 feedInProgress = false;
                 if (feedCount === maxFeeds) {
                     feedBtn.disabled = true;
                     feedBtn.style.opacity = '0.5';
-                    
+
                     setTimeout(() => {
                         poolClean.style.fill = '#2ecc71';
                         Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🦠', '✨', '🌿']);
@@ -2239,29 +2375,29 @@ function initIndTask3() {
             }, 800);
         };
     }
-    
+
     function completeTreatment(method, waterVal, bioVal) {
         gameplayArea.classList.add('hidden');
         GameState.updateWater(waterVal);
         GameState.updateBio(bioVal);
-        
+
         if (bioVal > 0) {
             Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 25, ['🦠', '✨', '💧', '🌿', '🌱']);
         } else {
             Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['✨', '💧', '💙']);
         }
-        
+
         const resultCard = document.getElementById('ind3-result-card');
         if (resultCard) resultCard.classList.remove('hidden');
-        
+
         typingText.classList.remove('hidden');
         typingText.innerHTML = '';
-        
+
         const methodNames = { 'filtration': 'Filtration', 'chemical': 'Chemical Coagulation', 'bacteria': 'Bacterial Treatment' };
         const msg1 = `${methodNames[method]} complete. Water quality restored.`;
         const msg2 = bioVal > 0 ? ' Biodiversity improved!' : '';
         const fullMsg = msg1 + msg2;
-        
+
         let i = 0;
         const typeInterval = setInterval(() => {
             typingText.innerHTML += fullMsg.charAt(i);
@@ -2274,11 +2410,11 @@ function initIndTask3() {
             }
         }, 40);
     }
-    
+
     btn1.onclick = () => showGameplay('filtration');
     btn2.onclick = () => showGameplay('chemical');
     btn3.onclick = () => showGameplay('bacteria');
-    
+
     nextBtn.onclick = () => {
         GameState.phase = 'residential';
         SceneManager.show('scene-residential', () => {
@@ -2298,9 +2434,9 @@ function checkAllAreasDone() {
                 const sky = resSvg.querySelector('rect[fill="#8ecae6"]');
                 if (sky) sky.setAttribute('fill', '#3498db');
             }
-            
+
             Toast.show('All pollution sources have been successfully managed.', '✅', 4000);
-            
+
             setTimeout(() => {
                 GameState.phase = 'reflection';
                 SceneManager.show('scene-reflection', () => initReflection());
@@ -2314,28 +2450,28 @@ function checkAllAreasDone() {
 // ============================================
 function initReflection() {
     if (GameState.phase !== 'reflection') return;
-    
+
     Audio.stopBg();
     Audio.play('ambient_ocean', { volume: 0.6, loop: true });
-    
+
     const bgSvg = document.querySelector('.reflection-bg-svg');
     bgSvg.style.transform = 'scale(1.2)';
-    
+
     const textContainer = document.getElementById('reflection-text-container');
-    
+
     const lines = [
         "Protecting water resources is a shared responsibility.",
         "Every action has an impact on the environment.",
         "The future of the ecosystem depends on the choices we make today."
     ];
-    
+
     let currentLine = 0;
-    
+
     function typeLine() {
         if (currentLine >= lines.length) {
             setTimeout(() => {
                 Modal.show('modal-you-survived');
-                
+
                 document.getElementById('btn-final-play-again').onclick = () => {
                     location.reload();
                 };
@@ -2345,11 +2481,11 @@ function initReflection() {
             }, 2000);
             return;
         }
-        
+
         textContainer.innerHTML = '';
         const msg = lines[currentLine];
         let i = 0;
-        
+
         const typeInterval = setInterval(() => {
             textContainer.innerHTML += msg.charAt(i);
             i++;
@@ -2358,12 +2494,12 @@ function initReflection() {
                 currentLine++;
                 if (currentLine === 1) bgSvg.style.transform = 'scale(1.05) translate(-20px, 10px)';
                 if (currentLine === 2) bgSvg.style.transform = 'scale(1.1) translate(20px, -10px)';
-                
+
                 setTimeout(typeLine, 3000);
             }
         }, 50);
     }
-    
+
     typeLine();
 }
 
@@ -2371,6 +2507,9 @@ function initReflection() {
 // INIT GAME
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize audio system immediately so browser can preload metadata
+    Audio.init();
+
     HUD.init();
     SceneManager.show('scene-landing', () => {
         initLanding();

@@ -18,46 +18,44 @@ The game is built entirely with **Vanilla HTML, CSS, and JavaScript** — no fra
 
 ---
 
-## 🎮 Gameplay
+## 🎮 Gameplay & Missions
 
-Players navigate a top-down island map using **WASD** and interact with zones by pressing **E**. Each zone triggers a unique cleanup mission:
+Players explore a dynamically expanding game world using a **Minimap** for fast travel. The game is divided into three major areas, each containing distinct, multi-step interactive tasks:
 
+### 🌊 Coastal Area
 | Task | Mission | Environmental Impact |
 |------|---------|----------------------|
-| 1 | 🐢 **Save a trapped marine animal** from plastic entanglement | Biodiversity +10 |
-| 2 | 🧹 **Clean plastic waste** scattered on the beach (8 items) | Water +10, Bio +5 |
-| 3 | 🔧 **Seal an underwater oil pipe** leak | — |
-| 4 | 🛢️ **Clean an ocean oil spill** — choose your method | Varies |
+| 1 | 🐢 **Save a trapped marine animal** from a plastic net | Biodiversity +10 |
+| 2 | 🧹 **Clean plastic waste** on a layered, animated beach | Water +10, Bio +5 |
+| 3 | 🔧 **Seal an underwater oil leak** (glue patch & drag) | — |
+| 4 | 🛢️ **Clean an ocean oil spill** (Choice: Burn vs Dispersant) | Varies |
 
-### Task 4 — The Decision Point
+### 🌾 Agricultural Area
+| Task | Mission | Environmental Impact |
+|------|---------|----------------------|
+| 1 | 🔎 **Identify pollution source** (fertilizer runoff scan) | — |
+| 2 | 🌳 **Plant buffer strips** along the river to stop runoff | Water +15, Bio +10 |
 
-Task 4 presents a real-world ethical dilemma with two cleanup methods:
+### 🏭 Industrial Area
+| Task | Mission | Environmental Impact |
+|------|---------|----------------------|
+| 1 | 🔎 **Find waste discharge pipe** on a factory pipeline | — |
+| 2 | 🔧 **Seal direct discharge** by dragging bolts & wrenching | — |
+| 3 | 🧪 **Treat wastewater** (Choice: Filter vs Chem vs Bacteria) | Varies (Bacteria Best: +15/+15) |
 
-**🔥 Method A: In-Situ Burning** *(Recommended)*
-- Contain the oil with a boom, then ignite it
-- Water Quality +25 · Biodiversity +5
-- Physically removes oil from the ocean surface
-
-**🧪 Method B: Corexit Dispersant**
-- Spray chemical dispersant from a boat, then inject at the source
-- Water Quality +20 · Biodiversity **-15**
-- Breaks oil into droplets — remains in the water column, harms marine life
-- Based on the real-world Deepwater Horizon (2010) response
-
-Your choice affects the final score and which badge you receive on the completion screen.
+Your choices in Coastal Task 4 and Industrial Task 3 affect your final score, evaluating whether you prioritize cheap, chemical fixes or ecologically sound bioremediation.
 
 ---
 
 ## ✨ Features
 
 - 🎬 **12-slide cinematic opening** with inline SVG illustrations
-- 🗺️ **Top-down island map** with WASD player movement and zone collision detection
+- 🗺️ **Persistent Minimap UI** for fast travel between Coastal, Agricultural, and Industrial zones.
 - 📊 **Live HUD** tracking Water Quality and Biodiversity in real time
 - ✅ **Mission checklist** panel updating as tasks are completed
-- 🎨 **Fully animated scenes** — waves, stars, particles, progress bars
-- 🔊 **Audio system** with clone-based overlapping playback (add `.mp3` files to enable)
+- 🎨 **Fully animated scenes** — layered SVG waves, helicopter POV, particles, progress bars
+- 🔊 **Comprehensive Audio Engine** with clone-based overlapping playback
 - 🌍 **Educational content** grounded in real environmental science
-- 📱 Partial **touch/mobile support** (keyboard + mouse fully supported)
 
 ---
 
@@ -76,21 +74,38 @@ open LastDrop/index.html
 
 That's it. No `npm install`, no build step.
 
-### Optional: Enable Audio
+### 🎧 Enable Audio (Assets Needed)
 
-Place the following `.mp3` files in `assets/audio/` to enable full audio:
+The game includes a complete audio engine, but the actual `.mp3` files are intentionally excluded from the repo to save space. Place the following files in `assets/audio/` to bring the game to life:
 
-| File | Used For |
-|------|----------|
-| `cinematic_bg.mp3` | Background music during the cinematic intro |
-| `ambient_ocean.mp3` | Looping ocean ambience during gameplay |
-| `alarm.mp3` | Crisis alert on map entry |
-| `click_success.mp3` | Positive feedback sound |
-| `task_complete.mp3` | Task completion fanfare |
-| `fire_burning.mp3` | Method A burning effect |
-| `chemical_spray.mp3` | Method B dispersant injection |
+**Background Ambience:**
+- `cinematic_bg.mp3` (Cinematic intro)
+- `ambient_ocean.mp3` (Base world, beach)
+- `ambient_underwater.mp3` (Task 3 underwater)
+- `ambient_factory.mp3` (Industrial area)
 
-The game degrades gracefully — all audio is wrapped in `try/catch` and missing files are silently skipped.
+**System & UI Sounds:**
+- `click_success.mp3` (Positive action)
+- `click_error.mp3` (Wrong choice)
+- `task_complete.mp3` (Mission success fanfare)
+- `alarm.mp3` (Crisis warning)
+- `ui_hover.mp3` (Hovering over minimap or cards)
+
+**Interaction SFX:**
+- `net_cut.mp3` (Snipping rope)
+- `trash_pickup.mp3` (Plastic rustle)
+- `glue_squish.mp3` (Applying patch glue)
+- `metal_snap.mp3` (Patch snapping)
+- `fire_burning.mp3` (In-situ burning)
+- `chemical_spray.mp3` (Dispersant spray)
+- `helicopter_loop.mp3` (Task 4 POV ambiance)
+- `radar_ping.mp3` (Scanning pollution)
+- `shovel_dig.mp3` (Planting trees)
+- `metal_drag.mp3` (Sliding bolts)
+- `wrench_ratchet.mp3` (Tightening bolts)
+- `stone_grind.mp3`, `sand_pour.mp3`, `liquid_splash.mp3`, `bacteria_bubble.mp3` (Industrial Task 3)
+
+*Note: The game degrades gracefully — all audio is wrapped in `try/catch` and missing files are silently skipped.*
 
 ---
 
