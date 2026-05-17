@@ -571,6 +571,8 @@ Starting values: Water Quality 60, Biodiversity 50. (Values clamp at 0 and 100).
 
 | Date | Change | Session/Agent |
 |---|---|---|
+| 2026-05-17 | **Dynamic Minimap Indicators:** Refactored map HTML to include `.map-alert-dot` across all areas. Created `updateMapCrisis()` helper function to apply `.crisis` (red pulse) and `.done` (green) dynamically based on progression. Cleaned up UX by replacing double-popup modals with a single Toast directing users to new areas. | Gemini |
+| 2026-05-16 | **Audio System Overhaul:** Refactored `Audio.play()` using Promises to fix `InvalidStateError` constraints. Added `offsets` support to trim silent intros of SFX dynamically. Assigned specific, realistic audio files (e.g., `net_cut`, `trash_pickup`, `metal_snap`, `ambient_underwater`) replacing generic click sounds. Stopped `fire_burning` loop successfully upon ignition finish. | Gemini |
 | 2026-05-16 | Industrial Task 3 Complete Redesign: Fixed text box responsiveness in Tasks 1-3, redesigned Task 3 with SVG wastewater treatment pools visual, implemented 3 interactive game mechanics (Filtration: click 3 filter layers; Chemical: drag bottle to pool; Bacteria: feed 3 times). Each method has unique gameplay interaction. | GitHub Copilot |
 | 2026-05-16 | Fixed mini-map z-index from 200 to 1000 and added pointer-events:auto on visible state to prevent overlay obstruction | GitHub Copilot |
 | 2026-05-13 | Fixed Task 4 — boom canvas sizing, boat drag event cleanup, Corexit progress tracking | Session `62f4ea7c` |
@@ -581,7 +583,7 @@ Starting values: Water Quality 60, Biodiversity 50. (Values clamp at 0 and 100).
 
 ## 16. What To Do Next / Open Items
 
-- [ ] Add audio files to `assets/audio/` for full experience
+- [x] Add audio files to `assets/audio/` for full experience (Done)
 - [ ] Mobile touch support is partially implemented but needs end-to-end QA on real devices
 - [ ] `assets/images/` is empty — illustrations could be replaced with real images if added here
 

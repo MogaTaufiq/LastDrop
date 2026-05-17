@@ -75,18 +75,26 @@ const Audio = {
 
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // Playback started! Now we can safely skip silence
                     const offset = this.offsets[id] || 0;
                     if (offset > 0 && player.currentTime < offset) {
                         player.currentTime = offset;
                     }
                     if (options.loop) this.bgMusic = player;
+                    // Auto-stop after maxDuration seconds
+                    if (options.duration) {
+                        setTimeout(() => {
+                            player.pause();
+                            player.currentTime = 0;
+                        }, options.duration * 1000);
+                    }
                 }).catch(e => console.warn('Audio play error:', id, e));
             } else {
-                // Fallback
                 const offset = this.offsets[id] || 0;
                 if (offset > 0) player.currentTime = offset;
                 if (options.loop) this.bgMusic = player;
+                if (options.duration) {
+                    setTimeout(() => { player.pause(); player.currentTime = 0; }, options.duration * 1000);
+                }
             }
 
             return player;
@@ -110,17 +118,17 @@ const Audio = {
         this.load('ambient_factory', 'assets/audio/ambient_factory.mp3', 0);
 
         // --- UI & SYSTEM SOUNDS ---
-        this.load('alarm', 'assets/audio/alarm.mp3', 0);
+        this.load('alarm', 'assets/audio/alarm.mp3', 2);
         // If "click_success.mp3" has 0.5s of silence at the start, change the 0 below to 0.5
         this.load('click_success', 'assets/audio/click_success.mp3', 3);
         this.load('click_error', 'assets/audio/click_error.mp3', 0);
         this.load('task_complete', 'assets/audio/task_complete.mp3', 0);
 
         // --- COASTAL SFX ---
-        this.load('net_cut', 'assets/audio/net_cut.mp3', 0);
+        this.load('net_cut', 'assets/audio/net_cut.mp3', 2);
         this.load('trash_pickup', 'assets/audio/trash_pickup.mp3', 0);
         // Using "metap_snap.mp3" because of the typo in the downloaded file name
-        this.load('metal_snap', 'assets/audio/metap_snap.mp3', 0);
+        this.load('metal_snap', 'assets/audio/metap_snap.mp3', 3);
         this.load('fire_burning', 'assets/audio/fire_burning.mp3', 0);
         this.load('chemical_spray', 'assets/audio/chemical_spray.mp3', 0);
 
@@ -776,10 +784,35 @@ function nextSlide() {
 // ============================================
 // SCENE: RESIDENTIAL WORLD & MINIMAP
 // ============================================
-let residentialControllerActive = false;
-let resX = 150;
-let resY = 400;
+let worldLoopActive = false;
+let worldX = 800;
+let worldY = 480;
+let worldNearArea = null;
 
+const ISLAND_POLY = [
+    [120,600],[80,420],[130,220],[280,140],[460,55],[700,40],
+    [900,55],[1100,70],[1320,140],[1430,280],[1530,410],
+    [1510,600],[1400,710],[1280,820],[1050,880],[820,890],
+    [590,900],[330,870],[200,780],[130,730]
+];
+
+const WORLD_AREAS = [
+    { id: 'coastal',      x: 270,  y: 710, radius: 110, name: 'Coastal Area' },
+    { id: 'agricultural', x: 360,  y: 190, radius: 110, name: 'Agricultural Area' },
+    { id: 'industrial',   x: 1310, y: 245, radius: 110, name: 'Industrial Area' },
+    { id: 'residential',  x: 800,  y: 480, radius: 80,  name: 'Residential Base' }
+];
+
+function isOnIsland(px, py) {
+    let inside = false;
+    for (let i = 0, j = ISLAND_POLY.length - 1; i < ISLAND_POLY.length; j = i++) {
+        const [xi, yi] = ISLAND_POLY[i], [xj, yj] = ISLAND_POLY[j];
+        if (((yi > py) !== (yj > py)) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
 function showMiniMap() {
     const mapContainer = document.getElementById('mini-map-container');
     if (mapContainer) mapContainer.classList.add('visible');
@@ -855,15 +888,14 @@ function initResidential() {
     if (GameState.phase !== 'residential') return;
     HUD.show();
     HUD.update();
-    showMiniMap();
+    // hide minimap in explore mode
+    hideMiniMap();
+    initMap(); // Ensure listeners are bound for E-key navigation
     TodoPanel.hide();
-    // Stop any area-specific ambience when returning to base
     Audio.stopBg();
 
-    // Update minimap crisis / done / locked indicators
     updateMapCrisis();
 
-    // update areas counter
     if (GameState.allTasksDone()) {
         const counter = document.getElementById('areas-counter');
         counter.classList.remove('hidden');
@@ -876,22 +908,49 @@ function initResidential() {
         }
     }
 
-    const player = document.getElementById('residential-player');
-    const speed = 5;
+    // Update Building States visually
+    const bldgCoastal = document.getElementById('world-bldg-coastal');
+    const bldgAgri = document.getElementById('world-bldg-agricultural');
+    const bldgInd = document.getElementById('world-bldg-industrial');
+
+    function updateWorldBuilding(bldg, state) {
+        if (!bldg) return;
+        bldg.classList.remove('crisis-glow', 'done-glow', 'locked-glow');
+        if (state === 'crisis') bldg.classList.add('crisis-glow');
+        else if (state === 'done') bldg.classList.add('done-glow');
+        else bldg.classList.add('locked-glow');
+    }
+
+    updateWorldBuilding(bldgCoastal, GameState.allTasksDone() ? 'done' : 'crisis');
+    updateWorldBuilding(bldgAgri, GameState.agriCompleted ? 'done' : (GameState.allTasksDone() ? 'crisis' : 'locked'));
+    updateWorldBuilding(bldgInd, GameState.indCompleted ? 'done' : (GameState.allTasksDone() ? 'crisis' : 'locked'));
+
+    const player = document.getElementById('world-player');
+    const prompt = document.getElementById('world-enter-prompt');
+    const promptName = document.getElementById('world-enter-area-name');
+    const speed = 4;
+    let bobPhase = 0;
 
     function updatePlayer() {
-        player.style.transform = `translate(${resX}px, ${resY}px)`;
+        player.setAttribute('transform', `translate(${worldX}, ${worldY})`);
     }
     updatePlayer();
 
-    if (!residentialControllerActive) {
-        residentialControllerActive = true;
+    if (!worldLoopActive) {
+        worldLoopActive = true;
         if (!window.keys) window.keys = { w: false, a: false, s: false, d: false, e: false };
 
         window.addEventListener('keydown', (e) => {
             if (GameState.phase !== 'residential') return;
             const key = e.key.toLowerCase();
-            if (window.keys.hasOwnProperty(key)) window.keys[key] = true;
+            if (window.keys.hasOwnProperty(key)) {
+                window.keys[key] = true;
+                if (key === 'e' && worldNearArea && worldNearArea.id !== 'residential') {
+                    // Start mission by forcing click on minimap area
+                    const mapBtn = document.getElementById(`map-${worldNearArea.id}`);
+                    if (mapBtn) mapBtn.click();
+                }
+            }
         });
 
         window.addEventListener('keyup', (e) => {
@@ -900,7 +959,34 @@ function initResidential() {
             if (window.keys.hasOwnProperty(key)) window.keys[key] = false;
         });
 
-        function resLoop() {
+        function checkWorldProximity() {
+            let closest = null;
+            let minDist = Infinity;
+            for (const area of WORLD_AREAS) {
+                const dx = worldX - area.x;
+                const dy = worldY - area.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < area.radius && dist < minDist) {
+                    closest = area;
+                    minDist = dist;
+                }
+            }
+            
+            if (closest && closest.id !== 'residential') {
+                if (worldNearArea !== closest) {
+                    worldNearArea = closest;
+                    promptName.textContent = closest.name;
+                    prompt.classList.remove('hidden');
+                }
+            } else {
+                if (worldNearArea !== null) {
+                    worldNearArea = null;
+                    prompt.classList.add('hidden');
+                }
+            }
+        }
+
+        function worldLoop() {
             if (GameState.phase === 'residential') {
                 let dx = 0; let dy = 0;
                 if (window.keys.w) dy -= speed;
@@ -909,25 +995,40 @@ function initResidential() {
                 if (window.keys.d) dx += speed;
 
                 if (dx !== 0 || dy !== 0) {
-                    resX += dx; resY += dy;
-                    resX = Math.max(0, Math.min(resX, 750));
-                    resY = Math.max(300, Math.min(resY, 550));
+                    // Normalize diagonal
+                    if (dx !== 0 && dy !== 0) {
+                        const len = Math.sqrt(dx*dx + dy*dy);
+                        dx = (dx/len) * speed;
+                        dy = (dy/len) * speed;
+                    }
+                    
+                    const newX = worldX + dx;
+                    const newY = worldY + dy;
+
+                    // Basic bounds check to prevent walking off ocean
+                    if (isOnIsland(newX, newY)) {
+                        worldX = newX;
+                        worldY = newY;
+                    } else if (isOnIsland(newX, worldY)) { // slide X
+                        worldX = newX;
+                    } else if (isOnIsland(worldX, newY)) { // slide Y
+                        worldY = newY;
+                    }
+
+                    // simple bobbing animation while walking
+                    bobPhase += 0.2;
+                    const bobY = Math.sin(bobPhase) * 4;
+                    player.setAttribute('transform', `translate(${worldX}, ${worldY + bobY})`);
+                    
+                    checkWorldProximity();
+                } else {
+                    bobPhase = 0;
                     updatePlayer();
                 }
             }
-            requestAnimationFrame(resLoop);
+            requestAnimationFrame(worldLoop);
         }
-        requestAnimationFrame(resLoop);
-    }
-
-    // Modal start button — only for first coastal crisis popup
-    const btnStart = document.getElementById('btn-start-mission');
-    if (btnStart) {
-        btnStart.onclick = () => {
-            Modal.hide('modal-map-alert');
-            initMap();
-            document.getElementById('map-coastal').click();
-        };
+        requestAnimationFrame(worldLoop);
     }
 
     // Trigger crisis alert ONCE — only for first entry (Coastal area)
@@ -936,15 +1037,15 @@ function initResidential() {
         setTimeout(() => {
             if (GameState.phase === 'residential') {
                 triggerAlarm();
-                setTimeout(() => Modal.show('modal-map-alert'), 2000);
+                // Replace redundant modal popup with a Toast instruction so they walk there
+                setTimeout(() => Toast.show('🚨 Crisis Detected! Walk to the Coastal Area to start your mission.', '', 6000), 2000);
             }
         }, 2000);
     } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
-        // After coastal done — use a Toast (no second modal popup)
         GameState.agriAlertShown = true;
         setTimeout(() => {
             if (GameState.phase === 'residential') {
-                Toast.show('🚨 New crisis zones detected! Check Agricultural & Industrial areas on the map.', '', 5000);
+                Toast.show('🚨 New crisis zones detected! Check Agricultural & Industrial areas.', '', 5000);
             }
         }, 1200);
     }
@@ -1009,7 +1110,7 @@ function initMap() {
                         GameState.currentArea = areaName;
                         // Switch to factory ambience for Industrial area
                         Audio.stopBg();
-                        Audio.play('ambient_factory', { volume: 0.4, loop: true });
+                        Audio.play('ambient_factory', { volume: 0.3, loop: true });
                         TodoPanel.show();
                         document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>Identify pollution source`;
                         document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>Stop direct discharge`;
@@ -1975,7 +2076,7 @@ function initAgriTask2() {
             slot.textContent = pos.type;
 
             Particles.burst(e.clientX, e.clientY, 4, ['✨', '💚', pos.type]);
-            Audio.play('shovel_dig', { volume: 0.6 });
+            Audio.play('shovel_dig', { volume: 0.6, duration: 2 });
 
             plantedCount++;
             counter.textContent = `🌱 ${plantedCount} / ${totalSlots} planted`;
@@ -2264,7 +2365,10 @@ function initIndTask3() {
                 poolMain.style.fill = `rgb(${Math.round(139 - (139 - 46) * progress)}, ${Math.round(69 - (69 - 180) * progress)}, ${Math.round(19 + (180 - 19) * progress)})`;
 
                 if (clickedLayers === 3) {
-                    completeTreatment('filtration', 15, 0);
+                    setTimeout(() => {
+                        poolClean.style.fill = '#2ecc71';
+                        completeTreatment('filtration', 15, 0);
+                    }, 1000);
                 }
             };
         });

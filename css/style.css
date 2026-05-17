@@ -2226,36 +2226,98 @@ body {
 }
 
 /* ============================================
-   RESIDENTIAL SCENE
+   WORLD MAP SCENE (formerly Residential)
    ============================================ */
-.residential-world {
-    position: relative;
+#scene-residential {
+    overflow: hidden;
+    background: #48cae4;
+}
+
+#world-map-svg {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%;
     height: 100%;
-    background: #8ecae6;
-    overflow: hidden;
+    z-index: 0;
 }
-#residential-player {
-    position: absolute;
-    width: 50px; height: 50px;
-    font-size: 40px;
-    transform: translate(0px, 0px);
-    transition: transform 0.1s linear;
+
+#world-player {
+    transition: none; /* JS handles frame-by-frame move */
     z-index: 10;
 }
-#residential-prompt {
+
+.world-building {
+    cursor: default;
+}
+.world-building .bldg-glow {
+    transition: all 0.5s ease;
+}
+.world-building.crisis-glow .bldg-glow {
+    stroke: var(--red);
+    animation: bldgPulse 1.5s infinite;
+}
+.world-building.done-glow .bldg-glow {
+    stroke: var(--green);
+    opacity: 0.5;
+}
+.world-building.locked-glow .bldg-glow {
+    stroke: rgba(255,255,255,0.2);
+}
+
+.world-cloud {
+    animation: cloudDrift 20s linear infinite alternate;
+}
+
+@keyframes cloudDrift {
+    0% { transform: translate(var(--cloud-x, 0), var(--cloud-y, 0)); }
+    100% { transform: translate(calc(var(--cloud-x, 0) + 60px), var(--cloud-y, 0)); }
+}
+
+@keyframes bldgPulse {
+    0%, 100% { stroke-width: 6; opacity: 1; }
+    50% { stroke-width: 14; opacity: 0.3; }
+}
+
+#world-enter-prompt {
     position: absolute;
-    bottom: 40px; left: 50%;
+    top: 20px;
+    left: 50%;
     transform: translateX(-50%);
     background: rgba(4, 30, 46, 0.9);
     border: 2px solid var(--teal);
-    color: var(--white);
-    padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: 12px;
+    padding: 15px 30px;
+    text-align: center;
+    z-index: 100;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    animation: promptEnter 0.3s ease-out;
+}
+#world-enter-prompt.hidden {
+    display: none;
+}
+.prompt-text {
     font-family: 'Exo 2', sans-serif;
+    color: var(--white);
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+.prompt-text strong {
+    color: var(--yellow);
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+}
+.prompt-area-name {
+    font-family: 'Orbitron', monospace;
+    color: var(--teal-light);
+    font-size: 1.2rem;
     font-weight: bold;
-    z-index: 110;
-    animation: promptPulse 1s infinite alternate;
+    text-transform: uppercase;
+}
+@keyframes promptEnter {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 /* ============================================
