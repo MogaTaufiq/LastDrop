@@ -9,6 +9,12 @@
 </head>
 
 <body>
+    <div id="landscape-warning">
+        <div class="phone-rotate-icon"></div>
+        <h2 data-lang-key="rotate_device_title">Rotate Your Device</h2>
+        <p data-lang-key="rotate_device_desc">Please rotate your device to Landscape mode for the best educational gaming experience!</p>
+    </div>
+
     <div id="feedback-toast">
         <div class="toast-text" id="toast-text">Good action!</div>
         <div class="toast-stats" id="toast-stats">+10 points</div>
@@ -18,7 +24,7 @@
         <div class="hud-bar">
             <div class="hud-item">
                 <span class="hud-icon">💧</span>
-                <span class="hud-label">Water Quality</span>
+                <span class="hud-label" data-lang-key="water_quality_label">Water Quality</span>
                 <div class="hud-track">
                     <div class="hud-fill water" id="hud-water-fill" style="width:60%"></div>
                 </div>
@@ -26,7 +32,7 @@
             </div>
             <div class="hud-item">
                 <span class="hud-icon">🦋</span>
-                <span class="hud-label">Biodiversity</span>
+                <span class="hud-label" data-lang-key="bio_label">Biodiversity</span>
                 <div class="hud-track">
                     <div class="hud-fill bio" id="hud-bio-fill" style="width:50%"></div>
                 </div>
@@ -38,11 +44,14 @@
     <div id="areas-counter" class="hidden">2 areas left to solve</div>
 
     <div id="todo-panel">
-        <div class="todo-title">🎯 Mission Checklist</div>
-        <div class="todo-item" id="todo-0"><span class="todo-check"></span>Help trapped marine animal</div>
-        <div class="todo-item" id="todo-1"><span class="todo-check"></span>Clean plastic waste on the shore</div>
-        <div class="todo-item" id="todo-2"><span class="todo-check"></span>Stop oil leak source</div>
-        <div class="todo-item" id="todo-3"><span class="todo-check"></span>Clean oil spill in the ocean</div>
+        <button class="ui-toggle-btn" id="btn-todo-toggle">➖</button>
+        <div class="todo-content">
+            <div class="todo-title" data-lang-key="todo_title">🎯 Mission Checklist</div>
+            <div class="todo-item" id="todo-0"><span class="todo-check"></span>Help trapped marine animal</div>
+            <div class="todo-item" id="todo-1"><span class="todo-check"></span>Clean plastic waste on the shore</div>
+            <div class="todo-item" id="todo-2"><span class="todo-check"></span>Stop oil leak source</div>
+            <div class="todo-item" id="todo-3"><span class="todo-check"></span>Clean oil spill in the ocean</div>
+        </div>
     </div>
 
     <div class="scene active" id="scene-landing">
@@ -56,7 +65,11 @@
             <h1>LAST <span>DROP</span></h1>
             <div class="subtitle">WATER SURVIVAL</div>
         </div>
-        <div class="tap-to-start">⋆ tap anywhere to start ⋆</div>
+        <div class="tap-to-start" data-lang-key="tap_to_start">⋆ tap anywhere to start ⋆</div>
+        <div class="lang-selector-container">
+            <button id="btn-lang-en" class="lang-btn active">EN</button>
+            <button id="btn-lang-id" class="lang-btn">ID</button>
+        </div>
     </div>
 
     <div class="scene" id="scene-cinematic">
@@ -75,7 +88,7 @@
             <div class="cinematic-dot"></div>
             <div class="cinematic-dot"></div>
         </div>
-        <button class="cinematic-next-btn" id="cin-next-btn">Next →</button>
+        <button class="cinematic-next-btn" id="cin-next-btn" data-lang-key="cinematic_next">Next →</button>
     </div>
 
     <div class="scene" id="scene-residential">
@@ -93,7 +106,25 @@
             <path d="M 120,600 C 80,420 130,220 280,140 C 460,55 700,40 900,55 C 1100,70 1320,140 1430,280 C 1530,410 1510,600 1400,710 C 1280,820 1050,880 820,890 C 590,900 330,870 200,780 C 130,730 140,660 120,600 Z" fill="#e8c547" stroke="#f4d03f" stroke-width="15" stroke-linejoin="round"/>
             
             <!-- Island Inner (Grass/Jungle) -->
-            <path d="M 200,580 C 160,430 200,280 330,210 C 480,140 680,120 880,130 C 1050,140 1230,200 1330,320 C 1410,420 1390,560 1310,650 C 1210,750 1020,800 820,810 C 620,820 400,790 280,710 C 230,670 220,620 200,580 Z" fill="#2d9e4f" stroke="#27ae60" stroke-width="10" stroke-linejoin="round"/>
+            <path id="world-island-grass" d="M 200,580 C 160,430 200,280 330,210 C 480,140 680,120 880,130 C 1050,140 1230,200 1330,320 C 1410,420 1390,560 1310,650 C 1210,750 1020,800 820,810 C 620,820 400,790 280,710 C 230,670 220,620 200,580 Z" fill="#2d9e4f" stroke="#27ae60" stroke-width="10" stroke-linejoin="round" style="transition: fill 1.5s ease;"/>
+
+            <!-- Agricultural River & Runoff Overlays -->
+            <path id="world-map-river" d="M 430,100 C 390,160 300,250 180,350 C 150,375 130,390 110,430" fill="none" stroke="#0096c7" stroke-width="25" stroke-linecap="round" style="pointer-events:none;"/>
+            <path id="world-agri-runoff" d="M 430,100 C 390,160 300,250 180,350 C 150,375 130,390 110,430" fill="none" stroke="#4a7c59" stroke-width="25" stroke-linecap="round" opacity="0" style="transition: opacity 1.5s ease; pointer-events:none;"/>
+            <path id="world-agri-ocean-plume" d="M 110,430 C 80,445 40,410 20,460 C 10,510 50,560 100,530 C 130,510 120,470 110,430 Z" fill="#4a7c59" opacity="0" style="transition: opacity 1.5s ease; pointer-events:none;"/>
+
+            <!-- Coastal Oil Slick & Floating Trash Overlays -->
+            <path id="world-oil-slick" d="M 50,650 C 120,580 280,620 350,720 C 400,790 320,880 180,890 C 80,880 10,800 50,650 Z" fill="#14140b" opacity="0.85" style="transition: opacity 1.5s ease, fill 1.5s ease; pointer-events: none;"/>
+            <g id="world-map-trash" style="transition: opacity 1.5s ease; pointer-events: none;">
+                <text x="120" y="680" font-size="20">🥤</text>
+                <text x="220" y="740" font-size="22">🧴</text>
+                <text x="180" y="800" font-size="20">🕸️</text>
+                <text x="80" y="720" font-size="18">📦</text>
+            </g>
+
+            <!-- Industrial Wastewater & Bubbling Sludge Overlays -->
+            <path id="world-ind-pipe" d="M 1360,250 L 1400,280" fill="none" stroke="#444" stroke-width="12" stroke-linecap="round" style="pointer-events:none;"/>
+            <path id="world-ind-sludge" d="M 1400,280 C 1450,260 1510,290 1550,330 C 1580,390 1520,450 1460,420 C 1420,400 1390,340 1400,280 Z" fill="#2d3033" opacity="0" style="transition: opacity 1.5s ease, fill 1.5s ease; pointer-events:none;"/>
 
             <!-- Roads -->
             <!-- Res(800,480) -> Coastal(270,710) -->
@@ -198,10 +229,20 @@
                 <rect x="-25" y="-60" width="10" height="40" fill="#f4a261" />
                 <rect x="15" y="-70" width="10" height="50" fill="#f4a261" />
                 <!-- Smoke -->
-                <circle cx="-20" cy="-70" r="8" fill="#ccc" opacity="0.7"/>
-                <circle cx="-25" cy="-80" r="10" fill="#ccc" opacity="0.6"/>
-                <circle cx="20" cy="-80" r="8" fill="#ccc" opacity="0.7"/>
-                <circle cx="25" cy="-95" r="12" fill="#ccc" opacity="0.5"/>
+                <g id="world-ind-smoke-dirty" style="transition: opacity 1.5s ease; pointer-events: none;">
+                    <circle cx="-20" cy="-70" r="8" fill="#4a5d4e" opacity="0.75"/>
+                    <circle cx="-25" cy="-80" r="12" fill="#4a5d4e" opacity="0.65"/>
+                    <circle cx="-35" cy="-95" r="16" fill="#3a483e" opacity="0.55"/>
+                    <circle cx="20" cy="-80" r="8" fill="#4a5d4e" opacity="0.75"/>
+                    <circle cx="25" cy="-95" r="12" fill="#4a5d4e" opacity="0.65"/>
+                    <circle cx="35" cy="-115" r="18" fill="#3a483e" opacity="0.55"/>
+                </g>
+                <g id="world-ind-smoke-clean" opacity="0" style="transition: opacity 1.5s ease; pointer-events: none;">
+                    <circle cx="-20" cy="-70" r="8" fill="#e0f2fe" opacity="0.8"/>
+                    <circle cx="-25" cy="-80" r="11" fill="#e0f2fe" opacity="0.6"/>
+                    <circle cx="20" cy="-80" r="8" fill="#e0f2fe" opacity="0.8"/>
+                    <circle cx="25" cy="-95" r="11" fill="#e0f2fe" opacity="0.6"/>
+                </g>
                 <!-- Door -->
                 <rect x="-10" y="5" width="20" height="15" fill="#34495e" />
                 <text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">INDUSTRIAL</text>
@@ -220,13 +261,21 @@
 
         <!-- E-Key Enter Prompt overlay -->
         <div id="world-enter-prompt" class="hidden">
-            <div class="prompt-text">Press <strong>E</strong> to enter</div>
+            <div class="prompt-text" data-lang-key="prompt_enter_text">Press <strong>E</strong> or <strong>Tap here</strong> to enter</div>
             <div id="world-enter-area-name" class="prompt-area-name">Coastal Area</div>
+        </div>
+
+        <!-- Mobile Joystick -->
+        <div id="mobile-joystick">
+            <div class="joystick-base">
+                <div class="joystick-knob"></div>
+            </div>
         </div>
     </div>
 
     <div class="mini-map-container" id="mini-map-container">
-        <div class="mini-map-title">MAP</div>
+        <button class="ui-toggle-btn" id="btn-map-toggle">➖</button>
+        <div class="mini-map-title" data-lang-key="map_title">MAP</div>
         <div class="mini-map-content">
             <svg class="map-bg-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="z-index: 1; position: absolute; width: 100%; height: 100%; pointer-events: none;">
                 <!-- Ocean Base -->
@@ -241,32 +290,32 @@
                 <text x="30" y="240" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
                 <text x="340" y="40" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
             </svg>
-
+ 
             <!-- Clickable Map Areas overlaying the SVG -->
             <div class="map-area" id="map-agricultural" data-area="agricultural" style="top: 15%; left: 15%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
                 <span class="map-alert-dot" style="display:none;"></span>
                 <span class="area-icon" style="font-size:1rem;">🌾</span>
-                <span class="area-name" style="font-size:0.7rem;">Agricultural</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_agricultural">Agricultural</span>
                 <span class="area-status" id="map-agri-status" style="font-size:0.6rem;"></span>
             </div>
             
             <div class="map-area" id="map-industrial" data-area="industrial" style="top: 15%; left: 55%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
                 <span class="map-alert-dot" style="display:none;"></span>
                 <span class="area-icon" style="font-size:1rem;">🏭</span>
-                <span class="area-name" style="font-size:0.7rem;">Industrial</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_industrial">Industrial</span>
                 <span class="area-status" id="map-ind-status" style="font-size:0.6rem;"></span>
             </div>
             
             <div class="map-area" id="map-residential" data-area="residential" style="top: 50%; left: 45%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
                 <span class="area-icon" style="font-size:1rem;">🏠</span>
-                <span class="area-name" style="font-size:0.7rem; text-align:center;">Residential<br>(Spawn)</span>
+                <span class="area-name" style="font-size:0.7rem; text-align:center;" data-lang-key="map_residential">Residential<br>(Spawn)</span>
             </div>
             
             <div class="map-area" id="map-coastal" data-area="coastal" style="top: 65%; left: 20%; width: 30%; height: 30%; z-index:10; border-radius: 50%;">
                 <span class="map-alert-dot"></span>
                 <span class="area-icon" style="font-size:1rem;">🌊</span>
-                <span class="area-name" style="font-size:0.7rem;">Coastal</span>
-                <span class="area-status" id="map-coastal-status" style="font-size:0.6rem;">🚨 CRISIS</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_coastal">Coastal</span>
+                <span class="area-status" id="map-coastal-status" style="font-size:0.6rem;" data-lang-key="map_coastal_status">🚨 CRISIS</span>
             </div>
         </div>
     </div>
@@ -503,6 +552,7 @@
     <div class="scene task-scene" id="scene-task4" style="background: linear-gradient(180deg, #02111b 0%, #062b40 100%);">
         <div class="task-header">
             <div class="task-title-text">🛢️ Clean Oil Spill</div>
+            <div class="task-step-indicator" id="t4-step-indicator" style="font-size: 0.85rem; color: var(--yellow); margin-top: 4px; font-family: 'Orbitron', sans-serif;"></div>
             <div class="task-instruction" id="t4-instruction">Choose a method to clean up the oil spill</div>
         </div>
 
@@ -628,7 +678,7 @@
                 </div>
                 <div id="t4-result-warning" class="hidden warning-text"></div>
                 <div id="t4-result-info" class="info-text"></div>
-                <button class="modal-btn mt-10" id="btn-t4-complete">Complete Task ✓</button>
+                <button class="modal-btn mt-10" id="btn-t4-complete" data-lang-key="btn_t4_complete">Complete Task ✓</button>
             </div>
         </div>
 
@@ -637,14 +687,14 @@
             <!-- Method Selection -->
             <div class="t4-method-selection" id="t4-method-selection">
                 <div class="t4-method-card" id="btn-method-a">
-                    <div class="t4-card-title">🔥 In-Situ Burning</div>
-                    <div class="t4-card-stats">Water +25 | Bio +5</div>
-                    <div class="t4-card-tag recommended">Recommended</div>
+                    <div class="t4-card-title" data-lang-key="t4_method_a_title">🔥 In-Situ Burning</div>
+                    <div class="t4-card-stats" data-lang-key="t4_method_a_stats">Water +25 | Bio +5</div>
+                    <div class="t4-card-tag recommended" data-lang-key="t4_method_a_tag">Recommended</div>
                 </div>
                 <div class="t4-method-card" id="btn-method-b">
-                    <div class="t4-card-title">🧪 Corexit Dispersant</div>
-                    <div class="t4-card-stats">Water +20 | Bio -15</div>
-                    <div class="t4-card-tag warning">⚠ May harm marine life</div>
+                    <div class="t4-card-title" data-lang-key="t4_method_b_title">🧪 Corexit Dispersant</div>
+                    <div class="t4-card-stats" data-lang-key="t4_method_b_stats">Water +20 | Bio -15</div>
+                    <div class="t4-card-tag warning" data-lang-key="t4_method_b_tag">⚠ May harm marine life</div>
                 </div>
             </div>
         </div>
@@ -681,7 +731,7 @@
                 <div class="help-progress-fill" id="scan-progress-fill"></div>
             </div>
             <div id="agri-typing-text" class="typing-text hidden" style="position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); width: 80%;"></div>
-            <button class="modal-btn hidden" id="btn-agri1-next" style="position:absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index:100;">Next Task →</button>
+            <button class="modal-btn hidden" id="btn-agri1-next" style="position:absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index:100;" data-lang-key="btn_next_task">Next Task →</button>
         </div>
     </div>
 
@@ -730,13 +780,46 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modal-how-to-play">
+        <div class="modal-box">
+            <div class="modal-icon">🎮</div>
+            <div class="modal-title" data-lang-key="how_to_play_title">How to Play & Controls</div>
+            <div class="modal-body">
+                <div class="controls-columns">
+                    <div class="controls-col">
+                        <h4 style="color: var(--teal-light);" data-lang-key="desktop_controls_title">💻 Desktop</h4>
+                        <ul data-lang-key="desktop_controls_list">
+                            <li>🏃 <strong>Move:</strong> WASD / Arrow Keys</li>
+                            <li>🔧 <strong>Actions:</strong> Drag & Drop / Click</li>
+                            <li>🚪 <strong>Enter Areas:</strong> Walk to area & press <strong>E</strong></li>
+                            <li>🗺️ <strong>Fast Travel:</strong> Click on Minimap</li>
+                        </ul>
+                    </div>
+                    <div class="controls-col">
+                        <h4 style="color: var(--green-light);" data-lang-key="mobile_controls_title">📱 Mobile</h4>
+                        <ul data-lang-key="mobile_controls_list">
+                            <li>🕹️ <strong>Move:</strong> Virtual On-screen Joystick</li>
+                            <li>👆 <strong>Actions:</strong> Tap items / Tap-to-Place</li>
+                            <li>🚪 <strong>Enter Areas:</strong> Walk to area & tap Prompt</li>
+                            <li>🗺️ <strong>Fast Travel:</strong> Tap on Minimap</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; text-align: center; color: var(--yellow); font-size: 0.85rem; font-weight: bold; font-family: 'Exo 2', sans-serif;" data-lang-key="landscape_recommendation">
+                    🔄 Landscape orientation is highly recommended for mobile players!
+                </div>
+            </div>
+            <button class="modal-btn" id="btn-start-briefing" data-lang-key="btn_begin_mission">▶ Begin Mission</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-map-alert">
         <div class="modal-box">
             <div class="modal-icon">🚨</div>
-            <div class="modal-title">Crisis Detected!</div>
-            <div class="modal-body">A pollution crisis has been detected in the <strong>Coastal
+            <div class="modal-title" data-lang-key="crisis_title">Crisis Detected!</div>
+            <div class="modal-body" data-lang-key="crisis_body">A pollution crisis has been detected in the <strong>Coastal
                     Area</strong>!<br>Complete all tasks to restore environmental balance.</div><button
-                class="modal-btn" id="btn-start-mission">▶ Start Mission</button>
+                class="modal-btn" id="btn-start-mission" data-lang-key="btn_start_mission">▶ Start Mission</button>
         </div>
     </div>
 
@@ -769,7 +852,7 @@
                </svg>
             </div>
             <div id="ind1-typing-text" class="typing-text hidden" style="position:absolute; bottom:15%; left:50%; transform:translateX(-50%); max-width:80%;\"></div>
-            <button class="modal-btn hidden" id="btn-ind1-next" style="position:absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index:100;">Next Task →</button>
+            <button class="modal-btn hidden" id="btn-ind1-next" style="position:absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index:100;" data-lang-key="btn_next_task">Next Task →</button>
         </div>
     </div>
 
@@ -832,7 +915,7 @@
                 <!-- Pool 2: Main Treatment -->
                 <ellipse cx="500" cy="220" rx="180" ry="80" fill="#111" stroke="#444" stroke-width="12"/>
                 <ellipse id="ind3-pool-main" cx="500" cy="220" rx="165" ry="70" fill="#4a7c59" style="transition: fill 1.5s ease;"/>
-                <text x="500" y="228" text-anchor="middle" fill="white" font-size="32" font-family="'Orbitron', sans-serif" opacity="0.6" id="ind3-pool-label">TREATMENT</text>
+                <text x="500" y="228" text-anchor="middle" fill="white" font-size="32" font-family="'Orbitron', sans-serif" opacity="0.6" id="ind3-pool-label" pointer-events="none">TREATMENT</text>
 
                 <!-- Effluent Pipe out -->
                 <path d="M 850,200 L 1020,200" stroke="#444" stroke-width="30" stroke-linecap="round" fill="none"/>
@@ -895,7 +978,7 @@
             <div id="ind3-result-card" class="t4-result-card hidden" style="position:absolute; top:30%; z-index:20;">
                 <div id="ind3-result-icon">✅</div>
                 <div id="ind3-typing-text" class="typing-text" style="font-size:1.2rem; margin-bottom:15px; text-align:center;"></div>
-                <button class="modal-btn mt-10" id="btn-ind3-next">Mission Complete ✓</button>
+                <button class="modal-btn mt-10" id="btn-ind3-next" data-lang-key="btn_mission_complete">Mission Complete ✓</button>
             </div>
         </div>
     </div>
@@ -912,17 +995,107 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-you-survived">
-        <div class="modal-box" style="background: linear-gradient(135deg, #f1faee, #a8dadc); color: #1d3557; border:none;">
-            <div class="modal-title" style="font-size: 2.5rem; color: #e63946; text-shadow: none;">YOU SURVIVED</div>
-            <div class="modal-body" style="color: #1d3557; font-size: 1.2rem; font-weight: 600;">
-                Water Quality: Stable<br>
-                Biodiversity: Recovered<br><br>
-                "Balance has been restored."
+    <div class="modal-overlay sustainability-modal" id="modal-sustainability-decision">
+        <div class="modal-box">
+            <div class="modal-title" id="decision-title">Sustainability Decision</div>
+            <div class="modal-subtitle" id="decision-subtitle">Evaluate the environmental trade-offs</div>
+            
+            <div class="decision-description" id="decision-desc">
+                Description of the environmental action...
             </div>
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="modal-btn" id="btn-final-play-again" style="background:var(--green); border:none; box-shadow:none;">Play Again</button>
-                <button class="modal-btn" id="btn-final-exit" style="background:var(--red); border:none; box-shadow:none;">Exit</button>
+            
+            <div class="decision-columns">
+                <div class="decision-column benefits">
+                    <h4>🌿 Environmental Benefits</h4>
+                    <ul id="decision-benefits-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <div class="decision-column risks">
+                    <h4>⚠️ Ecological Risks</h4>
+                    <ul id="decision-risks-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="decision-outlook-box">
+                <h4>🔮 Long-Term Outlook</h4>
+                <p id="decision-outlook-text">
+                    Long-term projection...
+                </p>
+            </div>
+            
+            <div class="decision-buttons">
+                <button class="modal-btn danger" id="btn-decision-back" data-lang-key="btn_back">Go Back</button>
+                <button class="modal-btn" id="btn-decision-confirm" data-lang-key="btn_confirm">Confirm Choice</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay report-card-modal" id="modal-you-survived">
+        <div class="modal-box">
+            <div class="modal-title" data-lang-key="report_card_title">Ecosystem Restoration Report Card</div>
+            <div class="modal-subtitle" data-lang-key="report_card_subtitle">Project Assessment Summary</div>
+            
+            <div class="report-grid">
+                <!-- Metrics Panel -->
+                <div class="report-metrics-panel">
+                    <h4 data-lang-key="report_metrics_title">Ecosystem Metrics</h4>
+                    
+                    <div class="report-metric-item">
+                        <div class="report-metric-header">
+                            <span data-lang-key="water_quality_label">Water Quality</span>
+                            <span id="report-water-val">0%</span>
+                        </div>
+                        <div class="report-metric-bar-bg">
+                            <div class="report-metric-bar-fill" id="report-water-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-metric-item">
+                        <div class="report-metric-header">
+                            <span data-lang-key="bio_label">Biodiversity</span>
+                            <span id="report-bio-val">0%</span>
+                        </div>
+                        <div class="report-metric-bar-bg">
+                            <div class="report-metric-bar-fill" id="report-bio-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Choices Panel -->
+                <div class="report-choices-panel">
+                    <h4 data-lang-key="report_decisions_title">Management Decisions</h4>
+                    <div class="report-choice-item">
+                        <span class="report-choice-label" data-lang-key="report_coastal_spill">Coastal Spill:</span>
+                        <span class="report-choice-value" id="report-choice-coastal">-</span>
+                    </div>
+                    <div class="report-choice-item">
+                        <span class="report-choice-label" data-lang-key="report_agri_pollution">Agri Pollution:</span>
+                        <span class="report-choice-value" id="report-choice-agri" data-lang-key="report_agri_choice_strips">Riparian Buffer Strips</span>
+                    </div>
+                    <div class="report-choice-item">
+                        <span class="report-choice-label" data-lang-key="report_industrial_effluent">Industrial Effluent:</span>
+                        <span class="report-choice-value" id="report-choice-industrial">-</span>
+                    </div>
+                </div>
+                
+                <!-- Long-Term Outlook Panel -->
+                <div class="report-outlook-panel" id="report-outlook-card">
+                    <div class="report-outlook-header">
+                        <span class="report-outlook-title" id="report-outlook-title">-</span>
+                        <span class="report-outlook-badge" id="report-outlook-badge">-</span>
+                    </div>
+                    <p class="report-outlook-text" id="report-outlook-desc">
+                        Analyzing your decisions...
+                    </p>
+                </div>
+            </div>
+            
+            <div class="report-buttons">
+                <button class="modal-btn" id="btn-final-play-again" data-lang-key="btn_play_again">Play Again</button>
+                <button class="modal-btn danger" id="btn-final-exit" data-lang-key="btn_exit">Exit</button>
             </div>
         </div>
     </div>

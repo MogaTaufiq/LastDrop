@@ -35,9 +35,9 @@
 LastDrop/
 ├── index.html          ← All HTML markup (scenes, HUD, modals, todo panel)
 ├── css/
-│   └── style.css       ← All CSS (1740 lines) — CSS variables, animations, scene styles
+│   └── style.css       ← All CSS (~2600 lines) — CSS variables, animations, scene styles
 ├── js/
-│   └── game.js         ← All game logic (1602 lines) — state, scene managers, task functions
+│   └── game.js         ← All game logic (~2760 lines) — state, scene managers, task functions
 ├── assets/
 │   ├── audio/          ← Empty; audio files must be placed here (see Audio section)
 │   └── images/         ← Empty; currently unused
@@ -58,7 +58,7 @@ LastDrop/
 --teal:       #00b4d8   ← primary interactive color
 --teal-light: #90e0ef   ← highlight/glow
 --green:      #2d9e4f   ← biodiversity / success
---green-light:#52c97a
+--green-light: #52c97a
 --red:        #e63946   ← danger / crisis
 --orange:     #f4a261   ← warning
 --yellow:     #ffd166
@@ -235,6 +235,9 @@ All scenes are `<div class="scene" id="...">`. Only one has `.active` at a time.
 | `scene-reflection` | `'reflection'` | Reflection scene — Beautiful island background with typing key messages |
 
 **Static overlay elements** (always in DOM, not scene-based):
+- `#landscape-warning` — Landscape orientation warning overlay for mobile portrait modes
+- `#modal-how-to-play` — Control instructions briefing modal (Desktop/Mobile)
+- `#mobile-joystick` — On-screen analog virtual joystick (shows on coarse pointer screens)
 - `#feedback-toast` — bottom toast notification
 - `#game-hud` — top-left HUD bars (Water Quality & Biodiversity)
 - `#mini-map-container` — top-right minimap for fast travel between areas
@@ -571,6 +574,10 @@ Starting values: Water Quality 60, Biodiversity 50. (Values clamp at 0 and 100).
 
 | Date | Change | Session/Agent |
 |---|---|---|
+| 2026-05-21 | **Environmental Consequence Overlays & Report Card:** Added SVG overlays to the world map representing coastal oil/litter, agricultural runoff/discharge, and industrial smoke/sludge. Created a centralized rendering engine (`updateWorldMapPollution()`) that updates these overlays dynamically based on player progress and choice quality (e.g. Corexit dispersant choice leaves a purple chemical plume, industrial completion transitions factory emissions from dirty smoke to clean steam, and biodiversity changes grass color). Implemented a Sustainability Decision Board modal displaying benefits/risks/outlook before confirming key choices. Replaced the final screen with a structured Ecosystem Restoration Report Card evaluating choices and assigning dynamic long-term outlook cards (Eco-Guardian, Toxic Quick-Fix, or Semi-Stable). | Gemini |
+| 2026-05-21 | **Modal Flow Rearrangement:** Shifted the Controls Briefing modal (`#modal-how-to-play`) to display automatically upon entering the Base World (after the cinematic intro). Rearranged the first Crisis Alert modal (`#modal-map-alert`) to trigger sequentially 800ms after the instructions are dismissed to prevent overlap. Blocked character WASD and virtual joystick inputs while either modal is visible to prevent background movement. Adjusted modal overlay z-index to 2000 to sit above the minimap and prevent background clicks. | Gemini |
+| 2026-05-21 | **Testing & CSS Cleanup:** Created and ran a Node-based VM sandbox unit testing suite (`game_unit_tests.js`) verifying `GameState`, `SceneManager`, `HUD` rendering thresholds, and scene transitions. Cleaned up obsolete CSS selectors (`#scene-map`, `#player-char`, `#interact-prompt` and `@keyframes promptPulse`) from `css/style.css`, achieving 100% integrity validation alignment across files. | Gemini |
+| 2026-05-21 | **Mobile Playability & Controls Briefing:** Added a controls briefing modal (`#modal-how-to-play`) at landing. Implemented a virtual analog joystick (`#mobile-joystick`) in `scene-residential` (Base World) with touch tracking and boundary sliding. Added a landscape orientation warning overlay (`#landscape-warning`) for mobile portrait modes. Built robust click-to-select and click-to-place fallbacks for drag-and-drop tasks (Industrial Task 2 flange bolts and Industrial Task 3 chemical bottle treatment) to ensure touch compatibility. | Gemini |
 | 2026-05-17 | **Dynamic Minimap Indicators:** Refactored map HTML to include `.map-alert-dot` across all areas. Created `updateMapCrisis()` helper function to apply `.crisis` (red pulse) and `.done` (green) dynamically based on progression. Cleaned up UX by replacing double-popup modals with a single Toast directing users to new areas. | Gemini |
 | 2026-05-16 | **Audio System Overhaul:** Refactored `Audio.play()` using Promises to fix `InvalidStateError` constraints. Added `offsets` support to trim silent intros of SFX dynamically. Assigned specific, realistic audio files (e.g., `net_cut`, `trash_pickup`, `metal_snap`, `ambient_underwater`) replacing generic click sounds. Stopped `fire_burning` loop successfully upon ignition finish. | Gemini |
 | 2026-05-16 | Industrial Task 3 Complete Redesign: Fixed text box responsiveness in Tasks 1-3, redesigned Task 3 with SVG wastewater treatment pools visual, implemented 3 interactive game mechanics (Filtration: click 3 filter layers; Chemical: drag bottle to pool; Bacteria: feed 3 times). Each method has unique gameplay interaction. | GitHub Copilot |
@@ -584,7 +591,7 @@ Starting values: Water Quality 60, Biodiversity 50. (Values clamp at 0 and 100).
 ## 16. What To Do Next / Open Items
 
 - [x] Add audio files to `assets/audio/` for full experience (Done)
-- [ ] Mobile touch support is partially implemented but needs end-to-end QA on real devices
+- [x] Mobile touch support is fully implemented, with instructions briefing, landscape warning, virtual analog joystick, and tap-to-place fallbacks for drag-and-drop tasks
 - [ ] `assets/images/` is empty — illustrations could be replaced with real images if added here
 
 ---
