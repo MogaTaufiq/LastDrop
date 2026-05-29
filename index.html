@@ -54,6 +54,51 @@
         </div>
     </div>
 
+    <div class="mini-map-container" id="mini-map-container">
+        <button class="ui-toggle-btn" id="btn-map-toggle">➖</button>
+        <div class="mini-map-title" data-lang-key="map_title">MAP</div>
+        <div class="mini-map-content">
+            <svg class="map-bg-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="z-index: 1; position: absolute; width: 100%; height: 100%; pointer-events: none;">
+                <!-- Ocean Base -->
+                <rect width="400" height="300" fill="transparent" />
+                
+                <!-- Main Island (Grass) -->
+                <path d="M 120,200 C 100,160 90,120 120,80 C 130,60 150,30 160,70 C 180,100 210,110 230,100 C 250,90 260,60 280,80 C 320,110 330,150 310,180 C 290,210 270,220 250,210 C 230,200 220,240 200,260 C 180,280 160,260 150,230 C 140,200 130,210 120,200 Z" fill="#2a9d8f" stroke="#000" stroke-width="2"/>
+                <path d="M 125,195 C 105,155 95,115 125,75 C 135,55 150,35 160,75 C 180,105 210,115 230,105 C 250,95 260,65 280,85 C 315,115 325,145 305,175 C 285,205 265,215 245,205 C 225,195 215,235 195,255 C 175,275 160,255 150,225 C 140,195 130,205 125,195 Z" fill="#2d9e4f" stroke="none" />
+                
+                <text x="30" y="240" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
+                <text x="340" y="40" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
+            </svg>
+ 
+            <!-- Clickable Map Areas overlaying the SVG -->
+            <div class="map-area" id="map-agricultural" data-area="agricultural" style="top: 15%; left: 15%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
+                <span class="map-alert-dot" style="display:none;"></span>
+                <span class="area-icon" style="font-size:1rem;">🌾</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_agricultural">Agricultural</span>
+                <span class="area-status" id="map-agri-status" style="font-size:0.6rem;"></span>
+            </div>
+            
+            <div class="map-area" id="map-industrial" data-area="industrial" style="top: 15%; left: 55%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
+                <span class="map-alert-dot" style="display:none;"></span>
+                <span class="area-icon" style="font-size:1rem;">🏭</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_industrial">Industrial</span>
+                <span class="area-status" id="map-ind-status" style="font-size:0.6rem;"></span>
+            </div>
+            
+            <div class="map-area" id="map-residential" data-area="residential" style="top: 50%; left: 45%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
+                <span class="area-icon" style="font-size:1rem;">🏠</span>
+                <span class="area-name" style="font-size:0.7rem; text-align:center;" data-lang-key="map_residential">Residential<br>(Spawn)</span>
+            </div>
+            
+            <div class="map-area" id="map-coastal" data-area="coastal" style="top: 65%; left: 20%; width: 30%; height: 30%; z-index:10; border-radius: 50%;">
+                <span class="map-alert-dot"></span>
+                <span class="area-icon" style="font-size:1rem;">🌊</span>
+                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_coastal">Coastal</span>
+                <span class="area-status" id="map-coastal-status" style="font-size:0.6rem;" data-lang-key="map_coastal_status">🚨 CRISIS</span>
+            </div>
+        </div>
+    </div>
+
     <div class="scene active" id="scene-landing">
         <div class="landing-stars"></div>
         <div class="landing-ocean">
@@ -92,6 +137,339 @@
     </div>
 
     <div class="scene" id="scene-residential">
+        <svg id="res-world-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="resSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#010d18"/>
+                    <stop offset="35%" stop-color="#041e2e"/>
+                    <stop offset="70%" stop-color="#0a3a58"/>
+                    <stop offset="100%" stop-color="#0d4f7a"/>
+                </linearGradient>
+                <linearGradient id="resOcean" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#0a4f7a"/>
+                    <stop offset="100%" stop-color="#041e2e"/>
+                </linearGradient>
+                <linearGradient id="resGround" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2d9e4f"/>
+                    <stop offset="55%" stop-color="#1f7a3a"/>
+                    <stop offset="100%" stop-color="#145528"/>
+                </linearGradient>
+                <linearGradient id="resPath" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#c8943a"/>
+                    <stop offset="100%" stop-color="#9a6e1e"/>
+                </linearGradient>
+                <radialGradient id="resBeacon" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffd166" stop-opacity="0.9"/>
+                    <stop offset="60%" stop-color="#ffd166" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="resWinGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#f4a261" stop-opacity="0.55"/>
+                    <stop offset="100%" stop-color="#f4a261" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="resTidepool" cx="50%" cy="40%" r="50%">
+                    <stop offset="0%" stop-color="#48cae4" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#023e8a" stop-opacity="0.85"/>
+                </radialGradient>
+            </defs>
+
+            <!-- SKY -->
+            <rect width="1600" height="900" fill="url(#resSky)"/>
+            <!-- Stars -->
+            <g id="res-stars">
+                <circle cx="45" cy="35" r="1.2" fill="#f0f8ff"/><circle cx="120" cy="60" r="1" fill="#f0f8ff"/>
+                <circle cx="200" cy="25" r="1.5" fill="#90e0ef"/><circle cx="280" cy="80" r="1" fill="#f0f8ff"/>
+                <circle cx="355" cy="45" r="1.3" fill="#f0f8ff"/><circle cx="425" cy="15" r="1" fill="#f0f8ff"/>
+                <circle cx="500" cy="55" r="1.4" fill="#90e0ef"/><circle cx="580" cy="30" r="1" fill="#f0f8ff"/>
+                <circle cx="645" cy="70" r="1.2" fill="#f0f8ff"/><circle cx="720" cy="20" r="1.5" fill="#f0f8ff"/>
+                <circle cx="795" cy="50" r="1" fill="#90e0ef"/><circle cx="870" cy="35" r="1.3" fill="#f0f8ff"/>
+                <circle cx="945" cy="65" r="1" fill="#f0f8ff"/><circle cx="1010" cy="18" r="1.4" fill="#f0f8ff"/>
+                <circle cx="1085" cy="48" r="1.1" fill="#90e0ef"/><circle cx="1155" cy="38" r="1" fill="#f0f8ff"/>
+                <circle cx="1205" cy="75" r="1.2" fill="#f0f8ff"/><circle cx="1270" cy="22" r="1" fill="#f0f8ff"/>
+                <circle cx="1330" cy="55" r="1.3" fill="#f0f8ff"/><circle cx="1525" cy="68" r="1" fill="#f0f8ff"/>
+                <circle cx="80" cy="110" r="0.8" fill="#f0f8ff" opacity="0.6"/><circle cx="165" cy="135" r="0.9" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="245" cy="95" r="0.8" fill="#90e0ef" opacity="0.6"/><circle cx="330" cy="120" r="0.7" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="460" cy="105" r="0.9" fill="#f0f8ff" opacity="0.6"/><circle cx="560" cy="130" r="0.8" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="665" cy="100" r="0.9" fill="#90e0ef" opacity="0.6"/><circle cx="762" cy="120" r="0.8" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="860" cy="95" r="0.7" fill="#f0f8ff" opacity="0.6"/><circle cx="960" cy="115" r="0.9" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="1060" cy="105" r="0.8" fill="#90e0ef" opacity="0.6"/><circle cx="1165" cy="125" r="0.7" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="1275" cy="98" r="0.9" fill="#f0f8ff" opacity="0.6"/><circle cx="1375" cy="118" r="0.8" fill="#f0f8ff" opacity="0.5"/>
+                <circle cx="1480" cy="100" r="0.9" fill="#90e0ef" opacity="0.6"/><circle cx="1560" cy="115" r="0.8" fill="#f0f8ff" opacity="0.5"/>
+            </g>
+            <!-- Moon -->
+            <circle cx="1420" cy="95" r="52" fill="#f0e68c" opacity="0.88"/>
+            <circle cx="1440" cy="82" r="43" fill="#0a2a45"/>
+            <circle cx="1420" cy="95" r="75" fill="#f0e68c" opacity="0.07"/>
+            <!-- Clouds -->
+            <g class="res-cloud" id="res-cloud-1"><ellipse cx="240" cy="185" rx="90" ry="28" fill="#0a3050" opacity="0.65"/><ellipse cx="285" cy="168" rx="60" ry="24" fill="#0d3a5c" opacity="0.5"/><ellipse cx="190" cy="178" rx="45" ry="18" fill="#0a3050" opacity="0.45"/></g>
+            <g class="res-cloud" id="res-cloud-2"><ellipse cx="820" cy="145" rx="110" ry="32" fill="#0a3050" opacity="0.55"/><ellipse cx="870" cy="128" rx="75" ry="26" fill="#0d3a5c" opacity="0.45"/><ellipse cx="770" cy="140" rx="50" ry="20" fill="#0a3050" opacity="0.4"/></g>
+            <g class="res-cloud" id="res-cloud-3"><ellipse cx="1100" cy="200" rx="80" ry="25" fill="#0a3050" opacity="0.5"/><ellipse cx="1145" cy="185" rx="55" ry="20" fill="#0d3a5c" opacity="0.4"/></g>
+
+            <!-- OCEAN HORIZON -->
+            <rect x="0" y="375" width="1600" height="3" fill="#48cae4" opacity="0.2"/>
+            <path d="M0,368 C320,353 640,383 960,368 C1280,353 1440,373 1600,362 L1600,445 L0,445 Z" fill="url(#resOcean)" opacity="0.85"/>
+            <path d="M0,392 C240,382 480,402 720,392 C960,382 1200,402 1440,392 C1500,388 1560,394 1600,392" fill="none" stroke="#48cae4" stroke-width="1.5" opacity="0.25"/>
+            <path d="M0,408 C200,398 400,418 600,408 C800,398 1000,418 1200,408 C1350,400 1500,412 1600,408" fill="none" stroke="#90e0ef" stroke-width="1" opacity="0.18"/>
+            <!-- Dark hills -->
+            <path d="M0,443 C180,415 360,440 540,422 C720,404 900,435 1080,418 C1260,401 1440,428 1600,415 L1600,480 L0,480 Z" fill="#081a12" opacity="0.9"/>
+            <path d="M0,455 C200,435 400,455 600,442 C800,429 1000,452 1200,440 C1400,428 1500,445 1600,440 L1600,495 L0,495 Z" fill="#0d2818"/>
+            <!-- Background trees (far) -->
+            <g opacity="0.55">
+                <g transform="translate(680,440)"><polygon points="0,-75 -20,0 20,0" fill="#091f0d"/><polygon points="0,-55 -17,10 17,10" fill="#0f3018"/><rect x="-3" y="0" width="6" height="35" fill="#3a2010"/></g>
+                <g transform="translate(780,448)"><polygon points="0,-65 -18,0 18,0" fill="#091f0d"/><polygon points="0,-48 -15,10 15,10" fill="#0f3018"/><rect x="-3" y="0" width="6" height="30" fill="#3a2010"/></g>
+                <g transform="translate(880,443)"><polygon points="0,-72 -19,0 19,0" fill="#091f0d"/><polygon points="0,-52 -16,10 16,10" fill="#0f3018"/><rect x="-3" y="0" width="6" height="32" fill="#3a2010"/></g>
+                <g transform="translate(1000,446)"><polygon points="0,-68 -18,0 18,0" fill="#091f0d"/><polygon points="0,-50 -15,10 15,10" fill="#0f3018"/><rect x="-3" y="0" width="6" height="30" fill="#3a2010"/></g>
+                <g transform="translate(1085,441)"><polygon points="0,-76 -20,0 20,0" fill="#091f0d"/><polygon points="0,-56 -17,10 17,10" fill="#0f3018"/><rect x="-3" y="0" width="6" height="34" fill="#3a2010"/></g>
+            </g>
+
+            <!-- GROUND -->
+            <path d="M0,468 C200,452 400,470 600,460 C800,450 1000,468 1200,458 C1400,448 1550,462 1600,465 L1600,900 L0,900 Z" fill="url(#resGround)"/>
+            <ellipse cx="350" cy="570" rx="130" ry="30" fill="#1a7a38" opacity="0.35"/>
+            <ellipse cx="1100" cy="600" rx="160" ry="35" fill="#1a7a38" opacity="0.28"/>
+            <!-- Path -->
+            <path d="M600,485 C635,500 685,514 732,520 L760,900 L578,900 Z" fill="url(#resPath)" opacity="0.72"/>
+            <path d="M732,520 C800,522 868,528 920,537 L958,900 L760,900 Z" fill="url(#resPath)" opacity="0.58"/>
+            <path d="M597,492 C628,504 670,516 710,521" fill="none" stroke="#52c97a" stroke-width="2.5" opacity="0.45"/>
+
+            <!-- LIGHTHOUSE (right) -->
+            <g id="res-lighthouse-group">
+                <rect x="1245" y="428" width="76" height="42" fill="#b8a898" rx="3"/>
+                <rect x="1242" y="425" width="82" height="8" fill="#a89888" rx="2"/>
+                <path d="M1262,168 L1254,428 L1312,428 L1304,168 Z" fill="#f0f8ff"/>
+                <path d="M1304,168 L1312,428 L1308,428 L1300,168 Z" fill="#d8d0c8" opacity="0.35"/>
+                <rect x="1255" y="222" width="56" height="38" fill="#e63946" opacity="0.92"/>
+                <rect x="1255" y="302" width="56" height="38" fill="#e63946" opacity="0.92"/>
+                <rect x="1255" y="382" width="56" height="38" fill="#e63946" opacity="0.92"/>
+                <rect x="1248" y="143" width="70" height="6" fill="#888" rx="2"/>
+                <rect x="1253" y="138" width="5" height="14" fill="#888"/><rect x="1263" y="138" width="5" height="14" fill="#888"/>
+                <rect x="1273" y="138" width="5" height="14" fill="#888"/><rect x="1283" y="138" width="5" height="14" fill="#888"/>
+                <rect x="1293" y="138" width="5" height="14" fill="#888"/><rect x="1303" y="138" width="5" height="14" fill="#888"/>
+                <rect x="1252" y="118" width="62" height="26" fill="#444" rx="3"/>
+                <circle id="res-beacon-light" cx="1283" cy="108" r="26" fill="#ffd166"/>
+                <circle cx="1283" cy="108" r="20" fill="#ffe599"/>
+                <circle id="res-beacon-glow-outer" cx="1283" cy="108" r="55" fill="url(#resBeacon)"/>
+                <rect x="1270" y="342" width="26" height="32" fill="#ffd166" opacity="0.4" rx="3"/>
+                <polygon id="res-light-beam" points="1283,108 1050,0 980,130 1150,230" fill="#ffd166" opacity="0.04"/>
+                <rect x="1272" y="396" width="22" height="32" fill="#0d3a5c" rx="2"/>
+            </g>
+
+            <!-- PINE TREES LEFT -->
+            <g id="res-left-trees">
+                <g transform="translate(112,328)"><rect x="-8" y="0" width="16" height="150" fill="#4a2a0e"/><polygon points="0,-228 -58,0 58,0" fill="#091f0d"/><polygon points="0,-193 -52,15 52,15" fill="#0f3018"/><polygon points="0,-158 -46,30 46,30" fill="#1a5a1a"/><polygon points="0,-123 -40,45 40,45" fill="#2d9e4f"/><polygon points="0,-88 -32,60 32,60" fill="#3ab85a"/></g>
+                <g transform="translate(222,356)"><rect x="-7" y="0" width="14" height="125" fill="#4a2a0e"/><polygon points="0,-193 -52,0 52,0" fill="#091f0d"/><polygon points="0,-161 -45,15 45,15" fill="#0f3018"/><polygon points="0,-128 -39,30 39,30" fill="#1a5a1a"/><polygon points="0,-96 -32,45 32,45" fill="#2d9e4f"/><polygon points="0,-66 -26,58 26,58" fill="#3ab85a"/></g>
+                <g transform="translate(328,376)"><rect x="-6" y="0" width="12" height="105" fill="#4a2a0e"/><polygon points="0,-158 -44,0 44,0" fill="#091f0d"/><polygon points="0,-130 -38,16 38,16" fill="#0f3018"/><polygon points="0,-102 -32,32 32,32" fill="#1a5a1a"/><polygon points="0,-74 -26,46 26,46" fill="#2d9e4f"/></g>
+                <g transform="translate(412,396)" opacity="0.82"><rect x="-5" y="0" width="10" height="80" fill="#4a2a0e"/><polygon points="0,-118 -32,0 32,0" fill="#091f0d"/><polygon points="0,-93 -27,14 27,14" fill="#0f3018"/><polygon points="0,-68 -22,28 22,28" fill="#1a5a1a"/></g>
+            </g>
+            <!-- PINE TREES RIGHT -->
+            <g id="res-right-trees">
+                <g transform="translate(1392,350)"><rect x="-7" y="0" width="14" height="130" fill="#4a2a0e"/><polygon points="0,-198 -54,0 54,0" fill="#091f0d"/><polygon points="0,-166 -46,16 46,16" fill="#0f3018"/><polygon points="0,-134 -38,32 38,32" fill="#1a5a1a"/><polygon points="0,-102 -32,48 32,48" fill="#2d9e4f"/><polygon points="0,-70 -26,62 26,62" fill="#3ab85a"/></g>
+                <g transform="translate(1496,370)" opacity="0.9"><rect x="-6" y="0" width="12" height="110" fill="#4a2a0e"/><polygon points="0,-170 -46,0 46,0" fill="#091f0d"/><polygon points="0,-140 -40,16 40,16" fill="#0f3018"/><polygon points="0,-110 -34,32 34,32" fill="#1a5a1a"/><polygon points="0,-80 -28,46 28,46" fill="#2d9e4f"/></g>
+            </g>
+
+            <!-- HOUSE -->
+            <g id="res-house-group" transform="translate(492,272)">
+                <!-- Porch -->
+                <rect x="-12" y="182" width="240" height="20" fill="#c8a870" rx="3"/>
+                <rect x="-12" y="165" width="240" height="10" fill="#e8e0d0" rx="4"/>
+                <rect x="2" y="165" width="5" height="20" fill="#d8d0c0"/><rect x="32" y="165" width="5" height="20" fill="#d8d0c0"/>
+                <rect x="62" y="165" width="5" height="20" fill="#d8d0c0"/><rect x="92" y="165" width="5" height="20" fill="#d8d0c0"/>
+                <rect x="122" y="165" width="5" height="20" fill="#d8d0c0"/><rect x="152" y="165" width="5" height="20" fill="#d8d0c0"/>
+                <rect x="182" y="165" width="5" height="20" fill="#d8d0c0"/><rect x="210" y="165" width="5" height="20" fill="#d8d0c0"/>
+                <!-- House body -->
+                <rect x="0" y="0" width="216" height="178" fill="#e8f2f2" rx="3"/>
+                <rect x="207" y="5" width="18" height="173" fill="#c4d8d8" opacity="0.8"/>
+                <!-- Roof -->
+                <polygon points="-16,0 108,-85 232,0" fill="#041e2e"/>
+                <polygon points="-16,0 108,-85 232,0" fill="none" stroke="#0d3a5c" stroke-width="3"/>
+                <!-- Chimney -->
+                <rect x="145" y="-102" width="30" height="58" fill="#b8a898"/>
+                <rect x="142" y="-106" width="36" height="10" fill="#a89888" rx="1"/>
+                <circle cx="162" cy="-115" r="7" fill="#0a2a40" opacity="0.35"/>
+                <circle cx="165" cy="-126" r="9" fill="#0a2a40" opacity="0.25"/>
+                <!-- Left window -->
+                <rect x="22" y="28" width="54" height="60" fill="#ffd166" opacity="0.78" rx="4"/>
+                <rect x="20" y="26" width="58" height="64" fill="none" stroke="#a08030" stroke-width="3" rx="4"/>
+                <ellipse cx="49" cy="58" rx="50" ry="40" fill="url(#resWinGlow)" opacity="0.6"/>
+                <line x1="22" y1="58" x2="76" y2="58" stroke="#c88030" stroke-width="2.5"/>
+                <line x1="49" y1="28" x2="49" y2="88" stroke="#c88030" stroke-width="2.5"/>
+                <!-- Right window -->
+                <rect x="142" y="28" width="54" height="60" fill="#ffd166" opacity="0.68" rx="4"/>
+                <rect x="140" y="26" width="58" height="64" fill="none" stroke="#a08030" stroke-width="3" rx="4"/>
+                <ellipse cx="169" cy="58" rx="50" ry="40" fill="url(#resWinGlow)" opacity="0.5"/>
+                <line x1="142" y1="58" x2="196" y2="58" stroke="#c88030" stroke-width="2.5"/>
+                <line x1="169" y1="28" x2="169" y2="88" stroke="#c88030" stroke-width="2.5"/>
+                <!-- Door -->
+                <rect x="83" y="105" width="50" height="78" fill="#f4a261" rx="4"/>
+                <path d="M83,105 Q108,85 133,105" fill="#f4a261" stroke="#c8801a" stroke-width="2"/>
+                <rect x="81" y="103" width="54" height="82" fill="none" stroke="#c8801a" stroke-width="3" rx="4"/>
+                <rect x="87" y="110" width="19" height="25" fill="#d87a18" opacity="0.35" rx="2"/>
+                <rect x="110" y="110" width="19" height="25" fill="#d87a18" opacity="0.35" rx="2"/>
+                <rect x="87" y="142" width="42" height="32" fill="#d87a18" opacity="0.28" rx="2"/>
+                <circle id="res-door-knob" cx="129" cy="158" r="5" fill="#ffd166"/>
+                <circle cx="78" cy="100" r="6" fill="#ffd166" opacity="0.95"/>
+                <ellipse cx="78" cy="100" rx="15" ry="12" fill="#ffd166" opacity="0.15"/>
+                <!-- Flower boxes -->
+                <rect x="17" y="89" width="60" height="12" fill="#8b5a2b" rx="3"/>
+                <rect x="137" y="89" width="60" height="12" fill="#8b5a2b" rx="3"/>
+                <circle cx="27" cy="86" r="7" fill="#e63946"/><circle cx="40" cy="83" r="8" fill="#ffd166"/>
+                <circle cx="54" cy="86" r="7" fill="#00b4d8"/><circle cx="67" cy="83" r="6" fill="#52c97a"/>
+                <circle cx="147" cy="86" r="7" fill="#ffd166"/><circle cx="160" cy="83" r="8" fill="#e63946"/>
+                <circle cx="174" cy="86" r="7" fill="#00b4d8"/><circle cx="187" cy="83" r="6" fill="#52c97a"/>
+                <!-- Porch columns -->
+                <rect x="-10" y="100" width="14" height="85" fill="#e0d8c8" rx="4"/>
+                <rect x="212" y="100" width="14" height="85" fill="#e0d8c8" rx="4"/>
+            </g>
+
+            <!-- FLOWERS -->
+            <g id="res-flowers-group">
+                <ellipse cx="432" cy="497" rx="72" ry="22" fill="#1a5a28" opacity="0.85"/>
+                <line x1="392" y1="496" x2="392" y2="509" stroke="#2d9e4f" stroke-width="2.5"/>
+                <line x1="415" y1="491" x2="415" y2="505" stroke="#2d9e4f" stroke-width="2.5"/>
+                <line x1="440" y1="487" x2="440" y2="501" stroke="#2d9e4f" stroke-width="2.5"/>
+                <line x1="463" y1="490" x2="463" y2="504" stroke="#2d9e4f" stroke-width="2.5"/>
+                <line x1="482" y1="494" x2="482" y2="507" stroke="#2d9e4f" stroke-width="2.5"/>
+                <circle cx="392" cy="485" r="10" fill="#e63946"/><circle cx="392" cy="485" r="5" fill="#c0392b"/>
+                <circle cx="415" cy="480" r="11" fill="#ffd166"/><circle cx="415" cy="480" r="5" fill="#f4a261"/>
+                <circle cx="440" cy="476" r="10" fill="#00b4d8"/><circle cx="440" cy="476" r="5" fill="#0077b6"/>
+                <circle cx="463" cy="480" r="9" fill="#52c97a"/><circle cx="463" cy="480" r="4" fill="#2d9e4f"/>
+                <circle cx="482" cy="484" r="10" fill="#e63946"/><circle cx="482" cy="484" r="5" fill="#c0392b"/>
+            </g>
+
+            <!-- MAILBOX -->
+            <g id="res-mailbox-group" transform="translate(760,490)">
+                <rect x="-4" y="0" width="7" height="48" fill="#7f8c8d"/>
+                <rect x="-20" y="-32" width="50" height="34" rx="14" fill="#e63946"/>
+                <rect x="-16" y="-28" width="42" height="26" rx="11" fill="#c0392b" opacity="0.5"/>
+                <rect x="-12" y="-12" width="30" height="4" fill="#1a0808" rx="1"/>
+                <rect x="28" y="-32" width="4" height="35" fill="#7f8c8d"/>
+                <rect x="28" y="-32" width="18" height="14" fill="#ffd166" rx="2"/>
+                <circle cx="14" cy="-16" r="3" fill="#888" opacity="0.8"/>
+            </g>
+
+            <!-- BENCH -->
+            <g id="res-bench-group" transform="translate(855,505)">
+                <rect x="-54" y="-28" width="8" height="42" rx="3" fill="#7a4a1a"/>
+                <rect x="46" y="-28" width="8" height="42" rx="3" fill="#7a4a1a"/>
+                <rect x="-46" y="-26" width="92" height="9" rx="4" fill="#8b5a2b"/>
+                <rect x="-46" y="-14" width="92" height="9" rx="4" fill="#8b5a2b"/>
+                <rect x="-46" y="0" width="92" height="10" rx="4" fill="#8b5a2b"/>
+                <rect x="-40" y="-26" width="5" height="35" fill="#6e4a22" rx="2"/>
+                <rect x="35" y="-26" width="5" height="35" fill="#6e4a22" rx="2"/>
+                <rect x="-48" y="8" width="7" height="24" fill="#6e4a22" rx="2"/>
+                <rect x="-18" y="8" width="7" height="24" fill="#6e4a22" rx="2"/>
+                <rect x="11" y="8" width="7" height="24" fill="#6e4a22" rx="2"/>
+                <rect x="41" y="8" width="7" height="24" fill="#6e4a22" rx="2"/>
+                <!-- Bird on bench -->
+                <g id="res-bench-bird-svg" transform="translate(10,-38)">
+                    <ellipse cx="0" cy="0" rx="10" ry="7" fill="#2d9e4f"/>
+                    <circle cx="9" cy="-4" r="7" fill="#1a7a38"/>
+                    <polygon points="16,-3 22,-1 16,-6" fill="#f4a261"/>
+                    <circle cx="11" cy="-6" r="2" fill="#111"/>
+                    <circle cx="11.5" cy="-6.5" r="0.8" fill="white"/>
+                </g>
+            </g>
+
+            <!-- FENCE -->
+            <g opacity="0.65">
+                <line x1="386" y1="492" x2="386" y2="535" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="424" y1="494" x2="424" y2="537" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="462" y1="497" x2="462" y2="540" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="383" y1="510" x2="465" y2="513" stroke="#c8b898" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="383" y1="525" x2="465" y2="528" stroke="#c8b898" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="892" y1="498" x2="892" y2="541" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="934" y1="500" x2="934" y2="543" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="976" y1="503" x2="976" y2="546" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                <line x1="889" y1="516" x2="978" y2="520" stroke="#c8b898" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="889" y1="531" x2="978" y2="535" stroke="#c8b898" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+
+            <!-- TIDE POOL -->
+            <g id="res-tidepool-group" transform="translate(168,628)">
+                <ellipse cx="0" cy="12" rx="95" ry="42" fill="url(#resTidepool)" opacity="0.85"/>
+                <ellipse cx="-18" cy="5" rx="32" ry="12" fill="white" opacity="0.1"/>
+                <ellipse cx="-85" cy="20" rx="28" ry="17" fill="#505a5a"/><ellipse cx="-75" cy="14" rx="20" ry="13" fill="#626c6c"/>
+                <ellipse cx="85" cy="18" rx="25" ry="15" fill="#505a5a"/><ellipse cx="75" cy="12" rx="18" ry="12" fill="#626c6c"/>
+                <ellipse cx="10" cy="50" rx="38" ry="20" fill="#505a5a"/><ellipse cx="-40" cy="48" rx="22" ry="14" fill="#626c6c"/>
+                <ellipse cx="25" cy="0" rx="12" ry="8" fill="#7a7a7a" opacity="0.85"/>
+                <path d="M-22,32 Q-10,10 2,22 Q12,32 18,16" fill="none" stroke="#2d9e4f" stroke-width="3.5" opacity="0.75" stroke-linecap="round"/>
+                <circle cx="-28" cy="28" r="7" fill="#e63946" opacity="0.85"/><circle cx="-28" cy="22" r="5" fill="#f4a261" opacity="0.9"/>
+                <g transform="translate(38,25) scale(0.7)"><polygon points="0,-14 3,-5 13,-5 5,1 8,12 0,6 -8,12 -5,1 -13,-5 -3,-5" fill="#f4a261" opacity="0.85"/></g>
+                <g id="res-crab-svg" transform="translate(-8,-4)">
+                    <rect x="-9" y="-6" width="18" height="12" rx="6" fill="#e63946"/>
+                    <circle cx="-13" cy="-4" r="5" fill="#c0392b"/><circle cx="13" cy="-4" r="5" fill="#c0392b"/>
+                    <ellipse cx="-18" cy="-8" rx="5" ry="4" fill="#e63946" transform="rotate(25 -18 -8)"/>
+                    <ellipse cx="18" cy="-8" rx="5" ry="4" fill="#e63946" transform="rotate(-25 18 -8)"/>
+                    <line x1="-13" y1="-2" x2="-22" y2="-10" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="13" y1="-2" x2="22" y2="-10" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="-5" cy="-9" r="2.5" fill="#1a1a1a"/><circle cx="5" cy="-9" r="2.5" fill="#1a1a1a"/>
+                    <circle cx="-4" cy="-10" r="1" fill="white"/><circle cx="6" cy="-10" r="1" fill="white"/>
+                </g>
+            </g>
+
+            <!-- FISHING BOAT -->
+            <g id="res-boat-group" transform="translate(338,662)">
+                <ellipse cx="0" cy="58" rx="82" ry="14" fill="#0a4f7a" opacity="0.3"/>
+                <path d="M-78,22 Q-82,44 -60,58 Q0,68 60,58 Q82,44 78,22 Z" fill="#5c3a1e"/>
+                <path d="M-78,22 Q0,14 78,22" fill="none" stroke="#8b5a2b" stroke-width="5" stroke-linecap="round"/>
+                <path d="M-60,22 Q-64,38 -48,48 Q0,56 48,48 Q64,38 60,22 Z" fill="#3a2010"/>
+                <rect x="-4" y="-100" width="8" height="125" fill="#8b5a2b" rx="2"/>
+                <rect x="-28" y="-90" width="56" height="7" fill="#7a4a22" rx="2"/>
+                <ellipse cx="22" cy="-90" rx="20" ry="6" fill="#c8b098" opacity="0.85"/>
+                <path d="M0,-95 Q28,-68 36,-38 Q42,-12 34,22" fill="none" stroke="#9a7a50" stroke-width="2.5" stroke-dasharray="5,4" opacity="0.7"/>
+                <path d="M-65,42 Q-52,36 -40,42" stroke="#2d9e4f" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+                <path d="M35,48 Q48,42 58,48" stroke="#2d9e4f" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+            </g>
+
+            <!-- ROCKS -->
+            <ellipse cx="1058" cy="512" rx="22" ry="13" fill="#505a5a"/>
+            <ellipse cx="1070" cy="518" rx="14" ry="9" fill="#626c6c"/>
+            <ellipse cx="360" cy="545" rx="18" ry="11" fill="#505a5a"/>
+            <ellipse cx="350" cy="551" rx="12" ry="8" fill="#626c6c"/>
+
+            <!-- FIREFLIES -->
+            <circle class="res-firefly" cx="548" cy="522" r="2.5" fill="#ffd166" opacity="0.65"/>
+            <circle class="res-firefly res-firefly-2" cx="748" cy="492" r="2" fill="#52c97a" opacity="0.55"/>
+            <circle class="res-firefly res-firefly-3" cx="982" cy="508" r="2.5" fill="#ffd166" opacity="0.7"/>
+            <circle class="res-firefly res-firefly-4" cx="198" cy="558" r="2" fill="#90e0ef" opacity="0.6"/>
+            <circle class="res-firefly res-firefly-5" cx="1150" cy="540" r="2.5" fill="#ffd166" opacity="0.6"/>
+            <circle class="res-firefly res-firefly-6" cx="488" cy="555" r="2" fill="#52c97a" opacity="0.5"/>
+
+            <!-- PLAYER -->
+            <g id="res-player" transform="translate(800,560)">
+                <ellipse cx="0" cy="20" rx="16" ry="6" fill="rgba(0,0,0,0.35)"/>
+                <ellipse cx="0" cy="0" rx="13" ry="16" fill="#00b4d8"/>
+                <ellipse cx="4" cy="2" rx="7" ry="10" fill="#0097b8" opacity="0.4"/>
+                <rect x="-8" y="12" width="6" height="14" rx="3" fill="#0077b6"/>
+                <rect x="2" y="12" width="6" height="14" rx="3" fill="#0077b6"/>
+                <rect x="-18" y="-6" width="8" height="6" rx="3" fill="#0077b6"/>
+                <rect x="10" y="-6" width="8" height="6" rx="3" fill="#0077b6"/>
+                <circle cx="0" cy="-21" r="14" fill="#f1c27d"/>
+                <path d="M-12,-30 Q0,-42 12,-30 Q10,-22 -10,-22" fill="#5c3a1e"/>
+                <circle cx="-4.5" cy="-22" r="3" fill="#1a1a1a"/>
+                <circle cx="4.5" cy="-22" r="3" fill="#1a1a1a"/>
+                <circle cx="-3.5" cy="-23" r="1.2" fill="white"/>
+                <circle cx="5.5" cy="-23" r="1.2" fill="white"/>
+                <path d="M-4.5,-16 Q0,-13 4.5,-16" fill="none" stroke="#5c3a1e" stroke-width="1.8" stroke-linecap="round"/>
+            </g>
+
+            <!-- INTERACTION RING -->
+            <circle id="res-interact-ring" cx="0" cy="0" r="62" fill="none" stroke="#00b4d8" stroke-width="2.5" stroke-dasharray="8,5" opacity="0" style="pointer-events:none;"/>
+        </svg>
+
+        <!-- Interaction Prompt -->
+        <div id="res-enter-prompt" class="hidden">
+            <div class="res-prompt-icon" id="res-prompt-icon">✨</div>
+            <div class="res-prompt-text">Press <strong>E</strong> or <strong>Tap</strong></div>
+        </div>
+    </div>
+
+    <!-- EXPLORE MAP SCENE -->
+    <div class="scene" id="scene-explore-map">
+        <div class="explore-map-header">
+            <div class="explore-map-title-text">🗺 EXPLORE MAP</div>
+            <div class="explore-map-hint-text">WASD to navigate · E to enter area · ESC to close</div>
+            <button id="btn-close-explore" class="explore-close-btn">✕ Close</button>
+        </div>
         <svg id="world-map-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
             <!-- Ocean background with radial gradient -->
             <defs>
@@ -101,18 +479,14 @@
                 </radialGradient>
             </defs>
             <rect width="1600" height="900" fill="url(#oceanGrad)" />
-            
             <!-- Island Base (Beach/Sand) -->
             <path d="M 120,600 C 80,420 130,220 280,140 C 460,55 700,40 900,55 C 1100,70 1320,140 1430,280 C 1530,410 1510,600 1400,710 C 1280,820 1050,880 820,890 C 590,900 330,870 200,780 C 130,730 140,660 120,600 Z" fill="#e8c547" stroke="#f4d03f" stroke-width="15" stroke-linejoin="round"/>
-            
             <!-- Island Inner (Grass/Jungle) -->
             <path id="world-island-grass" d="M 200,580 C 160,430 200,280 330,210 C 480,140 680,120 880,130 C 1050,140 1230,200 1330,320 C 1410,420 1390,560 1310,650 C 1210,750 1020,800 820,810 C 620,820 400,790 280,710 C 230,670 220,620 200,580 Z" fill="#2d9e4f" stroke="#27ae60" stroke-width="10" stroke-linejoin="round" style="transition: fill 1.5s ease;"/>
-
             <!-- Agricultural River & Runoff Overlays -->
             <path id="world-map-river" d="M 430,100 C 390,160 300,250 180,350 C 150,375 130,390 110,430" fill="none" stroke="#0096c7" stroke-width="25" stroke-linecap="round" style="pointer-events:none;"/>
             <path id="world-agri-runoff" d="M 430,100 C 390,160 300,250 180,350 C 150,375 130,390 110,430" fill="none" stroke="#4a7c59" stroke-width="25" stroke-linecap="round" opacity="0" style="transition: opacity 1.5s ease; pointer-events:none;"/>
             <path id="world-agri-ocean-plume" d="M 110,430 C 80,445 40,410 20,460 C 10,510 50,560 100,530 C 130,510 120,470 110,430 Z" fill="#4a7c59" opacity="0" style="transition: opacity 1.5s ease; pointer-events:none;"/>
-
             <!-- Coastal Oil Slick & Floating Trash Overlays -->
             <path id="world-oil-slick" d="M 50,650 C 120,580 280,620 350,720 C 400,790 320,880 180,890 C 80,880 10,800 50,650 Z" fill="#14140b" opacity="0.85" style="transition: opacity 1.5s ease, fill 1.5s ease; pointer-events: none;"/>
             <g id="world-map-trash" style="transition: opacity 1.5s ease; pointer-events: none;">
@@ -121,22 +495,14 @@
                 <text x="180" y="800" font-size="20">🕸️</text>
                 <text x="80" y="720" font-size="18">📦</text>
             </g>
-
             <!-- Industrial Wastewater & Bubbling Sludge Overlays -->
             <path id="world-ind-pipe" d="M 1360,250 L 1400,280" fill="none" stroke="#444" stroke-width="12" stroke-linecap="round" style="pointer-events:none;"/>
             <path id="world-ind-sludge" d="M 1400,280 C 1450,260 1510,290 1550,330 C 1580,390 1520,450 1460,420 C 1420,400 1390,340 1400,280 Z" fill="#2d3033" opacity="0" style="transition: opacity 1.5s ease, fill 1.5s ease; pointer-events:none;"/>
-
             <!-- Roads -->
-            <!-- Res(800,480) -> Coastal(270,710) -->
             <path d="M 800,480 C 650,580 480,640 270,710" fill="none" stroke="#d4a843" stroke-width="28" stroke-linecap="round"/>
-            <!-- Res(800,480) -> Agri(360,190) -->
             <path d="M 800,480 C 680,400 560,300 360,190" fill="none" stroke="#d4a843" stroke-width="28" stroke-linecap="round"/>
-            <!-- Res(800,480) -> Ind(1310,245) -->
             <path d="M 800,480 C 960,420 1100,340 1310,245" fill="none" stroke="#d4a843" stroke-width="28" stroke-linecap="round"/>
-            <!-- Agri(360,190) -> Ind(1310,245) top road -->
             <path d="M 360,190 C 700,155 1000,155 1310,245" fill="none" stroke="#d4a843" stroke-width="28" stroke-linecap="round"/>
-
-            <!-- Decorations (Trees, Rocks, etc.) -->
             <!-- Trees -->
             <g transform="translate(450,220)"><rect x="-5" y="0" width="10" height="40" fill="#d35400" /><circle cx="0" cy="0" r="25" fill="#2ecc71" /><circle cx="-15" cy="-10" r="15" fill="#27ae60" /><circle cx="15" cy="-10" r="15" fill="#27ae60" /></g>
             <g transform="translate(1100,220)"><rect x="-5" y="0" width="10" height="40" fill="#d35400" /><circle cx="0" cy="0" r="25" fill="#2ecc71" /><circle cx="-15" cy="-10" r="15" fill="#27ae60" /><circle cx="15" cy="-10" r="15" fill="#27ae60" /></g>
@@ -144,181 +510,43 @@
             <g transform="translate(600,600)"><rect x="-5" y="0" width="10" height="40" fill="#d35400" /><circle cx="0" cy="0" r="25" fill="#2ecc71" /><circle cx="-15" cy="-10" r="15" fill="#27ae60" /><circle cx="15" cy="-10" r="15" fill="#27ae60" /></g>
             <g transform="translate(200,450)"><rect x="-5" y="0" width="10" height="40" fill="#d35400" /><circle cx="0" cy="0" r="25" fill="#2ecc71" /><circle cx="-15" cy="-10" r="15" fill="#27ae60" /><circle cx="15" cy="-10" r="15" fill="#27ae60" /></g>
             <g transform="translate(1300,550)"><rect x="-5" y="0" width="10" height="40" fill="#d35400" /><circle cx="0" cy="0" r="25" fill="#2ecc71" /><circle cx="-15" cy="-10" r="15" fill="#27ae60" /><circle cx="15" cy="-10" r="15" fill="#27ae60" /></g>
-            
             <!-- Rocks -->
             <ellipse cx="250" cy="180" rx="15" ry="10" fill="#7f8c8d" />
             <ellipse cx="265" cy="185" rx="10" ry="8" fill="#95a5a6" />
             <ellipse cx="1400" cy="350" rx="18" ry="12" fill="#7f8c8d" />
             <ellipse cx="1380" cy="360" rx="12" ry="9" fill="#95a5a6" />
             <ellipse cx="500" cy="830" rx="20" ry="15" fill="#7f8c8d" />
-
             <!-- Clouds -->
-            <g class="world-cloud" transform="translate(200, 100)" opacity="0.8">
-                <rect x="0" y="20" width="100" height="40" rx="20" fill="#fff"/>
-                <circle cx="30" cy="20" r="25" fill="#fff"/>
-                <circle cx="70" cy="25" r="20" fill="#fff"/>
-            </g>
-            <g class="world-cloud" transform="translate(900, 80)" opacity="0.6" style="animation-delay:-5s;">
-                <rect x="0" y="20" width="120" height="50" rx="25" fill="#fff"/>
-                <circle cx="40" cy="20" r="30" fill="#fff"/>
-                <circle cx="80" cy="25" r="25" fill="#fff"/>
-            </g>
-            <g class="world-cloud" transform="translate(1300, 750)" opacity="0.7" style="animation-delay:-12s;">
-                <rect x="0" y="20" width="90" height="35" rx="17.5" fill="#fff"/>
-                <circle cx="25" cy="20" r="20" fill="#fff"/>
-                <circle cx="60" cy="25" r="15" fill="#fff"/>
-            </g>
-
+            <g class="world-cloud" transform="translate(200, 100)" opacity="0.8"><rect x="0" y="20" width="100" height="40" rx="20" fill="#fff"/><circle cx="30" cy="20" r="25" fill="#fff"/><circle cx="70" cy="25" r="20" fill="#fff"/></g>
+            <g class="world-cloud" transform="translate(900, 80)" opacity="0.6" style="animation-delay:-5s;"><rect x="0" y="20" width="120" height="50" rx="25" fill="#fff"/><circle cx="40" cy="20" r="30" fill="#fff"/><circle cx="80" cy="25" r="25" fill="#fff"/></g>
+            <g class="world-cloud" transform="translate(1300, 750)" opacity="0.7" style="animation-delay:-12s;"><rect x="0" y="20" width="90" height="35" rx="17.5" fill="#fff"/><circle cx="25" cy="20" r="20" fill="#fff"/><circle cx="60" cy="25" r="15" fill="#fff"/></g>
             <!-- Buildings -->
-            <!-- Residential Base -->
-            <g id="world-bldg-residential" class="world-building" transform="translate(800, 480)">
-                <circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" />
-                <!-- House 1 -->
-                <rect x="-40" y="-30" width="40" height="40" fill="#f5f5f5" rx="4"/>
-                <polygon points="-45,-30 -20,-55 5,-30" fill="#e63946" stroke="#c0392b" stroke-width="3" stroke-linejoin="round"/>
-                <rect x="-25" y="-10" width="10" height="20" fill="#8ecae6" />
-                <!-- House 2 -->
-                <rect x="0" y="-40" width="45" height="50" fill="#f5f5f5" rx="4"/>
-                <polygon points="-5,-40 22,-65 50,-40" fill="#00b4d8" stroke="#0077b6" stroke-width="3" stroke-linejoin="round"/>
-                <rect x="15" y="-15" width="15" height="25" fill="#8ecae6" />
-                <text x="0" y="35" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">RESIDENTIAL</text>
-            </g>
-
-            <!-- Coastal -->
-            <g id="world-bldg-coastal" class="world-building" transform="translate(270, 710)">
-                <circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" />
-                <!-- Pier -->
-                <rect x="-50" y="10" width="100" height="20" fill="#8b5a2b" rx="2"/>
-                <line x1="-40" y1="30" x2="-40" y2="50" stroke="#5c3a21" stroke-width="6"/>
-                <line x1="40" y1="30" x2="40" y2="50" stroke="#5c3a21" stroke-width="6"/>
-                <!-- Lighthouse -->
-                <path d="M-15,-10 L-25,10 L25,10 L15,-10 Z" fill="#e63946"/>
-                <path d="M-12,-30 L-15,-10 L15,-10 L12,-30 Z" fill="#f5f5f5"/>
-                <path d="M-10,-50 L-12,-30 L12,-30 L10,-50 Z" fill="#e63946"/>
-                <rect x="-15" y="-60" width="30" height="10" fill="#333" />
-                <circle cx="0" cy="-60" r="10" fill="#ffd166" />
-                <polygon points="-10,-60 0,-80 10,-60" fill="#e63946" stroke="#c0392b" stroke-width="2" stroke-linejoin="round"/>
-                <text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">COASTAL</text>
-            </g>
-
-            <!-- Agricultural -->
-            <g id="world-bldg-agricultural" class="world-building" transform="translate(360, 190)">
-                <circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" />
-                <!-- Barn -->
-                <rect x="-35" y="-20" width="70" height="40" fill="#e63946" rx="4"/>
-                <polygon points="-40,-20 -30,-45 0,-55 30,-45 40,-20" fill="#c0392b" />
-                <rect x="-10" y="5" width="20" height="15" fill="#fff" />
-                <line x1="-10" y1="5" x2="10" y2="20" stroke="#ccc" stroke-width="2"/>
-                <line x1="10" y1="5" x2="-10" y2="20" stroke="#ccc" stroke-width="2"/>
-                <!-- Silo -->
-                <rect x="35" y="-40" width="20" height="60" fill="#bdc3c7" />
-                <path d="M35,-40 C35,-55 55,-55 55,-40 Z" fill="#7f8c8d" />
-                <text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">AGRICULTURAL</text>
-            </g>
-
-            <!-- Industrial -->
-            <g id="world-bldg-industrial" class="world-building" transform="translate(1310, 245)">
-                <circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" />
-                <!-- Main Factory -->
-                <rect x="-45" y="-20" width="90" height="40" fill="#7f8c8d" rx="4"/>
-                <!-- Roof pattern -->
-                <polygon points="-45,-20 -30,-40 -15,-20" fill="#95a5a6" />
-                <polygon points="-15,-20 0,-40 15,-20" fill="#95a5a6" />
-                <polygon points="15,-20 30,-40 45,-20" fill="#95a5a6" />
-                <!-- Smokestacks -->
-                <rect x="-25" y="-60" width="10" height="40" fill="#f4a261" />
-                <rect x="15" y="-70" width="10" height="50" fill="#f4a261" />
-                <!-- Smoke -->
-                <g id="world-ind-smoke-dirty" style="transition: opacity 1.5s ease; pointer-events: none;">
-                    <circle cx="-20" cy="-70" r="8" fill="#4a5d4e" opacity="0.75"/>
-                    <circle cx="-25" cy="-80" r="12" fill="#4a5d4e" opacity="0.65"/>
-                    <circle cx="-35" cy="-95" r="16" fill="#3a483e" opacity="0.55"/>
-                    <circle cx="20" cy="-80" r="8" fill="#4a5d4e" opacity="0.75"/>
-                    <circle cx="25" cy="-95" r="12" fill="#4a5d4e" opacity="0.65"/>
-                    <circle cx="35" cy="-115" r="18" fill="#3a483e" opacity="0.55"/>
-                </g>
-                <g id="world-ind-smoke-clean" opacity="0" style="transition: opacity 1.5s ease; pointer-events: none;">
-                    <circle cx="-20" cy="-70" r="8" fill="#e0f2fe" opacity="0.8"/>
-                    <circle cx="-25" cy="-80" r="11" fill="#e0f2fe" opacity="0.6"/>
-                    <circle cx="20" cy="-80" r="8" fill="#e0f2fe" opacity="0.8"/>
-                    <circle cx="25" cy="-95" r="11" fill="#e0f2fe" opacity="0.6"/>
-                </g>
-                <!-- Door -->
-                <rect x="-10" y="5" width="20" height="15" fill="#34495e" />
-                <text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">INDUSTRIAL</text>
-            </g>
-
-            <!-- Player Character -->
+            <g id="world-bldg-residential" class="world-building" transform="translate(800, 480)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-40" y="-30" width="40" height="40" fill="#f5f5f5" rx="4"/><polygon points="-45,-30 -20,-55 5,-30" fill="#e63946" stroke="#c0392b" stroke-width="3" stroke-linejoin="round"/><rect x="-25" y="-10" width="10" height="20" fill="#8ecae6" /><rect x="0" y="-40" width="45" height="50" fill="#f5f5f5" rx="4"/><polygon points="-5,-40 22,-65 50,-40" fill="#00b4d8" stroke="#0077b6" stroke-width="3" stroke-linejoin="round"/><rect x="15" y="-15" width="15" height="25" fill="#8ecae6" /><text x="0" y="35" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">RESIDENTIAL</text></g>
+            <g id="world-bldg-coastal" class="world-building" transform="translate(270, 710)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-50" y="10" width="100" height="20" fill="#8b5a2b" rx="2"/><line x1="-40" y1="30" x2="-40" y2="50" stroke="#5c3a21" stroke-width="6"/><line x1="40" y1="30" x2="40" y2="50" stroke="#5c3a21" stroke-width="6"/><path d="M-15,-10 L-25,10 L25,10 L15,-10 Z" fill="#e63946"/><path d="M-12,-30 L-15,-10 L15,-10 L12,-30 Z" fill="#f5f5f5"/><path d="M-10,-50 L-12,-30 L12,-30 L10,-50 Z" fill="#e63946"/><rect x="-15" y="-60" width="30" height="10" fill="#333" /><circle cx="0" cy="-60" r="10" fill="#ffd166" /><polygon points="-10,-60 0,-80 10,-60" fill="#e63946" stroke="#c0392b" stroke-width="2" stroke-linejoin="round"/><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">COASTAL</text></g>
+            <g id="world-bldg-agricultural" class="world-building" transform="translate(360, 190)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-35" y="-20" width="70" height="40" fill="#e63946" rx="4"/><polygon points="-40,-20 -30,-45 0,-55 30,-45 40,-20" fill="#c0392b" /><rect x="-10" y="5" width="20" height="15" fill="#fff" /><line x1="-10" y1="5" x2="10" y2="20" stroke="#ccc" stroke-width="2"/><line x1="10" y1="5" x2="-10" y2="20" stroke="#ccc" stroke-width="2"/><rect x="35" y="-40" width="20" height="60" fill="#bdc3c7" /><path d="M35,-40 C35,-55 55,-55 55,-40 Z" fill="#7f8c8d" /><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">AGRICULTURAL</text></g>
+            <g id="world-bldg-industrial" class="world-building" transform="translate(1310, 245)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-45" y="-20" width="90" height="40" fill="#7f8c8d" rx="4"/><polygon points="-45,-20 -30,-40 -15,-20" fill="#95a5a6" /><polygon points="-15,-20 0,-40 15,-20" fill="#95a5a6" /><polygon points="15,-20 30,-40 45,-20" fill="#95a5a6" /><rect x="-25" y="-60" width="10" height="40" fill="#f4a261" /><rect x="15" y="-70" width="10" height="50" fill="#f4a261" /><g id="world-ind-smoke-dirty" style="transition: opacity 1.5s ease; pointer-events: none;"><circle cx="-20" cy="-70" r="8" fill="#4a5d4e" opacity="0.75"/><circle cx="-25" cy="-80" r="12" fill="#4a5d4e" opacity="0.65"/><circle cx="-35" cy="-95" r="16" fill="#3a483e" opacity="0.55"/><circle cx="20" cy="-80" r="8" fill="#4a5d4e" opacity="0.75"/><circle cx="25" cy="-95" r="12" fill="#4a5d4e" opacity="0.65"/><circle cx="35" cy="-115" r="18" fill="#3a483e" opacity="0.55"/></g><g id="world-ind-smoke-clean" opacity="0" style="transition: opacity 1.5s ease; pointer-events: none;"><circle cx="-20" cy="-70" r="8" fill="#e0f2fe" opacity="0.8"/><circle cx="-25" cy="-80" r="11" fill="#e0f2fe" opacity="0.6"/><circle cx="20" cy="-80" r="8" fill="#e0f2fe" opacity="0.8"/><circle cx="25" cy="-95" r="11" fill="#e0f2fe" opacity="0.6"/></g><rect x="-10" y="5" width="20" height="15" fill="#34495e" /><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">INDUSTRIAL</text></g>
+            <!-- World Player Character -->
             <g id="world-player" transform="translate(800, 480)">
-                <!-- Shadow -->
                 <ellipse cx="0" cy="15" rx="12" ry="5" fill="rgba(0,0,0,0.3)" />
-                <!-- Body -->
                 <ellipse cx="0" cy="0" rx="10" ry="12" fill="#00b4d8" />
-                <!-- Head -->
                 <circle cx="0" cy="-15" r="10" fill="#f1c27d" />
             </g>
         </svg>
-
-        <!-- E-Key Enter Prompt overlay -->
+        <!-- Area enter prompt (for explore map) -->
         <div id="world-enter-prompt" class="hidden">
-            <div class="prompt-text" data-lang-key="prompt_enter_text">Press <strong>E</strong> or <strong>Tap here</strong> to enter</div>
+            <div class="prompt-text" data-lang-key="prompt_enter_text">Press <strong>E</strong> or <strong>Tap</strong> to enter</div>
             <div id="world-enter-area-name" class="prompt-area-name">Coastal Area</div>
         </div>
+    </div>
 
-        <!-- Mobile Joystick -->
-        <div id="mobile-joystick">
-            <div class="joystick-base">
-                <div class="joystick-knob"></div>
-            </div>
+    <!-- Mobile Joystick (Shared) -->
+    <div id="mobile-joystick">
+        <div class="joystick-base">
+            <div class="joystick-knob"></div>
         </div>
     </div>
 
-    <div class="mini-map-container" id="mini-map-container">
-        <button class="ui-toggle-btn" id="btn-map-toggle">➖</button>
-        <div class="mini-map-title" data-lang-key="map_title">MAP</div>
-        <div class="mini-map-content">
-            <svg class="map-bg-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="z-index: 1; position: absolute; width: 100%; height: 100%; pointer-events: none;">
-                <!-- Ocean Base -->
-                <rect width="400" height="300" fill="transparent" />
-                
-                <!-- Main Island (Grass) -->
-                <!-- Shape matches the user's sketch -->
-                <path d="M 120,200 C 100,160 90,120 120,80 C 130,60 150,30 160,70 C 180,100 210,110 230,100 C 250,90 260,60 280,80 C 320,110 330,150 310,180 C 290,210 270,220 250,210 C 230,200 220,240 200,260 C 180,280 160,260 150,230 C 140,200 130,210 120,200 Z" fill="#2a9d8f" stroke="#000" stroke-width="2"/>
-                <path d="M 125,195 C 105,155 95,115 125,75 C 135,55 150,35 160,75 C 180,105 210,115 230,105 C 250,95 260,65 280,85 C 315,115 325,145 305,175 C 285,205 265,215 245,205 C 225,195 215,235 195,255 C 175,275 160,255 150,225 C 140,195 130,205 125,195 Z" fill="#2d9e4f" stroke="none" />
-                
-                <!-- Text for Ocean (optional context) -->
-                <text x="30" y="240" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
-                <text x="340" y="40" font-family="Exo 2" font-size="12" fill="rgba(255,255,255,0.4)" font-style="italic">ocean</text>
-            </svg>
- 
-            <!-- Clickable Map Areas overlaying the SVG -->
-            <div class="map-area" id="map-agricultural" data-area="agricultural" style="top: 15%; left: 15%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
-                <span class="map-alert-dot" style="display:none;"></span>
-                <span class="area-icon" style="font-size:1rem;">🌾</span>
-                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_agricultural">Agricultural</span>
-                <span class="area-status" id="map-agri-status" style="font-size:0.6rem;"></span>
-            </div>
-            
-            <div class="map-area" id="map-industrial" data-area="industrial" style="top: 15%; left: 55%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
-                <span class="map-alert-dot" style="display:none;"></span>
-                <span class="area-icon" style="font-size:1rem;">🏭</span>
-                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_industrial">Industrial</span>
-                <span class="area-status" id="map-ind-status" style="font-size:0.6rem;"></span>
-            </div>
-            
-            <div class="map-area" id="map-residential" data-area="residential" style="top: 50%; left: 45%; width: 35%; height: 35%; z-index:10; border-radius: 50%;">
-                <span class="area-icon" style="font-size:1rem;">🏠</span>
-                <span class="area-name" style="font-size:0.7rem; text-align:center;" data-lang-key="map_residential">Residential<br>(Spawn)</span>
-            </div>
-            
-            <div class="map-area" id="map-coastal" data-area="coastal" style="top: 65%; left: 20%; width: 30%; height: 30%; z-index:10; border-radius: 50%;">
-                <span class="map-alert-dot"></span>
-                <span class="area-icon" style="font-size:1rem;">🌊</span>
-                <span class="area-name" style="font-size:0.7rem;" data-lang-key="map_coastal">Coastal</span>
-                <span class="area-status" id="map-coastal-status" style="font-size:0.6rem;" data-lang-key="map_coastal_status">🚨 CRISIS</span>
-            </div>
-        </div>
-    </div>
+
 
     <div class="scene task-scene" id="scene-task1">
         <div class="task-header">

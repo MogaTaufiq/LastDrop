@@ -2182,19 +2182,199 @@ body {
 }
 
 /* ============================================
-   WORLD MAP SCENE (formerly Residential)
+   RESIDENTIAL SCENE (2D Home Environment)
    ============================================ */
 #scene-residential {
     overflow: hidden;
-    background: #48cae4;
+    background: #010d18;
+}
+
+#res-world-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+}
+
+#res-player { transition: none; }
+
+/* Animated clouds in residential scene */
+.res-cloud { animation: resCloudDrift 28s linear infinite alternate; }
+#res-cloud-2 { animation-duration: 35s; animation-delay: -10s; }
+#res-cloud-3 { animation-duration: 22s; animation-delay: -16s; animation-direction: alternate-reverse; }
+@keyframes resCloudDrift {
+    from { transform: translateX(0); }
+    to { transform: translateX(90px); }
+}
+
+/* Firefly glow animation */
+.res-firefly { animation: resFireflyPulse 3s ease-in-out infinite; }
+.res-firefly-2 { animation-duration: 4s; animation-delay: -1s; }
+.res-firefly-3 { animation-duration: 2.5s; animation-delay: -0.5s; }
+.res-firefly-4 { animation-duration: 3.8s; animation-delay: -2.2s; }
+.res-firefly-5 { animation-duration: 3.2s; animation-delay: -1.5s; }
+.res-firefly-6 { animation-duration: 4.5s; animation-delay: -3s; }
+@keyframes resFireflyPulse {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 1; }
+}
+
+/* Lighthouse beacon pulse */
+#res-beacon-light { animation: resBeaconPulse 2.5s ease-in-out infinite; }
+#res-beacon-glow-outer { animation: resBeaconGlowPulse 2.5s ease-in-out infinite; }
+@keyframes resBeaconPulse {
+    0%, 100% { r: 26; }
+    50% { r: 30; }
+}
+@keyframes resBeaconGlowPulse {
+    0%, 100% { r: 55; opacity: 0.5; }
+    50% { r: 72; opacity: 0.85; }
+}
+
+/* Interaction prompt (E to interact) */
+#res-enter-prompt {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(4, 30, 46, 0.92);
+    border: 2px solid var(--teal);
+    border-radius: 14px;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,180,216,0.3);
+    animation: promptSlideIn 0.3s ease-out;
+    cursor: pointer;
+}
+#res-enter-prompt.hidden { display: none; }
+@keyframes promptSlideIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.res-prompt-icon {
+    font-size: 1.4rem;
+    animation: iconBounce 1s ease-in-out infinite;
+}
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+.res-prompt-text {
+    font-family: 'Exo 2', sans-serif;
+    color: var(--white);
+    font-size: 0.95rem;
+}
+.res-prompt-text strong {
+    color: var(--yellow);
+    background: rgba(255,255,255,0.15);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+}
+
+/* Interaction ring spin animation */
+#res-interact-ring {
+    animation: resRingSpin 4s linear infinite;
+    transform-origin: center;
+}
+@keyframes resRingSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   EXPLORE MAP OVERLAY
+   ============================================ */
+#scene-explore-map {
+    background: rgba(1, 13, 24, 0.96);
+    backdrop-filter: blur(4px);
+    align-items: stretch;
+    justify-content: stretch;
+    transition: opacity 0.5s ease;
+}
+#scene-explore-map.active {
+    display: flex;
+    animation: exploreMapIn 0.35s ease-out;
+}
+@keyframes exploreMapIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.explore-map-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: rgba(4, 30, 46, 0.9);
+    border-bottom: 2px solid var(--teal);
+    box-shadow: 0 2px 15px rgba(0,180,216,0.2);
+    flex-shrink: 0;
+    z-index: 10;
+}
+.explore-map-title-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--teal-light);
+    text-shadow: 0 0 10px rgba(0,180,216,0.5);
+    letter-spacing: 2px;
+}
+.explore-map-hint-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.78rem;
+    color: var(--gray);
+    flex: 1;
+}
+.explore-close-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--white);
+    background: rgba(230, 57, 70, 0.25);
+    border: 1.5px solid var(--red);
+    border-radius: 8px;
+    padding: 7px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+}
+.explore-close-btn:hover {
+    background: var(--red);
+    box-shadow: 0 0 12px rgba(230,57,70,0.5);
+    transform: scale(1.05);
 }
 
 #world-map-svg {
-    position: absolute;
-    top: 0; left: 0;
+    flex: 1;
     width: 100%;
-    height: 100%;
     z-index: 0;
+}
+
+/* ============================================
+   MINIMAP CRISIS BLINK
+   ============================================ */
+.mini-map-container.map-crisis-blink {
+    animation: mapCrisisBlink 1.4s ease-in-out infinite;
+}
+@keyframes mapCrisisBlink {
+    0%, 100% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: 0 0 0 3px rgba(230,57,70,0.9), 0 0 22px rgba(230,57,70,0.5);
+    }
+}
+.mini-map-container.map-crisis-blink .mini-map-content {
+    animation: mapBorderBlink 1.4s ease-in-out infinite;
+}
+@keyframes mapBorderBlink {
+    0%, 100% { border-color: var(--teal); }
+    50% { border-color: var(--red); }
 }
 
 #world-player {
@@ -2477,18 +2657,19 @@ body {
 
 /* Mobile Joystick UI */
 #mobile-joystick {
-    position: absolute;
+    position: fixed;
     bottom: 30px;
     left: 30px;
     width: 110px;
     height: 110px;
-    z-index: 100;
+    z-index: 1000;
     display: none;
     touch-action: none;
 }
 
 @media (pointer: coarse) {
-    #mobile-joystick {
+    body:has(#scene-residential.active) #mobile-joystick,
+    body:has(#scene-explore-map.active) #mobile-joystick {
         display: block;
     }
 }

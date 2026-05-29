@@ -1123,65 +1123,77 @@ const cinematicSlides = [
     {
         text: 'Water is essential for life.',
         bg: 'oil-spill-sea',
-        type: 'oil-sea'
+        type: 'oil-sea',
+        image: 'assets/images/opening/scene_1.jpg'
     },
     {
         text: 'Yet today, it is under threat.',
         bg: 'industrial-pipe',
-        type: 'pipe'
+        type: 'pipe',
+        image: 'assets/images/opening/scene_2.jpg'
     },
     {
         text: 'Coastal ecosystems are increasingly polluted by human activities.',
         bg: 'algae-water',
-        type: 'algae'
+        type: 'algae',
+        image: 'assets/images/opening/scene_3.jpg'
     },
     // Scene 2: Problem Escalation
     {
         text: 'Oil spills spread across oceans, destroying marine habitats.',
         bg: 'oil-spill-sea',
-        type: 'oil-sea'
+        type: 'oil-sea',
+        image: 'assets/images/opening/scene_4.webp'
     },
     {
         text: 'Agricultural runoff carries fertilizers and chemicals into water…',
         bg: 'algae-water',
-        type: 'algae'
+        type: 'algae',
+        image: 'assets/images/opening/scene_5.jpg'
     },
     {
         text: 'Industrial waste releases toxic substances into rivers and seas.',
         bg: 'industrial-pipe',
-        type: 'pipe'
+        type: 'pipe',
+        image: 'assets/images/opening/scene_6.jpeg'
     },
     // Scene 3: Impact
     {
         text: 'The consequences are severe.',
         bg: 'dead-sea',
-        type: 'dead'
+        type: 'dead',
+        image: 'assets/images/opening/scene_7.jpg'
     },
     {
         text: 'Marine life dies. Ecosystems collapse.',
         bg: 'dead-sea',
-        type: 'dead'
+        type: 'dead',
+        image: 'assets/images/opening/scene_8.jpg'
     },
     {
         text: 'Water becomes unsafe for human use.',
         bg: 'dirty-water',
-        type: 'dirty'
+        type: 'dirty',
+        image: 'assets/images/opening/scene_9.jpg'
     },
     // Scene 4: Player Hook
     {
         text: 'In a small coastal town, water quality continues to decline under constant pressure from pollution.',
         bg: 'coastal-town',
-        type: 'town'
+        type: 'town',
+        image: 'assets/images/opening/scene_10_11.jpg'
     },
     {
         text: 'As environmental conditions worsen, maintaining water quality becomes increasingly difficult.',
         bg: 'coastal-town',
-        type: 'town'
+        type: 'town',
+        image: 'assets/images/opening/scene_10_11.jpg'
     },
     {
         text: 'Your actions will determine whether the system can recover… or collapse.',
         bg: 'coastal-town',
         type: 'town',
+        image: 'assets/images/opening/scene_10_11.jpg',
         isLast: true
     }
 ];
@@ -1460,7 +1472,7 @@ function renderSlide(index) {
     const div = document.createElement('div');
     div.className = 'cinematic-slide active';
     div.innerHTML = `
-        <div class="cin-illustration">${getCinematicBg(slide.type)}</div>
+        <img src="${slide.image}" class="cinematic-bg" alt="illustration">
         <div class="cinematic-overlay"></div>
         <div class="cinematic-text">
             <h2 id="slide-text"></h2>
@@ -1517,6 +1529,88 @@ let worldNearArea = null;
 let joystickDir = { x: 0, y: 0 };
 let joystickActive = false;
 let joystickInitialized = false;
+
+// Residential scene state
+let resLoopActive = false;
+let exploreMapActive = false;
+let resX = 800, resY = 560;
+let resNearInteractable = null;
+let resInteractCooldown = false;
+let inputInitialized = false;
+
+// ============================================
+// RESIDENTIAL INTERACTABLE OBJECTS
+// ============================================
+const RES_INTERACTABLES = [
+    { id: 'lighthouse', x: 1283, y: 380, radius: 105, icon: '\uD83D\uDD26', action: () => interactLighthouse() },
+    { id: 'house',      x: 610,  y: 458, radius: 90,  icon: '\uD83C\uDFE0', action: () => interactHouse() },
+    { id: 'mailbox',    x: 763,  y: 510, radius: 62,  icon: '\uD83D\uDCEC', action: () => interactMailbox() },
+    { id: 'flowers',    x: 440,  y: 490, radius: 68,  icon: '\uD83C\uDF38', action: () => interactFlowers() },
+    { id: 'bench',      x: 855,  y: 510, radius: 68,  icon: '\uD83E\uDE91', action: () => interactBench() },
+    { id: 'tidepool',   x: 168,  y: 640, radius: 88,  icon: '\uD83E\uDDAA', action: () => interactTidepool() },
+    { id: 'boat',       x: 338,  y: 678, radius: 88,  icon: '\u26F5',       action: () => interactBoat() },
+    { id: 'tree',       x: 220,  y: 400, radius: 82,  icon: '\uD83C\uDF32', action: () => interactTree() }
+];
+
+function interactLighthouse() {
+    const beacon = document.getElementById('res-beacon-light');
+    const glow   = document.getElementById('res-beacon-glow-outer');
+    if (beacon) { beacon.style.transition='all 0.3s'; beacon.setAttribute('r','38'); beacon.setAttribute('fill','#fff8d0'); setTimeout(() => { beacon.setAttribute('r','26'); beacon.setAttribute('fill','#ffd166'); beacon.style.transition=''; }, 550); }
+    if (glow)   { glow.setAttribute('r','90'); setTimeout(() => glow.setAttribute('r','55'), 600); }
+    Particles.burst(1283*window.innerWidth/1600, 108*window.innerHeight/900, 10, ['\u2728','\uD83D\uDCAB','\u2B50','\uD83D\uDD06']);
+    Toast.show('\uD83D\uDCA1 Lighthouses guided sailors for centuries. Today, sustainable choices are the light that guides humanity toward a healthier ocean.', '', 5500);
+}
+function interactHouse() {
+    const knob = document.getElementById('res-door-knob');
+    if (knob) { knob.setAttribute('r','8'); knob.setAttribute('fill','#fff'); setTimeout(() => { knob.setAttribute('r','5'); knob.setAttribute('fill','#ffd166'); }, 450); }
+    Particles.burst(610*window.innerWidth/1600, 458*window.innerHeight/900, 8, ['\uD83D\uDC9A','\uD83C\uDFE0','\u2764\uFE0F','\u2728']);
+    Toast.show('\uD83C\uDFE0 This is your home \u2014 and so is our ocean. Every sustainable choice ripples outward to protect our shared world.', '', 5500);
+}
+function interactMailbox() {
+    Particles.burst(763*window.innerWidth/1600, 510*window.innerHeight/900, 8, ['\uD83D\uDC8C','\u2709\uFE0F','\uD83D\uDC99']);
+    showContinueModal('\uD83D\uDCEC A Letter from Nature',
+        '<em style="line-height:1.9;color:#90e0ef;font-style:italic;">\"Dear Friend,<br><br>Thank you for caring about our waters. The rivers remember every kind act \u2014 every buffer strip planted, every waste pipe sealed, every spill cleaned up.<br><br>The ocean and I are watching, and we are deeply grateful.<br><br>\u2014 The Coastal Ecosystem\"</em>',
+        'Close Letter \uD83D\uDC99', () => {});
+}
+function interactFlowers() {
+    Particles.burst(440*window.innerWidth/1600, 490*window.innerHeight/900, 16, ['\uD83E\uDD8B','\uD83C\uDF38','\uD83C\uDF3A','\uD83C\uDF3C','\uD83D\uDC90','\uD83C\uDF3B']);
+    Toast.show('\uD83E\uDD8B Healthy pollinator populations signal a thriving ecosystem. Riparian buffer strips in agricultural areas protect vibrant habitats like this garden!', '', 5500);
+}
+function interactBench() {
+    Particles.burst(855*window.innerWidth/1600, 510*window.innerHeight/900, 8, ['\u2B50','\uD83C\uDF19','\uD83D\uDCAD','\uD83C\uDF0A','\uD83C\uDF3F']);
+    Toast.show('\uD83E\uDE91 Taking a moment... 2.2 billion people worldwide still lack access to safe drinking water. Our environmental choices today shape the ocean of tomorrow.', '', 5500);
+}
+function interactTidepool() {
+    const crab = document.getElementById('res-crab-svg');
+    if (crab) {
+        let p = 0;
+        const iv = setInterval(() => {
+            p++;
+            crab.setAttribute('transform', `translate(${-8 + Math.sin(p * 0.85) * 15}, -4)`);
+            if (p > 14) { clearInterval(iv); crab.setAttribute('transform', 'translate(-8,-4)'); }
+        }, 75);
+    }
+    Particles.burst(168*window.innerWidth/1600, 640*window.innerHeight/900, 10, ['\uD83E\uDDAA','\uD83D\uDC1A','\uD83C\uDF0A','\uD83D\uDCA7','\uD83D\uDC20','\u2B50']);
+    Toast.show('\uD83E\uDDAA Tide pools shelter hundreds of species in a single pool of water. Industrial and agricultural runoff devastates these fragile micro-ecosystems.', '', 5500);
+}
+function interactBoat() {
+    const boat = document.getElementById('res-boat-group');
+    if (boat) {
+        let angle = 0, dir = 1, frames = 0;
+        const iv = setInterval(() => {
+            frames++; angle += dir * 1.2;
+            if (Math.abs(angle) > 5) dir *= -1;
+            boat.setAttribute('transform', `translate(338,662) rotate(${angle},338,700)`);
+            if (frames > 20) { clearInterval(iv); boat.setAttribute('transform', 'translate(338,662)'); }
+        }, 60);
+    }
+    Particles.burst(338*window.innerWidth/1600, 678*window.innerHeight/900, 8, ['\u26F5','\uD83D\uDC1F','\uD83C\uDF0A','\uD83C\uDFA3']);
+    Toast.show('\u26F5 Local fishing communities depend entirely on ocean health. Pollution destroys livelihoods and threatens food security for hundreds of millions of people worldwide.', '', 5500);
+}
+function interactTree() {
+    Particles.burst(220*window.innerWidth/1600, 390*window.innerHeight/900, 12, ['\uD83D\uDC26','\uD83C\uDF43','\uD83C\uDF32','\uD83C\uDF3F','\u2728']);
+    Toast.show('\uD83C\uDF32 Coastal forests are natural pollution barriers. Their root systems can reduce runoff entering the ocean by up to 85%, protecting marine habitats.', '', 5500);
+}
 
 function initJoystick() {
     const joystick = document.getElementById('mobile-joystick');
@@ -1619,14 +1713,10 @@ function updateMapCrisis() {
     const coastal    = document.getElementById('map-coastal');
     const agri       = document.getElementById('map-agricultural');
     const industrial = document.getElementById('map-industrial');
-
     if (!coastal) return;
-
     const coastalStatus = document.getElementById('map-coastal-status');
     const agriStatus    = document.getElementById('map-agri-status');
     const indStatus     = document.getElementById('map-ind-status');
-
-    // Helper: set area state
     function setAreaState(el, statusEl, state, label) {
         el.classList.remove('crisis', 'done');
         const dot = el.querySelector('.map-alert-dot');
@@ -1634,58 +1724,309 @@ function updateMapCrisis() {
         if (state === 'crisis') {
             el.classList.add('crisis');
             if (dot) dot.style.display = '';
-            if (statusEl) statusEl.textContent = label || '🚨 CRISIS';
+            if (statusEl) statusEl.textContent = label || '\uD83D\uDEA8 CRISIS';
         } else if (state === 'done') {
             el.classList.add('done');
-            if (statusEl) statusEl.textContent = label || '✅ SAFE';
+            if (statusEl) statusEl.textContent = label || '\u2705 SAFE';
         } else {
-            // neutral / locked
             if (statusEl) statusEl.textContent = label || '';
         }
     }
-
-    // --- Coastal ---
     if (GameState.allTasksDone()) {
-        setAreaState(coastal, coastalStatus, 'done', '✅ SAFE');
+        setAreaState(coastal, coastalStatus, 'done', '\u2705 SAFE');
     } else {
-        setAreaState(coastal, coastalStatus, 'crisis', '🚨 CRISIS');
+        setAreaState(coastal, coastalStatus, 'crisis', '\uD83D\uDEA8 CRISIS');
     }
-
-    // --- Agricultural (only active after Coastal done) ---
     if (GameState.agriCompleted) {
-        setAreaState(agri, agriStatus, 'done', '✅ SAFE');
+        setAreaState(agri, agriStatus, 'done', '\u2705 SAFE');
     } else if (GameState.allTasksDone()) {
-        setAreaState(agri, agriStatus, 'crisis', '🚨 CRISIS');
+        setAreaState(agri, agriStatus, 'crisis', '\uD83D\uDEA8 CRISIS');
     } else {
-        setAreaState(agri, agriStatus, 'neutral', '🔒 LOCKED');
+        setAreaState(agri, agriStatus, 'neutral', '\uD83D\uDD12 LOCKED');
     }
-
-    // --- Industrial (only active after Coastal done) ---
     if (GameState.indCompleted) {
-        setAreaState(industrial, indStatus, 'done', '✅ SAFE');
+        setAreaState(industrial, indStatus, 'done', '\u2705 SAFE');
     } else if (GameState.allTasksDone()) {
-        setAreaState(industrial, indStatus, 'crisis', '🚨 CRISIS');
+        setAreaState(industrial, indStatus, 'crisis', '\uD83D\uDEA8 CRISIS');
     } else {
-        setAreaState(industrial, indStatus, 'neutral', '🔒 LOCKED');
+        setAreaState(industrial, indStatus, 'neutral', '\uD83D\uDD12 LOCKED');
+    }
+    // Minimap blinking
+    const allDone = GameState.allTasksDone() && GameState.agriCompleted && GameState.indCompleted;
+    const mc = document.getElementById('mini-map-container');
+    if (mc) {
+        if (!allDone && GameState.coastalAlertShown) { mc.classList.add('map-crisis-blink'); }
+        else { mc.classList.remove('map-crisis-blink'); }
     }
 }
 
 
+function setupResInteractables() {
+    RES_INTERACTABLES.forEach(obj => {
+        const el = document.getElementById(`res-${obj.id}-group`) || document.getElementById(`res-${obj.id}-svg`);
+        if (el) {
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                const dist = Math.sqrt(Math.pow(resX - obj.x, 2) + Math.pow(resY - obj.y, 2));
+                if (dist < obj.radius * 1.7 && !resInteractCooldown) {
+                    resInteractCooldown = true;
+                    obj.action();
+                    setTimeout(() => { resInteractCooldown = false; }, 2500);
+                }
+            };
+        }
+    });
+    const prompt = document.getElementById('res-enter-prompt');
+    if (prompt) {
+        prompt.onclick = () => {
+            if (resNearInteractable && !resInteractCooldown) {
+                resInteractCooldown = true;
+                resNearInteractable.action();
+                setTimeout(() => { resInteractCooldown = false; }, 2500);
+            }
+        };
+    }
+}
+
+function resLoop() {
+    if (!resLoopActive || GameState.phase !== 'residential' || exploreMapActive) {
+        resLoopActive = false; return;
+    }
+    const howToPlay = document.getElementById('modal-how-to-play');
+    const mapAlert  = document.getElementById('modal-map-alert');
+    const blocked = (howToPlay && howToPlay.classList.contains('visible')) ||
+                    (mapAlert  && mapAlert.classList.contains('visible'));
+    if (!blocked) {
+        const speed = 4; let dx = 0, dy = 0;
+        if (window.keys) {
+            if (window.keys.w) dy -= speed; if (window.keys.s) dy += speed;
+            if (window.keys.a) dx -= speed; if (window.keys.d) dx += speed;
+        }
+        if (joystickActive) { dx = joystickDir.x * speed; dy = joystickDir.y * speed; }
+        if (dx !== 0 || dy !== 0) {
+            if (!joystickActive && dx !== 0 && dy !== 0) { const l = Math.sqrt(dx*dx+dy*dy); dx=(dx/l)*speed; dy=(dy/l)*speed; }
+            resX = Math.max(80, Math.min(1520, resX + dx));
+            resY = Math.max(462, Math.min(778, resY + dy));
+            const player = document.getElementById('res-player');
+            if (player) player.setAttribute('transform', `translate(${resX},${resY})`);
+        }
+        checkResProximity();
+    }
+    requestAnimationFrame(resLoop);
+}
+
+function checkResProximity() {
+    let closest = null, minDist = Infinity;
+    for (const obj of RES_INTERACTABLES) {
+        const dist = Math.sqrt(Math.pow(resX - obj.x, 2) + Math.pow(resY - obj.y, 2));
+        if (dist < obj.radius && dist < minDist) { closest = obj; minDist = dist; }
+    }
+    const prompt = document.getElementById('res-enter-prompt');
+    const icon   = document.getElementById('res-prompt-icon');
+    const ring   = document.getElementById('res-interact-ring');
+    if (closest && !resInteractCooldown) {
+        resNearInteractable = closest;
+        if (prompt) prompt.classList.remove('hidden');
+        if (icon) icon.textContent = closest.icon;
+        if (ring) { ring.setAttribute('cx', closest.x); ring.setAttribute('cy', closest.y); ring.setAttribute('opacity', '0.65'); }
+    } else {
+        resNearInteractable = null;
+        if (prompt) prompt.classList.add('hidden');
+        if (ring) ring.setAttribute('opacity', '0');
+    }
+}
+
+function triggerFirstCrisis() {
+    if (GameState.coastalAlertShown) return;
+    GameState.coastalAlertShown = true;
+    triggerAlarm();
+    Modal.show('modal-map-alert');
+    document.getElementById('btn-start-mission').onclick = () => {
+        Modal.hide('modal-map-alert');
+        Toast.show('\uD83D\uDEA8 Crisis Detected! Click the minimap to explore and reach the Coastal Area.', '', 6000);
+        showMiniMap();
+        const mc = document.getElementById('mini-map-container');
+        if (mc) {
+            mc.classList.remove('minimized');
+            const tog = document.getElementById('btn-map-toggle');
+            if (tog) tog.textContent = '\u2796';
+            mc.classList.add('map-highlight-pulse');
+            setTimeout(() => mc.classList.remove('map-highlight-pulse'), 4000);
+        }
+        updateMapCrisis();
+    };
+}
+
+function openExploreMap() {
+    if (exploreMapActive) return;
+    exploreMapActive = true;
+    resLoopActive = false;
+    joystickActive = false; // Prevent stuck drift
+    
+    GameState.phase = 'explore-map';
+    SceneManager.show('scene-explore-map', () => {
+        const player = document.getElementById('world-player');
+        if (player) player.setAttribute('transform', `translate(${worldX},${worldY})`);
+        updateMapCrisis();
+        if (!worldLoopActive) { worldLoopActive = true; requestAnimationFrame(worldLoop); }
+    });
+    hideMiniMap();
+    Audio.play('click_success', { volume: 0.2 });
+}
+
+function closeExploreMap() {
+    if (!exploreMapActive) return;
+    exploreMapActive = false;
+    worldLoopActive = false;
+    const prompt = document.getElementById('world-enter-prompt');
+    if (prompt) prompt.classList.add('hidden');
+    worldNearArea = null;
+    
+    GameState.phase = 'residential';
+    SceneManager.show('scene-residential', () => {
+        initResidential();
+    });
+}
+
+let _worldBobPhase = 0;
+function worldLoop() {
+    if (!worldLoopActive || !exploreMapActive) { worldLoopActive = false; return; }
+    const speed = 4; let dx = 0, dy = 0;
+    if (window.keys) {
+        if (window.keys.w) dy -= speed; if (window.keys.s) dy += speed;
+        if (window.keys.a) dx -= speed; if (window.keys.d) dx += speed;
+    }
+    if (joystickActive) { dx = joystickDir.x * speed; dy = joystickDir.y * speed; }
+    if (dx !== 0 || dy !== 0) {
+        if (!joystickActive && dx !== 0 && dy !== 0) { const l=Math.sqrt(dx*dx+dy*dy); dx=(dx/l)*speed; dy=(dy/l)*speed; }
+        const newX = worldX+dx, newY = worldY+dy;
+        if (isOnIsland(newX,newY)) { worldX=newX; worldY=newY; }
+        else if (isOnIsland(newX,worldY)) { worldX=newX; }
+        else if (isOnIsland(worldX,newY)) { worldY=newY; }
+        _worldBobPhase += 0.2;
+        const player = document.getElementById('world-player');
+        if (player) player.setAttribute('transform', `translate(${worldX},${worldY + Math.sin(_worldBobPhase)*4})`);
+        checkWorldProximity();
+    }
+    requestAnimationFrame(worldLoop);
+}
+
+function checkWorldProximity() {
+    let closest = null, minDist = Infinity;
+    for (const area of WORLD_AREAS) {
+        const dx=worldX-area.x, dy=worldY-area.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if (dist < area.radius && dist < minDist) { closest=area; minDist=dist; }
+    }
+    const prompt = document.getElementById('world-enter-prompt');
+    const pName  = document.getElementById('world-enter-area-name');
+    if (closest && closest.id !== 'residential') {
+        worldNearArea = closest;
+        if (pName) pName.textContent = getTranslation(closest.name);
+        if (prompt) prompt.classList.remove('hidden');
+    } else {
+        worldNearArea = null;
+        if (prompt) prompt.classList.add('hidden');
+    }
+}
+
+function enterArea(areaName) {
+    if (areaName === 'residential') {
+        closeExploreMap();
+        return;
+    }
+    if (exploreMapActive) {
+        exploreMapActive = false;
+        worldLoopActive = false;
+        const prompt = document.getElementById('world-enter-prompt');
+        if (prompt) prompt.classList.add('hidden');
+        worldNearArea = null;
+    }
+    if (areaName === 'coastal') {
+        if (!GameState.allTasksDone()) {
+            showMissionIntro('Coastal Area', 'A pollution crisis has been detected in the Coastal Area! Complete all tasks to restore environmental balance.', () => {
+                GameState.currentArea = areaName; TodoPanel.show();
+                GameState.phase = 'task1'; SceneManager.show('scene-task1', () => initTask1());
+            });
+        } else { Toast.show(getTranslation('Coastal Area is already safe!'), '\u2705', 2000); }
+    } else if (areaName === 'agricultural') {
+        if (GameState.allTasksDone() && !GameState.agriCompleted) {
+            showMissionIntro('Agricultural Area', 'Pollution detected in the Agricultural Area. Excess nutrients are affecting water quality.', () => {
+                GameState.currentArea = areaName; TodoPanel.show();
+                document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
+                document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>${getTranslation('Apply buffer strips')}`;
+                document.getElementById('todo-2').style.display = 'none';
+                document.getElementById('todo-3').style.display = 'none';
+                document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
+                document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
+                GameState.phase = 'agri1'; SceneManager.show('scene-agri-task1', () => initAgriTask1());
+            });
+        } else if (GameState.agriCompleted) { Toast.show(getTranslation('Agricultural Area is already safe!'), '\u2705', 2000); }
+        else { Toast.show(getTranslation('Solve Coastal Area first!'), '\uD83D\uDD12', 2000); }
+    } else if (areaName === 'industrial') {
+        if (GameState.allTasksDone() && !GameState.indCompleted) {
+            showMissionIntro('Industrial Area', 'Pollution detected in the Industrial Area. Untreated wastewater is being released into the river.', () => {
+                GameState.currentArea = areaName; Audio.stopBg(); Audio.play('ambient_factory', { volume: 0.3, loop: true }); TodoPanel.show();
+                document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
+                document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>${getTranslation('Stop direct discharge')}`;
+                document.getElementById('todo-2').innerHTML = `<span class="todo-check"></span>${getTranslation('Treat wastewater before release')}`;
+                document.getElementById('todo-2').style.display = 'flex';
+                document.getElementById('todo-3').style.display = 'none';
+                document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
+                document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
+                GameState.phase = 'ind1'; SceneManager.show('scene-ind-task1', () => initIndTask1());
+            });
+        } else if (GameState.indCompleted) { Toast.show(getTranslation('Industrial Area is already safe!'), '\u2705', 2000); }
+        else { Toast.show(getTranslation('Solve Coastal Area first!'), '\uD83D\uDD12', 2000); }
+    }
+}
+
+function showMissionIntro(title, body, onStart) {
+    document.getElementById('mission-intro-title').textContent = getTranslation(title);
+    document.getElementById('mission-intro-body').innerHTML = getTranslation(body);
+    Modal.show('modal-mission-intro');
+    document.getElementById('btn-mission-start').onclick = () => { Modal.hide('modal-mission-intro'); onStart(); };
+}
+
 function initResidential() {
     if (GameState.phase !== 'residential') return;
-    HUD.show();
-    HUD.update();
+    // Stop explore map if open
+    exploreMapActive = false; worldLoopActive = false;
+    HUD.show(); HUD.update();
     updateWorldMapPollution();
-    // Hide minimap until the player dismisses the crisis alert on first visit
-    // After that, always show it
-    if (!GameState.coastalAlertShown) {
-        hideMiniMap();
-    } else {
-        showMiniMap();
-    }
-    initMap(); // Ensure listeners are bound for E-key navigation
+    if (!GameState.coastalAlertShown) { hideMiniMap(); } else { showMiniMap(); }
+    initMap();
     TodoPanel.hide();
     Audio.stopBg();
+    // Reset residential player position
+    resX = 800; resY = 560;
+    const resPlayer = document.getElementById('res-player');
+    if (resPlayer) resPlayer.setAttribute('transform', `translate(${resX},${resY})`);
+    setupResInteractables();
+    if (!resLoopActive) { resLoopActive = true; requestAnimationFrame(resLoop); }
+    // Setup keyboard input once
+    if (!inputInitialized) {
+        inputInitialized = true;
+        if (!window.keys) window.keys = { w:false, a:false, s:false, d:false };
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'e') {
+                if (exploreMapActive && worldNearArea && worldNearArea.id !== 'residential') {
+                    const aid = worldNearArea.id; enterArea(aid); return;
+                }
+                if (!exploreMapActive && GameState.phase === 'residential' && resNearInteractable && !resInteractCooldown) {
+                    resInteractCooldown = true; resNearInteractable.action();
+                    setTimeout(() => { resInteractCooldown = false; }, 2500); return;
+                }
+            }
+            if (key === 'escape' && exploreMapActive) { closeExploreMap(); return; }
+            if (window.keys.hasOwnProperty(key)) window.keys[key] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (window.keys && window.keys.hasOwnProperty(key)) window.keys[key] = false;
+        });
+    }
+    updateMapCrisis();
 
     updateMapCrisis();
 
@@ -1706,7 +2047,7 @@ function initResidential() {
         }
     }
 
-    // Update Building States visually
+    // Update Building States visually (in explore map SVG)
     const bldgCoastal = document.getElementById('world-bldg-coastal');
     const bldgAgri = document.getElementById('world-bldg-agricultural');
     const bldgInd = document.getElementById('world-bldg-industrial');
@@ -1716,186 +2057,33 @@ function initResidential() {
         bldg.classList.remove('crisis-glow', 'done-glow', 'locked-glow');
         if (state === 'crisis') bldg.classList.add('crisis-glow');
         else if (state === 'done') bldg.classList.add('done-glow');
-        else bldg.classList.add('locked-glow');
+        if (GameState.agriCompleted && GameState.indCompleted) counter.textContent = getTranslation('All areas resolved! ✅');
+        else if (GameState.agriCompleted || GameState.indCompleted) counter.textContent = getTranslation('1 area left to solve');
+        else counter.textContent = getTranslation('2 areas left to solve');
     }
-
-    updateWorldBuilding(bldgCoastal, GameState.allTasksDone() ? 'done' : 'crisis');
-    updateWorldBuilding(bldgAgri, GameState.agriCompleted ? 'done' : (GameState.allTasksDone() ? 'crisis' : 'locked'));
-    updateWorldBuilding(bldgInd, GameState.indCompleted ? 'done' : (GameState.allTasksDone() ? 'crisis' : 'locked'));
-
-    const player = document.getElementById('world-player');
-    const prompt = document.getElementById('world-enter-prompt');
-    const promptName = document.getElementById('world-enter-area-name');
-    const speed = 4;
-    let bobPhase = 0;
-
-    prompt.onclick = () => {
-        if (GameState.phase === 'residential' && worldNearArea && worldNearArea.id !== 'residential') {
-            const mapBtn = document.getElementById(`map-${worldNearArea.id}`);
-            if (mapBtn) mapBtn.click();
-        }
-    };
-
-    function updatePlayer() {
-        player.setAttribute('transform', `translate(${worldX}, ${worldY})`);
-    }
-    updatePlayer();
-
-    if (!worldLoopActive) {
-        worldLoopActive = true;
-        if (!window.keys) window.keys = { w: false, a: false, s: false, d: false, e: false };
-
-        window.addEventListener('keydown', (e) => {
-            if (GameState.phase !== 'residential') return;
-            const key = e.key.toLowerCase();
-            if (window.keys.hasOwnProperty(key)) {
-                window.keys[key] = true;
-                if (key === 'e' && worldNearArea && worldNearArea.id !== 'residential') {
-                    // Start mission by forcing click on minimap area
-                    const mapBtn = document.getElementById(`map-${worldNearArea.id}`);
-                    if (mapBtn) mapBtn.click();
-                }
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if (GameState.phase !== 'residential') return;
-            const key = e.key.toLowerCase();
-            if (window.keys.hasOwnProperty(key)) window.keys[key] = false;
-        });
-
-        function checkWorldProximity() {
-            let closest = null;
-            let minDist = Infinity;
-            for (const area of WORLD_AREAS) {
-                const dx = worldX - area.x;
-                const dy = worldY - area.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < area.radius && dist < minDist) {
-                    closest = area;
-                    minDist = dist;
-                }
-            }
-            
-            if (closest && closest.id !== 'residential') {
-                if (worldNearArea !== closest) {
-                    worldNearArea = closest;
-                    promptName.textContent = closest.name;
-                    prompt.classList.remove('hidden');
-                }
-            } else {
-                if (worldNearArea !== null) {
-                    worldNearArea = null;
-                    prompt.classList.add('hidden');
-                }
-            }
-        }
-
-        function worldLoop() {
-            if (GameState.phase === 'residential') {
-                // Ignore input when instructions modal or map alert modal is visible
-                const isHowToPlayVisible = document.getElementById('modal-how-to-play').classList.contains('visible');
-                const isMapAlertVisible = document.getElementById('modal-map-alert').classList.contains('visible');
-                if (isHowToPlayVisible || isMapAlertVisible) {
-                    requestAnimationFrame(worldLoop);
-                    return;
-                }
-
-                let dx = 0; let dy = 0;
-                if (window.keys.w) dy -= speed;
-                if (window.keys.s) dy += speed;
-                if (window.keys.a) dx -= speed;
-                if (window.keys.d) dx += speed;
-
-                if (joystickActive) {
-                    dx = joystickDir.x * speed;
-                    dy = joystickDir.y * speed;
-                }
-
-                if (dx !== 0 || dy !== 0) {
-                    // Normalize diagonal
-                    if (!joystickActive && dx !== 0 && dy !== 0) {
-                        const len = Math.sqrt(dx*dx + dy*dy);
-                        dx = (dx/len) * speed;
-                        dy = (dy/len) * speed;
-                    }
-                    
-                    const newX = worldX + dx;
-                    const newY = worldY + dy;
-
-                    // Basic bounds check to prevent walking off ocean
-                    if (isOnIsland(newX, newY)) {
-                        worldX = newX;
-                        worldY = newY;
-                    } else if (isOnIsland(newX, worldY)) { // slide X
-                        worldX = newX;
-                    } else if (isOnIsland(worldX, newY)) { // slide Y
-                        worldY = newY;
-                    }
-
-                    // simple bobbing animation while walking
-                    bobPhase += 0.2;
-                    const bobY = Math.sin(bobPhase) * 4;
-                    player.setAttribute('transform', `translate(${worldX}, ${worldY + bobY})`);
-                    
-                    checkWorldProximity();
-                } else {
-                    bobPhase = 0;
-                    updatePlayer();
-                }
-            }
-            requestAnimationFrame(worldLoop);
-        }
-        requestAnimationFrame(worldLoop);
-    }
-
-function triggerFirstCrisis() {
-    if (GameState.coastalAlertShown) return;
-    GameState.coastalAlertShown = true;
-    triggerAlarm();
-    Modal.show('modal-map-alert');
-    document.getElementById('btn-start-mission').onclick = () => {
-        Modal.hide('modal-map-alert');
-        Toast.show('🚨 Crisis Detected! Walk to the Coastal Area to start your mission.', '', 6000);
-
-        // Reveal minimap and guide player to it
-        showMiniMap();
-        const mapContainer = document.getElementById('mini-map-container');
-        const mapToggleBtn = document.getElementById('btn-map-toggle');
-        if (mapContainer) {
-            mapContainer.classList.remove('minimized');
-            if (mapToggleBtn) mapToggleBtn.textContent = '➖';
-            mapContainer.classList.add('map-highlight-pulse');
-            setTimeout(() => {
-                mapContainer.classList.remove('map-highlight-pulse');
-            }, 4000);
-        }
-    };
-}
-
-    // Instructions flow followed by crisis alarm
+    
     if (!GameState.instructionsShown) {
         Modal.show('modal-how-to-play');
         document.getElementById('btn-start-briefing').onclick = () => {
             Modal.hide('modal-how-to-play');
             GameState.instructionsShown = true;
-            setTimeout(() => {
-                if (GameState.phase === 'residential') {
-                    triggerFirstCrisis();
-                }
-            }, 800);
+            setTimeout(() => { if (GameState.phase === 'residential') triggerFirstCrisis(); }, 800);
         };
     } else if (!GameState.coastalAlertShown && !GameState.allTasksDone()) {
         triggerFirstCrisis();
     } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
         GameState.agriAlertShown = true;
         setTimeout(() => {
-            if (GameState.phase === 'residential') {
-                Toast.show('🚨 New crisis zones detected! Check Agricultural & Industrial areas.', '', 5000);
-            }
+            if (GameState.phase === 'residential') Toast.show('\uD83D\uDEA8 New crisis zones detected! Click the minimap to explore.', '', 5000);
         }, 1200);
+    } else if (GameState.allTasksDone() && (GameState.agriCompleted || GameState.indCompleted) && (!GameState.agriCompleted || !GameState.indCompleted)) {
+        setTimeout(() => {
+            if (GameState.phase === 'residential') Toast.show('One more area to restore! Click the minimap to explore.', '\uD83D\uDDFA\uFE0F', 3000);
+        }, 1500);
     }
 }
+
+
 
 let mapControllerActive = false;
 
@@ -1903,97 +2091,43 @@ function initMap() {
     if (mapControllerActive) return;
     mapControllerActive = true;
 
+    // Minimap area clicks → open explore map (not direct enterArea)
     const areas = document.querySelectorAll('.mini-map-content .map-area');
     areas.forEach(area => {
         area.onclick = () => {
-            enterArea(area.dataset.area);
+            if (area.dataset.area === 'residential') return; // already home
+            openExploreMap();
         };
     });
 
-    function enterArea(areaName) {
-        if (areaName === 'coastal') {
-            if (!GameState.allTasksDone()) {
-                showMissionIntro('Coastal Area',
-                    'A pollution crisis has been detected in the Coastal Area! Complete all tasks to restore environmental balance.',
-                    () => {
-                        GameState.currentArea = areaName;
-                        TodoPanel.show();
-                        GameState.phase = 'task1';
-                        SceneManager.show('scene-task1', () => initTask1());
-                    }
-                );
-            } else {
-                Toast.show('Coastal Area is already safe!', '✅', 2000);
-            }
-        } else if (areaName === 'agricultural') {
-            if (GameState.allTasksDone() && !GameState.agriCompleted) {
-                showMissionIntro('Agricultural Area',
-                    'Pollution detected in the Agricultural Area. Excess nutrients are affecting water quality.',
-                    () => {
-                        GameState.currentArea = areaName;
-                        TodoPanel.show();
-                        document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
-                        document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>${getTranslation('Apply buffer strips')}`;
-                        document.getElementById('todo-2').style.display = 'none';
-                        document.getElementById('todo-3').style.display = 'none';
-                        document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
-                        document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
+    // Close button for explore map
+    const closeBtn = document.getElementById('btn-close-explore');
+    if (closeBtn) closeBtn.onclick = () => closeExploreMap();
 
-                        GameState.phase = 'agri1';
-                        SceneManager.show('scene-agri-task1', () => initAgriTask1());
-                    }
-                );
-            } else if (GameState.agriCompleted) {
-                Toast.show('Agricultural Area is already safe!', '✅', 2000);
-            } else {
-                Toast.show('Solve Coastal Area first!', '🔒', 2000);
-            }
-        } else if (areaName === 'industrial') {
-            if (GameState.allTasksDone() && !GameState.indCompleted) {
-                showMissionIntro('Industrial Area',
-                    'Pollution detected in the Industrial Area. Untreated wastewater is being released into the river.',
-                    () => {
-                        GameState.currentArea = areaName;
-                        // Switch to factory ambience for Industrial area
-                        Audio.stopBg();
-                        Audio.play('ambient_factory', { volume: 0.3, loop: true });
-                        TodoPanel.show();
-                        document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
-                        document.getElementById('todo-1').innerHTML = `<span class="todo-check"></span>${getTranslation('Stop direct discharge')}`;
-                        document.getElementById('todo-2').innerHTML = `<span class="todo-check"></span>${getTranslation('Treat wastewater before release')}`;
-                        document.getElementById('todo-2').style.display = 'flex';
-                        document.getElementById('todo-3').style.display = 'none';
-                        document.querySelectorAll('.todo-item').forEach(el => el.classList.remove('done'));
-                        document.querySelectorAll('.todo-check').forEach(el => el.textContent = '');
-
-                        GameState.phase = 'ind1';
-                        SceneManager.show('scene-ind-task1', () => initIndTask1());
-                    }
-                );
-            } else if (GameState.indCompleted) {
-                Toast.show('Industrial Area is already safe!', '✅', 2000);
-            } else {
-                Toast.show('Solve Coastal Area first!', '🔒', 2000);
-            }
-        } else if (areaName === 'residential') {
-            GameState.phase = 'residential';
-            SceneManager.show('scene-residential', () => {
-                initResidential();
-                checkAllAreasDone();
-            });
-        } else {
-            Toast.show('Area is locked.', '🔒', 2000);
+    // Building shortcut clicks in explore map SVG (mobile-friendly direct entry)
+    [['world-bldg-coastal','coastal'],['world-bldg-agricultural','agricultural'],['world-bldg-industrial','industrial'],['world-bldg-residential','residential']].forEach(([elId, area]) => {
+        const el = document.getElementById(elId);
+        if (el) {
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                if (exploreMapActive) {
+                    // Snap world player near the area, then enter
+                    const targetArea = WORLD_AREAS.find(a => a.id === area);
+                    if (targetArea) { worldX = targetArea.x; worldY = targetArea.y; }
+                    enterArea(area);
+                }
+            };
         }
-    }
+    });
 
-    function showMissionIntro(title, body, onStart) {
-        document.getElementById('mission-intro-title').textContent = getTranslation(title);
-        document.getElementById('mission-intro-body').innerHTML = getTranslation(body);
-        Modal.show('modal-mission-intro');
-        const btn = document.getElementById('btn-mission-start');
-        btn.onclick = () => {
-            Modal.hide('modal-mission-intro');
-            onStart();
+    // World-enter-prompt tap (in explore map) → enter nearest area
+    const worldPrompt = document.getElementById('world-enter-prompt');
+    if (worldPrompt) {
+        worldPrompt.onclick = () => {
+            if (exploreMapActive && worldNearArea && worldNearArea.id !== 'residential') {
+                const aid = worldNearArea.id;
+                enterArea(aid);
+            }
         };
     }
 }
@@ -2001,6 +2135,7 @@ function initMap() {
 // ============================================
 // SCENE: TASK 1 — SAVE TRAPPED ANIMAL
 // ============================================
+
 function initTask1() {
     if (GameState.phase !== 'task1') return;
     const instructionEl = document.getElementById('t1-instruction');
