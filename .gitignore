@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Local dev tooling (preview server config, agent scratch)
+.claude/

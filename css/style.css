@@ -368,6 +368,7 @@ body {
     cursor: pointer;
     transition: all 0.3s;
     text-transform: uppercase;
+    border-radius: 8px;
 }
 
 .cinematic-next-btn:hover {
@@ -411,6 +412,35 @@ body {
     gap: 8px;
     pointer-events: none;
 }
+
+/* Global Back button — bottom-left, styled to match the cinematic Next button
+   (rounded rectangle, translucent teal) so the two read as a matching pair. */
+.btn-back {
+    position: fixed;
+    bottom: 30px;
+    left: 40px;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 180, 216, 0.2);
+    border: 1px solid var(--teal);
+    border-radius: 8px;
+    color: var(--teal-light);
+    padding: 10px 24px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-back:hover {
+    background: rgba(0, 180, 216, 0.4);
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
+}
+.btn-back.hidden { display: none; }
+.btn-back-arrow { font-size: 1rem; font-weight: 900; line-height: 1; }
 
 .hud-item {
     display: flex;
@@ -828,6 +858,60 @@ body {
 }
 
 /* ============================================
+   STAT-GAIN POPUP (prominent task-completion feedback)
+   ============================================ */
+.stat-gain-popup {
+    position: fixed;
+    top: 88px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+    display: flex;
+    gap: 14px;
+    z-index: 4000;            /* above modals so gains are always visible */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-gain-popup.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+.stat-gain-chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: rgba(4, 30, 46, 0.96);
+    border: 2px solid var(--teal);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    animation: statChipPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-gain-chip.gain-pos { border-color: var(--green-light); box-shadow: 0 8px 30px rgba(82,201,122,0.40); }
+.stat-gain-chip.gain-neg { border-color: var(--red);         box-shadow: 0 8px 30px rgba(230,57,70,0.40); }
+.stat-gain-icon { font-size: 1.6rem; }
+.stat-gain-label {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.85rem;
+    color: var(--white);
+    font-weight: 600;
+}
+.stat-gain-delta {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    margin-left: 4px;
+}
+.gain-pos .stat-gain-delta { color: var(--green-light); }
+.gain-neg .stat-gain-delta { color: var(--red); }
+@keyframes statChipPop {
+    0%   { transform: scale(0.5); }
+    60%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================
    TASK SCENES
    ============================================ */
 .task-scene {
@@ -838,11 +922,19 @@ body {
 
 .task-header {
     position: absolute;
-    top: 80px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     z-index: 10;
+    /* dark scrim so the title/instruction stay readable on bright backgrounds
+       (e.g. the green Agricultural scenes and the brighter Task 4 ocean) */
+    background: rgba(4, 20, 35, 0.72);
+    padding: 10px 26px;
+    border-radius: 14px;
+    backdrop-filter: blur(4px);
+    max-width: min(92vw, 680px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
 }
 
 .task-number {
@@ -1293,6 +1385,88 @@ body {
 @keyframes dropzonePulse {
     from { border-color: rgba(255,200,0,0.4); box-shadow: none; }
     to   { border-color: rgba(255,200,0,0.9); box-shadow: 0 0 15px rgba(255,200,0,0.4); }
+}
+
+/* ---- Repair patch over the crack (bolt-down mechanic) ---- */
+.t3-patch {
+    position: absolute;
+    bottom: 55%;
+    left: calc(48.5% - 50px);
+    width: 100px;
+    height: 100px;
+    z-index: 30;
+}
+.t3-patch-plate {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(150,160,190,0.95) 0%, rgba(90,100,130,0.95) 100%);
+    border: 3px solid #ffd166;
+    border-radius: 8px;
+    box-shadow: 0 0 18px rgba(255,210,0,0.45), 0 4px 14px rgba(0,0,0,0.5);
+}
+.t3-bolt-slot {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px dashed #e74c3c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: rgba(0,0,0,0.28);
+    cursor: pointer;
+    animation: t3SlotPulse 1.4s ease-in-out infinite;
+}
+.t3-bolt-slot.filled {
+    border: 2px solid #2ecc71;
+    background: transparent;
+    animation: none;
+    cursor: default;
+}
+@keyframes t3SlotPulse {
+    0%, 100% { border-color: rgba(231,76,60,0.75); box-shadow: 0 0 0 rgba(231,76,60,0); }
+    50%      { border-color: #ff6b5a; box-shadow: 0 0 10px rgba(231,76,60,0.7); }
+}
+.t3-toolbox-panel {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(4,20,35,0.9);
+    border: 2px solid rgba(0,180,216,0.5);
+    border-radius: 14px;
+    padding: 12px 22px;
+    z-index: 40;
+    backdrop-filter: blur(6px);
+    text-align: center;
+}
+.t3-toolbox-bolts {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.t3-tool-bolt {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: #222;
+    border: 2px solid var(--teal);
+    border-radius: 8px;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.t3-tool-bolt:hover { transform: scale(1.08); }
+.t3-tool-bolt:active { cursor: grabbing; }
+.t3-tool-bolt-selected {
+    box-shadow: 0 0 14px var(--teal);
+    border-color: var(--teal-light);
+    transform: scale(1.1);
 }
 
 /* ---- Glue Panel (Step 1) ---- */
@@ -1887,14 +2061,23 @@ body {
 
 #t4-boat {
     position: absolute;
-    font-size: 2rem;
+    /* Enlarged + glowing so it clearly reads as the primary tool vs the other icons */
+    font-size: 3.4rem;
     z-index: 10;
     cursor: grab;
     user-select: none;
     transform: translate(-50%, -50%);
     transition: transform 0.05s linear;
+    /* glow pulse is on `filter` only — never `transform` — so it can't fight the
+       drag logic, which keeps translate(-50%,-50%) while updating left/top. */
+    filter: drop-shadow(0 0 9px rgba(255, 209, 102, 0.85));
+    animation: t4BoatGlow 1.6s ease-in-out infinite;
 }
 #t4-boat:active { cursor: grabbing; }
+@keyframes t4BoatGlow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.65)); }
+    50%      { filter: drop-shadow(0 0 20px rgba(255, 209, 102, 1)); }
+}
 
 /* Underwater Scene */
 #t4-underwater-scene {
@@ -2181,6 +2364,70 @@ body {
     box-shadow: 0 0 15px var(--teal);
 }
 
+/* Industrial Task 2 — pipe joint flange assembly (bolts sit ON the flange) */
+.ind2-pipe-run {
+    position: absolute;
+    top: 44%;
+    left: 0;
+    width: 100%;
+    height: 92px;
+    transform: translateY(-50%);
+    background: linear-gradient(180deg, #6f6f6f 0%, #4a4a4a 48%, #2b2b2b 100%);
+    border-top: 3px solid #8c8c8c;
+    border-bottom: 3px solid #1c1c1c;
+    z-index: 1;
+}
+.ind2-joint {
+    position: absolute;
+    top: 44%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: 240px;
+    z-index: 5;
+}
+.ind2-flange {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 230px;
+    background: linear-gradient(180deg, #8a8a8a 0%, #5e5e5e 50%, #383838 100%);
+    border: 2px solid #9a9a9a;
+    border-radius: 9px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.ind2-flange-left  { left: 2px; }
+.ind2-flange-right { right: 2px; }
+.ind2-seam {
+    position: absolute;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 94%;
+    background: #141414;
+    border-radius: 4px;
+}
+.ind2-leak {
+    position: absolute;
+    top: 58%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 96px;
+    background: linear-gradient(180deg, #8b9264 0%, rgba(139,146,100,0) 100%);
+    opacity: 0.85;
+    border-radius: 50% 50% 40% 40%;
+    z-index: 4;
+    animation: ind2LeakDrip 0.9s ease-in infinite;
+}
+@keyframes ind2LeakDrip {
+    0%   { transform: translateX(-50%) translateY(0);    opacity: 0.85; }
+    100% { transform: translateX(-50%) translateY(22px); opacity: 0.25; }
+}
+#ind2-bolts-container { position: absolute; inset: 0; z-index: 6; }
+
 /* ============================================
    RESIDENTIAL SCENE (2D Home Environment)
    ============================================ */
@@ -2274,6 +2521,44 @@ body {
     border-radius: 4px;
     font-family: 'Orbitron', monospace;
     font-size: 0.85rem;
+}
+
+/* Residential explore guidance hint (bottom-center banner) */
+.res-explore-hint {
+    position: absolute;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(560px, 86vw);
+    background: rgba(4, 30, 46, 0.92);
+    border: 2px solid var(--teal);
+    border-radius: 14px;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 95;
+    box-shadow: 0 6px 24px rgba(0,180,216,0.32);
+    font-family: 'Exo 2', sans-serif;
+    color: var(--white);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    text-align: left;
+    animation: exploreHintPulse 2.4s ease-in-out infinite;
+}
+.res-explore-hint.hidden { display: none; }
+.res-explore-hint-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    animation: iconBounce 1.4s ease-in-out infinite;
+}
+@keyframes exploreHintPulse {
+    0%, 100% { box-shadow: 0 6px 22px rgba(0,180,216,0.26); border-color: var(--teal); }
+    50%      { box-shadow: 0 6px 30px rgba(144,224,239,0.55); border-color: var(--teal-light); }
+}
+.res-explore-hint.fading-out { animation: exploreHintOut 0.55s ease forwards; }
+@keyframes exploreHintOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(16px); }
 }
 
 /* Interaction ring spin animation */
@@ -2524,6 +2809,37 @@ body {
 @keyframes plantGrow {
     from { transform: translate(-50%, -50%) scale(0); }
     to { transform: translate(-50%, -50%) scale(1.2); }
+}
+/* Agri Task 1 scan-area "click here" label */
+.scan-area-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    pointer-events: none;
+    text-align: center;
+}
+.scan-area-label .scan-emoji { font-size: 1.9rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+.scan-area-label .scan-text {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.8rem;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+}
+
+/* Empty plant spots pulse + show a "+" so students know where to click */
+.plant-slot-empty { animation: plantSlotPulse 1.6s ease-in-out infinite; }
+.plant-slot-hint {
+    color: rgba(255,255,255,0.92);
+    font-size: 1.7rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    pointer-events: none;
+}
+@keyframes plantSlotPulse {
+    0%, 100% { border-color: rgba(255,255,255,0.5); box-shadow: 0 0 0 rgba(82,201,122,0); }
+    50%      { border-color: var(--green-light); box-shadow: 0 0 14px rgba(82,201,122,0.6); }
 }
 
 /* ============================================
@@ -3025,6 +3341,23 @@ body {
     margin-top: 15px;
     z-index: 100;
 }
+/* Subtle developer credit on the title screen */
+.landing-credit {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    color: var(--gray);
+    opacity: 0.4;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.landing-credit span { color: var(--teal-light); font-weight: 600; }
+.landing-credit:hover { opacity: 0.7; }
 .lang-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);

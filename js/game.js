@@ -57,7 +57,87 @@ const GameState = {
 // TRANSLATIONS DICTIONARY (EN / ID)
 // ============================================
 const TRANSLATIONS = {
-    en: {},
+    en: {
+        // ---- Landing ----
+        'tap_to_start': '⋆ tap anywhere to start ⋆',
+
+        // ---- Cinematic button ----
+        'cinematic_next': 'Next →',
+
+        // ---- HUD labels ----
+        'water_quality_label': 'Water Quality',
+        'bio_label': 'Biodiversity',
+
+        // ---- Controls modal ----
+        'how_to_play_title': 'How to Play & Controls',
+        'desktop_controls_title': '💻 Desktop',
+        'mobile_controls_title': '📱 Mobile',
+        'desktop_controls_list': '<li>🏃 <strong>Move:</strong> WASD / Arrow Keys</li><li>🔧 <strong>Actions:</strong> Drag & Drop / Click</li><li>🚪 <strong>Enter Areas:</strong> Walk to area & press <strong>E</strong></li><li>🗺️ <strong>Fast Travel:</strong> Click on Minimap</li>',
+        'mobile_controls_list': '<li>🕹️ <strong>Move:</strong> Virtual On-screen Joystick</li><li>👆 <strong>Actions:</strong> Tap items / Tap-to-Place</li><li>🚪 <strong>Enter Areas:</strong> Walk to area & tap Prompt</li><li>🗺️ <strong>Fast Travel:</strong> Tap on Minimap</li>',
+        'landscape_recommendation': '🔄 Landscape orientation is highly recommended for mobile players!',
+        'btn_begin_mission': '▶ Begin Mission',
+
+        // ---- Map panel ----
+        'map_title': 'MAP',
+        'map_agricultural': 'Agricultural',
+        'map_industrial': 'Industrial',
+        'map_residential': 'Residential<br>(Spawn)',
+        'map_coastal': 'Coastal',
+        'map_coastal_status': '🚨 CRISIS',
+
+        // ---- Todo panel ----
+        'todo_title': '🎯 Mission Checklist',
+
+        // ---- Explore hint ----
+        'explore_hint': 'Explore the area! Click on objects around you to learn how human activities affect water quality and biodiversity.',
+        'explore_map_hint': 'Move your character (WASD / joystick) to the glowing Coastal area, then press E to enter · ESC to close',
+        'scan_click_hint': 'Click here to scan',
+        'ind1_click_hint': 'Click the discharge pipe',
+
+        // ---- Prompt ----
+        'prompt_enter_text': 'Press <strong>E</strong> or <strong>Tap</strong> to enter',
+
+        // ---- Crisis modal ----
+        'crisis_title': 'Crisis Detected!',
+        'crisis_body': 'A pollution crisis has been detected in the <strong>Coastal Area</strong>!<br>Complete all tasks to restore environmental balance.',
+        'btn_start_mission': '▶ Start Mission',
+
+        // ---- Rotate device ----
+        'rotate_device_title': 'Rotate Your Device',
+        'rotate_device_desc': 'Please rotate your device to Landscape mode for the best educational gaming experience!',
+
+        // ---- Task 4 method cards ----
+        't4_method_a_title': '🔥 In-Situ Burning',
+        't4_method_a_stats': 'Water +25 | Bio +5',
+        't4_method_a_tag': 'Recommended',
+        't4_method_b_title': '🧪 Corexit Dispersant',
+        't4_method_b_stats': 'Water +20 | Bio -15',
+        't4_method_b_tag': '⚠ May harm marine life',
+        'btn_t4_complete': 'Complete Task ✓',
+
+        // ---- Navigation buttons ----
+        'btn_next_task': 'Next Task →',
+        'btn_mission_complete': 'Mission Complete ✓',
+
+        // ---- Decision board ----
+        'btn_back': 'Go Back',
+        'btn_confirm': 'Confirm Choice',
+
+        // ---- Back navigation button ----
+        'btn_back_nav': 'Back',
+
+        // ---- Report card ----
+        'report_card_title': 'Ecosystem Restoration Report Card',
+        'report_card_subtitle': 'Project Assessment Summary',
+        'report_metrics_title': 'Ecosystem Metrics',
+        'report_decisions_title': 'Management Decisions',
+        'report_coastal_spill': 'Coastal Spill:',
+        'report_agri_pollution': 'Agri Pollution:',
+        'report_agri_choice_strips': 'Riparian Buffer Strips',
+        'report_industrial_effluent': 'Industrial Effluent:',
+        'btn_play_again': 'Play Again',
+        'btn_exit': 'Exit',
+    },
     id: {
         // ---- Landing ----
         'tap_to_start': '⋆ ketuk di mana saja untuk memulai ⋆',
@@ -104,6 +184,19 @@ const TRANSLATIONS = {
 
         // ---- Todo panel ----
         'todo_title': '🎯 Daftar Misi',
+        'explore_hint': 'Jelajahi area ini! Klik objek di sekitarmu untuk mempelajari bagaimana aktivitas manusia memengaruhi kualitas air dan keanekaragaman hayati.',
+        'explore_map_hint': 'Gerakkan karaktermu (WASD / joystick) ke area Pesisir yang menyala, lalu tekan E untuk masuk · ESC untuk menutup',
+        'scan_click_hint': 'Klik di sini untuk memindai',
+        'ind1_click_hint': 'Klik pipa pembuangan',
+        'Click the glowing red zone on the discharge pipe to identify the wastewater source.': 'Klik zona merah yang menyala pada pipa pembuangan untuk mengidentifikasi sumber air limbah.',
+        'Drag each missing bolt onto the pipe flange, then click the 🔧 wrench to tighten all the bolts.': 'Seret setiap baut yang hilang ke flensa pipa, lalu klik kunci 🔧 untuk mengencangkan semua baut.',
+        'Take bolts from the toolbox and drag them onto the patch to seal the leak!': 'Ambil baut dari kotak perkakas dan seret ke penambal untuk menutup kebocoran!',
+        'Drag the bolts onto the patch': 'Seret baut ke penambal',
+        'All bolts secured! Sealing the leak...': 'Semua baut terpasang! Menutup kebocoran...',
+        'Click the glowing red zone on the farm to scan and reveal the pollution source.': 'Klik zona merah yang menyala di ladang untuk memindai dan menemukan sumber polusi.',
+        'Plant vegetation along the river by clicking each highlighted spot to filter runoff.': 'Tanam vegetasi di sepanjang sungai dengan mengklik setiap titik yang ditandai untuk menyaring limpasan.',
+        'Water Quality': 'Kualitas Air',
+        'Biodiversity': 'Keanekaragaman Hayati',
         'prompt_enter_text': 'Tekan <strong>E</strong> atau <strong>Ketuk di sini</strong> untuk masuk',
 
         // ---- Crisis modal ----
@@ -131,6 +224,13 @@ const TRANSLATIONS = {
         // ---- Decision board ----
         'btn_back': 'Kembali',
         'btn_confirm': 'Konfirmasi Pilihan',
+
+        // ---- Back navigation button + leave confirm ----
+        'btn_back_nav': 'Kembali',
+        'Leave this mission?': 'Tinggalkan misi ini?',
+        'Your progress in this area will reset and you will return to the Residential Area.': 'Progres di area ini akan diatur ulang dan kamu akan kembali ke Area Pemukiman.',
+        'Leave': 'Tinggalkan',
+        'Stay': 'Tetap di Sini',
 
         // ---- Report card ----
         'report_card_title': 'Laporan Restorasi Ekosistem',
@@ -777,6 +877,18 @@ const Audio = {
             player.volume = options.volume !== undefined ? options.volume : 0.7;
             player.loop = options.loop || false;
 
+            // Track the background loop SYNCHRONOUSLY (not inside the async play()
+            // promise) and stop any previously-playing loop first, so background
+            // loops can never stack — e.g. factory ambience bleeding into an ocean
+            // scene if a new loop starts before the old promise resolved.
+            if (options.loop) {
+                if (this.bgMusic && this.bgMusic !== player) {
+                    this.bgMusic.pause();
+                    try { this.bgMusic.currentTime = 0; } catch (e) {}
+                }
+                this.bgMusic = player;
+            }
+
             // We must call play() first to ensure it attaches to the user gesture.
             const playPromise = player.play();
 
@@ -786,7 +898,6 @@ const Audio = {
                     if (offset > 0 && player.currentTime < offset) {
                         player.currentTime = offset;
                     }
-                    if (options.loop) this.bgMusic = player;
                     // Auto-stop after maxDuration seconds
                     if (options.duration) {
                         setTimeout(() => {
@@ -798,7 +909,6 @@ const Audio = {
             } else {
                 const offset = this.offsets[id] || 0;
                 if (offset > 0) player.currentTime = offset;
-                if (options.loop) this.bgMusic = player;
                 if (options.duration) {
                     setTimeout(() => { player.pause(); player.currentTime = 0; }, options.duration * 1000);
                 }
@@ -895,6 +1005,7 @@ const SceneManager = {
             setTimeout(() => {
                 next.classList.add('active');
                 GameState.currentScene = sceneId;
+                updateBackButton(sceneId);
                 if (callback) callback();
             }, 100);
         }
@@ -1030,6 +1141,29 @@ function showContinueModal(title, body, buttonText, onContinue) {
         overlay.remove();
         onContinue();
     }, { once: true });
+}
+
+// Prominent, animated Water/Biodiversity gain popup shown on task completion.
+// stats: array of { icon, label, delta }
+function showStatGain(stats) {
+    if (typeof document === 'undefined' || !stats || !stats.length) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'stat-gain-popup';
+    wrap.innerHTML = stats.map(s => {
+        const cls = s.delta >= 0 ? 'gain-pos' : 'gain-neg';
+        const sign = s.delta > 0 ? '+' : '';
+        return `<div class="stat-gain-chip ${cls}">
+            <span class="stat-gain-icon">${s.icon}</span>
+            <span class="stat-gain-label">${getTranslation(s.label)}</span>
+            <span class="stat-gain-delta">${sign}${s.delta}</span>
+        </div>`;
+    }).join('');
+    document.body.appendChild(wrap);
+    requestAnimationFrame(() => wrap.classList.add('show'));
+    setTimeout(() => {
+        wrap.classList.remove('show');
+        setTimeout(() => wrap.remove(), 450);
+    }, 2800);
 }
 
 // ============================================
@@ -1168,13 +1302,13 @@ const cinematicSlides = [
         text: 'Marine life dies. Ecosystems collapse.',
         bg: 'dead-sea',
         type: 'dead',
-        image: 'assets/images/opening/scene_8.jpg'
+        image: 'assets/images/opening/scene_8.webp'
     },
     {
         text: 'Water becomes unsafe for human use.',
         bg: 'dirty-water',
         type: 'dirty',
-        image: 'assets/images/opening/scene_9.jpg'
+        image: 'assets/images/opening/scene_9.webp'
     },
     // Scene 4: Player Hook
     {
@@ -1485,6 +1619,9 @@ function renderSlide(index) {
     // Update next button
     const btn = document.getElementById('cin-next-btn');
     btn.textContent = slide.isLast ? getTranslation('Begin Mission →') : getTranslation('Next →');
+
+    // Back button is hidden on the very first slide (nothing to go back to)
+    updateBackButton('scene-cinematic');
 }
 
 function updateDots() {
@@ -1518,6 +1655,82 @@ function nextSlide() {
     }
 }
 
+function prevSlide() {
+    if (GameState.phase !== 'cinematic') return;
+    if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide(currentSlide);
+        updateDots();
+    }
+}
+
+// ============================================
+// GLOBAL BACK BUTTON (per-scene navigation)
+// ============================================
+const BACK_VISIBLE_SCENES = [
+    'scene-cinematic', 'scene-explore-map',
+    'scene-task1', 'scene-task2', 'scene-task3', 'scene-task4',
+    'scene-agri-task1', 'scene-agri-task2',
+    'scene-ind-task1', 'scene-ind-task2', 'scene-ind-task3'
+];
+
+function updateBackButton(sceneId) {
+    if (typeof document === 'undefined') return;
+    const btn = document.getElementById('btn-back');
+    if (!btn) return;
+    let show = BACK_VISIBLE_SCENES.indexOf(sceneId) !== -1;
+    // Nothing to go back to on the very first cinematic slide.
+    if (sceneId === 'scene-cinematic' && currentSlide === 0) show = false;
+    btn.classList.toggle('hidden', !show);
+}
+
+function goBack() {
+    const phase = GameState.phase;
+    if (phase === 'cinematic') { prevSlide(); return; }
+    if (phase === 'explore-map') { closeExploreMap(); return; }
+    const taskPhases = ['task1','task2','task3','task4','agri1','agri2','ind1','ind2','ind3'];
+    if (taskPhases.indexOf(phase) !== -1) { showBackConfirm(); }
+}
+
+function showBackConfirm() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay visible';
+    overlay.innerHTML = `
+        <div class="modal-box">
+            <div class="modal-icon">↩️</div>
+            <div class="modal-title">${getTranslation('Leave this mission?')}</div>
+            <div class="modal-body">${getTranslation('Your progress in this area will reset and you will return to the Residential Area.')}</div>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+                <button class="modal-btn danger" id="back-confirm-leave">${getTranslation('Leave')}</button>
+                <button class="modal-btn" id="back-confirm-stay">${getTranslation('Stay')}</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#back-confirm-stay').onclick = () => overlay.remove();
+    overlay.querySelector('#back-confirm-leave').onclick = () => {
+        overlay.remove();
+        exitCurrentAreaToResidential();
+    };
+}
+
+function exitCurrentAreaToResidential() {
+    const phase = GameState.phase;
+    // Coastal tasks store progress in tasksCompleted and always replay from task 1,
+    // so reset that progress (and choice) for a clean re-entry.
+    if (['task1','task2','task3','task4'].indexOf(phase) !== -1) {
+        GameState.tasksCompleted = [false, false, false, false];
+        GameState.task4Choice = null;
+        document.querySelectorAll('#todo-panel .todo-item').forEach(el => el.classList.remove('done'));
+        document.querySelectorAll('#todo-panel .todo-check').forEach(el => { el.textContent = ''; });
+    }
+    if (phase === 'ind3') { GameState.ind3Choice = null; }
+    // Agri/Industrial progress isn't persisted mid-area (only final flags), and their
+    // todo panels are rebuilt by enterArea() on re-entry — nothing else to reset.
+    Audio.stopBg();
+    GameState.phase = 'residential';
+    SceneManager.show('scene-residential', () => initResidential());
+}
+
 // ============================================
 // SCENE: RESIDENTIAL WORLD & MINIMAP
 // ============================================
@@ -1537,6 +1750,11 @@ let resX = 800, resY = 560;
 let resNearInteractable = null;
 let resInteractCooldown = false;
 let inputInitialized = false;
+
+// Crisis gating: the first crisis alert only appears AFTER the player has actually
+// explored the residential base (>=3 distinct objects) or a fallback timer elapses.
+let exploredResObjects = new Set();
+let crisisFallbackTimer = null;
 
 // ============================================
 // RESIDENTIAL INTERACTABLE OBJECTS
@@ -1770,7 +1988,7 @@ function setupResInteractables() {
                 const dist = Math.sqrt(Math.pow(resX - obj.x, 2) + Math.pow(resY - obj.y, 2));
                 if (dist < obj.radius * 1.7 && !resInteractCooldown) {
                     resInteractCooldown = true;
-                    obj.action();
+                    doResInteract(obj);
                     setTimeout(() => { resInteractCooldown = false; }, 2500);
                 }
             };
@@ -1781,7 +1999,7 @@ function setupResInteractables() {
         prompt.onclick = () => {
             if (resNearInteractable && !resInteractCooldown) {
                 resInteractCooldown = true;
-                resNearInteractable.action();
+                doResInteract(resNearInteractable);
                 setTimeout(() => { resInteractCooldown = false; }, 2500);
             }
         };
@@ -1836,9 +2054,46 @@ function checkResProximity() {
     }
 }
 
+// Central interaction entry point — every way of triggering an object (direct click,
+// prompt click, "E" key) routes through here so exploration is tracked consistently.
+function doResInteract(obj) {
+    if (!obj) return;
+    obj.action();
+    recordExploration(obj.id);
+}
+
+function recordExploration(id) {
+    if (!id || GameState.coastalAlertShown) return;
+    exploredResObjects.add(id);
+    // Hide the explore hint once the player has tried at least one object.
+    const hint = document.getElementById('res-explore-hint');
+    if (hint && !hint.classList.contains('hidden') && !hint.classList.contains('fading-out')) {
+        hint.classList.add('fading-out');
+        setTimeout(() => { hint.classList.add('hidden'); hint.classList.remove('fading-out'); }, 550);
+    }
+    // Crisis surfaces only after genuine exploration (3 distinct objects).
+    if (exploredResObjects.size >= 3) {
+        triggerFirstCrisis();
+    }
+}
+
+function beginExplorationPhase() {
+    if (GameState.coastalAlertShown) return;
+    const hint = document.getElementById('res-explore-hint');
+    if (hint) { hint.classList.remove('fading-out'); hint.classList.remove('hidden'); }
+    // Fallback: if the player doesn't explore enough, surface the crisis after 30s.
+    if (crisisFallbackTimer) clearTimeout(crisisFallbackTimer);
+    crisisFallbackTimer = setTimeout(() => {
+        if (GameState.phase === 'residential' && !GameState.coastalAlertShown) triggerFirstCrisis();
+    }, 30000);
+}
+
 function triggerFirstCrisis() {
     if (GameState.coastalAlertShown) return;
     GameState.coastalAlertShown = true;
+    if (crisisFallbackTimer) { clearTimeout(crisisFallbackTimer); crisisFallbackTimer = null; }
+    const hint = document.getElementById('res-explore-hint');
+    if (hint) hint.classList.add('hidden');
     triggerAlarm();
     Modal.show('modal-map-alert');
     document.getElementById('btn-start-mission').onclick = () => {
@@ -1996,7 +2251,9 @@ function initResidential() {
     if (!GameState.coastalAlertShown) { hideMiniMap(); } else { showMiniMap(); }
     initMap();
     TodoPanel.hide();
-    Audio.stopBg();
+    // Base world (and the explore map it leads into) is a coastal/ocean setting —
+    // play ocean ambience, which also replaces any lingering loop (e.g. factory).
+    Audio.play('ambient_ocean', { volume: 0.3, loop: true });
     // Reset residential player position
     resX = 800; resY = 560;
     const resPlayer = document.getElementById('res-player');
@@ -2014,7 +2271,7 @@ function initResidential() {
                     const aid = worldNearArea.id; enterArea(aid); return;
                 }
                 if (!exploreMapActive && GameState.phase === 'residential' && resNearInteractable && !resInteractCooldown) {
-                    resInteractCooldown = true; resNearInteractable.action();
+                    resInteractCooldown = true; doResInteract(resNearInteractable);
                     setTimeout(() => { resInteractCooldown = false; }, 2500); return;
                 }
             }
@@ -2067,10 +2324,11 @@ function initResidential() {
         document.getElementById('btn-start-briefing').onclick = () => {
             Modal.hide('modal-how-to-play');
             GameState.instructionsShown = true;
-            setTimeout(() => { if (GameState.phase === 'residential') triggerFirstCrisis(); }, 800);
+            // Let the player explore the base first; crisis is gated in beginExplorationPhase().
+            setTimeout(() => { if (GameState.phase === 'residential') beginExplorationPhase(); }, 600);
         };
     } else if (!GameState.coastalAlertShown && !GameState.allTasksDone()) {
-        triggerFirstCrisis();
+        beginExplorationPhase();
     } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
         GameState.agriAlertShown = true;
         setTimeout(() => {
@@ -2205,6 +2463,7 @@ function initTask1() {
             Audio.play('task_complete', { volume: 0.8 });
             Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 12, ['🐢', '💚', '✨', '🌊']);
             Toast.show(getTranslation('Good action! Biodiversity improved.'), getTranslation('🦋 Biodiversity +10'), 3000);
+            showStatGain([{ icon: '🦋', label: 'Biodiversity', delta: 10 }]);
 
             showContinueModal(
                 getTranslation('Task 1 Completed'),
@@ -2230,15 +2489,17 @@ function initTask2() {
     if (GameState.phase !== 'task2') return;
     const instructionEl = document.getElementById('t2-instruction');
     if (instructionEl) typeWriter(instructionEl, getTranslation('Click each trash item to collect it'), 40);
+    // Positions kept clear of the bottom-right corner where the mission checklist
+    // sits (which is large on laptop/phone) so no trash is hidden behind it.
     const trashItems = [
-        { emoji: '🧴', x: 6, y: 52 },
-        { emoji: '🥤', x: 18, y: 75 },
-        { emoji: '🛍️', x: 30, y: 58 },
-        { emoji: '🧃', x: 46, y: 82 },
-        { emoji: '🍶', x: 60, y: 55 },
-        { emoji: '🥡', x: 72, y: 70 },
-        { emoji: '🧴', x: 84, y: 62 },
-        { emoji: '🪣', x: 38, y: 68 }
+        { emoji: '🧴', x: 8,  y: 56 },
+        { emoji: '🥤', x: 20, y: 76 },
+        { emoji: '🛍️', x: 32, y: 60 },
+        { emoji: '🧃', x: 44, y: 82 },
+        { emoji: '🍶', x: 56, y: 66 },
+        { emoji: '🥡', x: 58, y: 48 },
+        { emoji: '🧴', x: 70, y: 44 },
+        { emoji: '🪣', x: 30, y: 47 }
     ];
 
     let collected = 0;
@@ -2294,6 +2555,7 @@ function initTask2() {
     function completeTask2() {
         GameState.updateWater(10);
         GameState.updateBio(5);
+        showStatGain([{ icon: '💧', label: 'Water Quality', delta: 10 }, { icon: '🦋', label: 'Biodiversity', delta: 5 }]);
         GameState.completeTask(1);
         Audio.play('task_complete', { volume: 0.8 });
         Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🌊', '✨', '💧', '🌿']);
@@ -2328,124 +2590,77 @@ function initTask3() {
     Audio.play('ambient_underwater', { volume: 0.5, loop: true });
 
     const instructionEl = document.getElementById('t3-instruction');
-    if (instructionEl) typeWriter(instructionEl, getTranslation('Apply glue on all 4 edges of the patch plate, then drag it to the crack!'), 35);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Take bolts from the toolbox and drag them onto the patch to seal the leak!'), 35);
 
-    // ── STEP 1: Glue all 4 edges ──────────────────────────────────────
-    const edges = ['top', 'right', 'bottom', 'left'];
-    const glued = new Set();
-    const hintEl = document.getElementById('t3-glue-hint');
+    // ── Bolt the patch over the crack (drag screws from the toolbox, like the discharge fix) ──
+    const dz = document.getElementById('t3-dropzone');
+    if (dz) dz.style.display = 'none';   // old plate drop-target is unused by the bolt mechanic
 
-    edges.forEach(edgeName => {
-        const el = document.getElementById(`t3-edge-${edgeName}`);
-        if (!el) return;
-        el.addEventListener('click', () => {
-            if (glued.has(edgeName)) return;
-            glued.add(edgeName);
-            el.classList.add('glued');
-            el.textContent = getTranslation('✔ GLUED');
-            // Glue squish SFX would be ideal; use metal_snap as close alternative since no glue_squish in assets
-            Audio.play('click_success', { volume: 0.5 });
-            Particles.burst(el.getBoundingClientRect().left + 12, el.getBoundingClientRect().top + 12, 4, ['✨', '🟡']);
+    const patch = document.getElementById('t3-patch');
+    const toolbox = document.getElementById('t3-toolbox');
+    const hintEl = document.getElementById('t3-toolbox-hint');
+    const slots = patch ? patch.querySelectorAll('.t3-bolt-slot') : [];
+    const TOTAL_BOLTS = 4;
+    let boltsPlaced = 0;
+    let selectedBolt = null;
 
-            if (hintEl) hintEl.textContent = `${getTranslation('Apply glue')} (${glued.size}/4)`;
+    if (patch) patch.classList.remove('hidden');
 
-            if (glued.size === 4) {
-                setTimeout(startStep2, 600);
-            }
-        });
-    });
+    function refreshT3Hint() {
+        if (hintEl) hintEl.textContent = `${getTranslation('Drag the bolts onto the patch')} (${boltsPlaced}/${TOTAL_BOLTS})`;
+    }
+    refreshT3Hint();
 
-    // ── STEP 2: Drag glued plate to crack ────────────────────────────
-    function startStep2() {
-        const gluePanel = document.getElementById('t3-glue-panel');
-        if (gluePanel) gluePanel.classList.add('hidden');
-
-        const plate = document.getElementById('t3-draggable-plate');
-        if (!plate) return;
-        plate.classList.remove('hidden');
-
-        if (instructionEl) typeWriter(instructionEl, getTranslation('Now drag the patch plate to the crack on the pipe!'), 40);
-
-        // Drag logic
-        let isDragging = false;
-        let offsetX = 0, offsetY = 0;
-
-        plate.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            const rect = plate.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            plate.style.transition = 'none';
-            plate.style.right = 'unset';
-            plate.style.transform = 'none';
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        // Touch support
-        plate.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            const touch = e.touches[0];
-            const rect = plate.getBoundingClientRect();
-            offsetX = touch.clientX - rect.left;
-            offsetY = touch.clientY - rect.top;
-            plate.style.transition = 'none';
-            plate.style.right = 'unset';
-            plate.style.transform = 'none';
-            e.preventDefault();
-        }, { passive: false });
-        document.addEventListener('touchmove', onTouchMove, { passive: false });
-        document.addEventListener('touchend', onTouchEnd);
-
-        function movePlateTo(clientX, clientY) {
-            if (!isDragging) return;
-            plate.style.left = (clientX - offsetX) + 'px';
-            plate.style.top = (clientY - offsetY) + 'px';
-        }
-
-        function onMouseMove(e) { movePlateTo(e.clientX, e.clientY); }
-        function onTouchMove(e) {
-            e.preventDefault();
-            movePlateTo(e.touches[0].clientX, e.touches[0].clientY);
-        }
-
-        function checkDrop(clientX, clientY) {
-            isDragging = false;
-            const dropzone = document.getElementById('t3-dropzone');
-            if (!dropzone) return;
-            const dz = dropzone.getBoundingClientRect();
-            const px = clientX;
-            const py = clientY;
-            // Did the plate's center land inside/near the dropzone?
-            if (px > dz.left - 30 && px < dz.right + 30 && py > dz.top - 30 && py < dz.bottom + 30) {
-                // Snap plate to dropzone
-                plate.style.transition = 'all 0.4s ease';
-                plate.style.left = dz.left + 'px';
-                plate.style.top = dz.top + 'px';
-                plate.style.width = dz.width + 'px';
-                plate.style.height = dz.height + 'px';
-                cleanup();
-                setTimeout(sealPipe, 500);
-            }
-        }
-
-        function onMouseUp(e) { checkDrop(e.clientX, e.clientY); }
-        function onTouchEnd(e) {
-            const touch = e.changedTouches[0];
-            checkDrop(touch.clientX, touch.clientY);
-        }
-
-        function cleanup() {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            document.removeEventListener('touchmove', onTouchMove);
-            document.removeEventListener('touchend', onTouchEnd);
-            plate.onmousedown = null;
-            plate.ontouchstart = null;
+    // Build draggable bolts in the toolbox
+    if (toolbox) {
+        toolbox.innerHTML = '';
+        for (let i = 0; i < TOTAL_BOLTS; i++) {
+            const bolt = document.createElement('div');
+            bolt.className = 't3-tool-bolt';
+            bolt.textContent = '🔩';
+            bolt.draggable = true;
+            bolt.ondragstart = (e) => { e.dataTransfer.setData('text/plain', 'bolt'); setTimeout(() => { bolt.style.opacity = '0.4'; }, 0); };
+            bolt.ondragend = () => { bolt.style.opacity = '1'; };
+            bolt.onclick = () => {
+                if (selectedBolt && selectedBolt !== bolt) selectedBolt.classList.remove('t3-tool-bolt-selected');
+                if (selectedBolt === bolt) { bolt.classList.remove('t3-tool-bolt-selected'); selectedBolt = null; }
+                else { selectedBolt = bolt; bolt.classList.add('t3-tool-bolt-selected'); }
+            };
+            toolbox.appendChild(bolt);
         }
     }
+
+    function placeT3Bolt(slot) {
+        if (!slot || slot.classList.contains('filled')) return;
+        const tool = selectedBolt || (toolbox && toolbox.querySelector('.t3-tool-bolt'));
+        if (!tool) return;
+        if (selectedBolt) { selectedBolt.classList.remove('t3-tool-bolt-selected'); selectedBolt = null; }
+        tool.remove();
+        slot.classList.add('filled');
+        slot.textContent = '🔩';
+        // scraping / ratcheting SFX as the bolt is driven in
+        Audio.play('metal_drag', { volume: 0.6 });
+        Audio.play('wrench_ratchet', { volume: 0.5 });
+        const r = slot.getBoundingClientRect();
+        Particles.burst(r.left + r.width / 2, r.top + r.height / 2, 4, ['✨', '🔩']);
+        boltsPlaced++;
+        refreshT3Hint();
+        if (boltsPlaced >= TOTAL_BOLTS) {
+            if (instructionEl) typeWriter(instructionEl, getTranslation('All bolts secured! Sealing the leak...'), 35);
+            const tp = document.getElementById('t3-toolbox-panel');
+            if (tp) tp.classList.add('hidden');
+            setTimeout(sealPipe, 700);
+        }
+    }
+
+    // Drag-and-drop + click-to-place fallback (touch friendly)
+    slots.forEach(slot => {
+        slot.ondragover = (e) => { e.preventDefault(); };
+        slot.ondrop = (e) => { e.preventDefault(); if (e.dataTransfer.getData('text/plain') === 'bolt') placeT3Bolt(slot); };
+        slot.onclick = () => { if (selectedBolt) placeT3Bolt(slot); };
+    });
+
+    // (Old glue-then-drag-plate flow removed — Task 3 now uses the bolt-drag mechanic above.)
 
     // ── Seal pipe animation & complete ───────────────────────────────
     function sealPipe() {
@@ -2933,10 +3148,12 @@ function initTask4() {
             GameState.updateWater(25);
             GameState.updateBio(5);
             Audio.play('task_complete', { volume: 0.8 });
+            showStatGain([{ icon: '💧', label: 'Water Quality', delta: 25 }, { icon: '🦋', label: 'Biodiversity', delta: 5 }]);
         } else {
             GameState.updateWater(20);
             GameState.updateBio(-15);
             Audio.play('task_complete', { volume: 0.8 });
+            showStatGain([{ icon: '💧', label: 'Water Quality', delta: 20 }, { icon: '🦋', label: 'Biodiversity', delta: -15 }]);
         }
 
         GameState.completeTask(3);
@@ -2959,7 +3176,7 @@ function initTask4() {
 function initAgriTask1() {
     if (GameState.phase !== 'agri1') return;
     const instructionEl = document.getElementById('agri1-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Scan the farm area to find the source of pollution.', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Click the glowing red zone on the farm to scan and reveal the pollution source.'), 40);
 
     const scanArea = document.getElementById('farm-scan-area');
     const progBar = document.getElementById('scan-progress');
@@ -3030,7 +3247,7 @@ function initAgriTask1() {
 function initAgriTask2() {
     if (GameState.phase !== 'agri2') return;
     const instructionEl = document.getElementById('agri2-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Plant vegetation along the river to filter runoff.', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Plant vegetation along the river by clicking each highlighted spot to filter runoff.'), 40);
 
     const slotsContainer = document.getElementById('plant-slots-container');
     const riverDirty = document.getElementById('agri2-river-dirty');
@@ -3048,13 +3265,15 @@ function initAgriTask2() {
 
     positions.forEach((pos, idx) => {
         const slot = document.createElement('div');
-        slot.className = 'plant-slot';
+        slot.className = 'plant-slot plant-slot-empty';
         slot.style.left = pos.x + 'px';
         slot.style.top = pos.y + 'px';
+        slot.innerHTML = '<span class="plant-slot-hint">+</span>';
 
         slot.onclick = (e) => {
             if (slot.classList.contains('planted')) return;
             slot.classList.add('planted');
+            slot.classList.remove('plant-slot-empty');
             slot.textContent = pos.type;
 
             Particles.burst(e.clientX, e.clientY, 4, ['✨', '💚', pos.type]);
@@ -3076,6 +3295,7 @@ function initAgriTask2() {
     function completeAgri2() {
         GameState.updateWater(15);
         GameState.updateBio(10);
+        showStatGain([{ icon: '💧', label: 'Water Quality', delta: 15 }, { icon: '🦋', label: 'Biodiversity', delta: 10 }]);
         GameState.agriCompleted = true;
         GameState.completeTask(1, true);
 
@@ -3101,7 +3321,7 @@ function initAgriTask2() {
 function initIndTask1() {
     if (GameState.phase !== 'ind1') return;
     const instructionEl = document.getElementById('ind1-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Locate the source of industrial wastewater.', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Click the glowing red zone on the discharge pipe to identify the wastewater source.'), 40);
     // ambient_factory is already playing (started by enterArea())
 
     const pipeArea = document.getElementById('ind-pipe-area');
@@ -3154,7 +3374,7 @@ function initIndTask1() {
 function initIndTask2() {
     if (GameState.phase !== 'ind2') return;
     const instructionEl = document.getElementById('ind2-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Fix the leaking pipe joint. Drag missing bolts and tighten all.', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Drag each missing bolt onto the pipe flange, then click the 🔧 wrench to tighten all the bolts.'), 40);
 
     const container = document.getElementById('ind2-bolts-container');
     const toolbox = document.getElementById('ind2-toolbox');
@@ -3166,11 +3386,13 @@ function initIndTask2() {
     toolbox.innerHTML = '';
     successMsg.classList.add('hidden');
 
+    // Coordinates are relative to the #ind2-joint flange plate (180x240) so the
+    // bolts visibly sit on the two flange columns of the pipe joint.
     const slotPositions = [
-        { x: 370, y: 240, hasBolt: true }, { x: 430, y: 240, hasBolt: false },
-        { x: 370, y: 280, hasBolt: false }, { x: 430, y: 280, hasBolt: true },
-        { x: 370, y: 320, hasBolt: true }, { x: 430, y: 320, hasBolt: false },
-        { x: 370, y: 360, hasBolt: false }, { x: 430, y: 360, hasBolt: true }
+        { x: 30,  y: 45,  hasBolt: true },  { x: 150, y: 45,  hasBolt: false },
+        { x: 30,  y: 100, hasBolt: false }, { x: 150, y: 100, hasBolt: true },
+        { x: 30,  y: 155, hasBolt: true },  { x: 150, y: 155, hasBolt: false },
+        { x: 30,  y: 210, hasBolt: false }, { x: 150, y: 210, hasBolt: true }
     ];
 
     let boltsTightened = 0;
@@ -3345,10 +3567,20 @@ function initIndTask3() {
         const layers = document.querySelectorAll('#ind3-filtration-area .ind-filter-layer');
         let clickedLayers = 0;
 
+        // Reset layer state (important when re-entering via the Back button):
+        // only the first layer is visible; the rest are hidden until clicked in order.
         layers.forEach((layer, idx) => {
+            layer.classList.remove('completed');
+            layer.style.opacity = '1';
             if (idx === 0) {
+                layer.classList.remove('hidden');
                 layer.style.display = 'flex';
+            } else {
+                layer.classList.add('hidden');
             }
+        });
+
+        layers.forEach((layer, idx) => {
             layer.onclick = () => {
                 if (layer.classList.contains('completed')) return;
                 layer.classList.add('completed');
@@ -3365,6 +3597,9 @@ function initIndTask3() {
 
                 if (idx < layers.length - 1) {
                     setTimeout(() => {
+                        // .hidden uses display:none !important, so inline display can't
+                        // override it — must remove the class to reveal the next layer.
+                        layers[idx + 1].classList.remove('hidden');
                         layers[idx + 1].style.display = 'flex';
                     }, 600);
                 }
@@ -3519,6 +3754,10 @@ function initIndTask3() {
         gameplayArea.classList.add('hidden');
         GameState.updateWater(waterVal);
         GameState.updateBio(bioVal);
+        const _statGains = [];
+        if (waterVal) _statGains.push({ icon: '💧', label: 'Water Quality', delta: waterVal });
+        if (bioVal) _statGains.push({ icon: '🦋', label: 'Biodiversity', delta: bioVal });
+        showStatGain(_statGains);
 
         if (bioVal > 0) {
             Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 25, ['🦠', '✨', '💧', '🌿', '🌱']);
@@ -3667,6 +3906,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize toggle panel buttons for minimap and todo
     initTogglePanels();
+
+    // Global Back button (per-scene navigation)
+    const backBtn = document.getElementById('btn-back');
+    if (backBtn) backBtn.onclick = (e) => { e.stopPropagation(); goBack(); };
 
     HUD.init();
     SceneManager.show('scene-landing', () => {

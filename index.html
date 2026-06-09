@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Last Drop: Water Survival 0009</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=20260609b" />
 </head>
 
 <body>
@@ -40,6 +40,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Global Back button (per-scene navigation: opening → end) -->
+    <button id="btn-back" class="btn-back hidden" aria-label="Back">
+        <span class="btn-back-arrow">←</span><span data-lang-key="btn_back_nav">Back</span>
+    </button>
 
     <div id="areas-counter" class="hidden">2 areas left to solve</div>
 
@@ -115,6 +120,7 @@
             <button id="btn-lang-en" class="lang-btn active">EN</button>
             <button id="btn-lang-id" class="lang-btn">ID</button>
         </div>
+        <div class="landing-credit">crafted by <span>moviq</span></div>
     </div>
 
     <div class="scene" id="scene-cinematic">
@@ -461,13 +467,19 @@
             <div class="res-prompt-icon" id="res-prompt-icon">✨</div>
             <div class="res-prompt-text">Press <strong>E</strong> or <strong>Tap</strong></div>
         </div>
+
+        <!-- Explore guidance hint -->
+        <div id="res-explore-hint" class="res-explore-hint hidden">
+            <span class="res-explore-hint-icon">🧭</span>
+            <span data-lang-key="explore_hint">Explore the area! Click on objects around you to learn how human activities affect water quality and biodiversity.</span>
+        </div>
     </div>
 
     <!-- EXPLORE MAP SCENE -->
     <div class="scene" id="scene-explore-map">
         <div class="explore-map-header">
             <div class="explore-map-title-text">🗺 EXPLORE MAP</div>
-            <div class="explore-map-hint-text">WASD to navigate · E to enter area · ESC to close</div>
+            <div class="explore-map-hint-text" data-lang-key="explore_map_hint">Move your character (WASD / joystick) to the glowing Coastal area, then press E to enter · ESC to close</div>
             <button id="btn-close-explore" class="explore-close-btn">✕ Close</button>
         </div>
         <svg id="world-map-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -525,11 +537,37 @@
             <g id="world-bldg-coastal" class="world-building" transform="translate(270, 710)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-50" y="10" width="100" height="20" fill="#8b5a2b" rx="2"/><line x1="-40" y1="30" x2="-40" y2="50" stroke="#5c3a21" stroke-width="6"/><line x1="40" y1="30" x2="40" y2="50" stroke="#5c3a21" stroke-width="6"/><path d="M-15,-10 L-25,10 L25,10 L15,-10 Z" fill="#e63946"/><path d="M-12,-30 L-15,-10 L15,-10 L12,-30 Z" fill="#f5f5f5"/><path d="M-10,-50 L-12,-30 L12,-30 L10,-50 Z" fill="#e63946"/><rect x="-15" y="-60" width="30" height="10" fill="#333" /><circle cx="0" cy="-60" r="10" fill="#ffd166" /><polygon points="-10,-60 0,-80 10,-60" fill="#e63946" stroke="#c0392b" stroke-width="2" stroke-linejoin="round"/><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">COASTAL</text></g>
             <g id="world-bldg-agricultural" class="world-building" transform="translate(360, 190)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-35" y="-20" width="70" height="40" fill="#e63946" rx="4"/><polygon points="-40,-20 -30,-45 0,-55 30,-45 40,-20" fill="#c0392b" /><rect x="-10" y="5" width="20" height="15" fill="#fff" /><line x1="-10" y1="5" x2="10" y2="20" stroke="#ccc" stroke-width="2"/><line x1="10" y1="5" x2="-10" y2="20" stroke="#ccc" stroke-width="2"/><rect x="35" y="-40" width="20" height="60" fill="#bdc3c7" /><path d="M35,-40 C35,-55 55,-55 55,-40 Z" fill="#7f8c8d" /><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">AGRICULTURAL</text></g>
             <g id="world-bldg-industrial" class="world-building" transform="translate(1310, 245)"><circle class="bldg-glow" cx="0" cy="-20" r="70" fill="none" stroke-width="6" /><rect x="-45" y="-20" width="90" height="40" fill="#7f8c8d" rx="4"/><polygon points="-45,-20 -30,-40 -15,-20" fill="#95a5a6" /><polygon points="-15,-20 0,-40 15,-20" fill="#95a5a6" /><polygon points="15,-20 30,-40 45,-20" fill="#95a5a6" /><rect x="-25" y="-60" width="10" height="40" fill="#f4a261" /><rect x="15" y="-70" width="10" height="50" fill="#f4a261" /><g id="world-ind-smoke-dirty" style="transition: opacity 1.5s ease; pointer-events: none;"><circle cx="-20" cy="-70" r="8" fill="#4a5d4e" opacity="0.75"/><circle cx="-25" cy="-80" r="12" fill="#4a5d4e" opacity="0.65"/><circle cx="-35" cy="-95" r="16" fill="#3a483e" opacity="0.55"/><circle cx="20" cy="-80" r="8" fill="#4a5d4e" opacity="0.75"/><circle cx="25" cy="-95" r="12" fill="#4a5d4e" opacity="0.65"/><circle cx="35" cy="-115" r="18" fill="#3a483e" opacity="0.55"/></g><g id="world-ind-smoke-clean" opacity="0" style="transition: opacity 1.5s ease; pointer-events: none;"><circle cx="-20" cy="-70" r="8" fill="#e0f2fe" opacity="0.8"/><circle cx="-25" cy="-80" r="11" fill="#e0f2fe" opacity="0.6"/><circle cx="20" cy="-80" r="8" fill="#e0f2fe" opacity="0.8"/><circle cx="25" cy="-95" r="11" fill="#e0f2fe" opacity="0.6"/></g><rect x="-10" y="5" width="20" height="15" fill="#34495e" /><text x="0" y="45" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(1px 1px 2px rgba(0,0,0,0.8))">INDUSTRIAL</text></g>
-            <!-- World Player Character -->
+            <!-- World Player Character (matches the residential avatar, made prominent) -->
             <g id="world-player" transform="translate(800, 480)">
-                <ellipse cx="0" cy="15" rx="12" ry="5" fill="rgba(0,0,0,0.3)" />
-                <ellipse cx="0" cy="0" rx="10" ry="12" fill="#00b4d8" />
-                <circle cx="0" cy="-15" r="10" fill="#f1c27d" />
+                <!-- pulsing highlight ring so the player clearly stands out -->
+                <ellipse cx="0" cy="24" rx="24" ry="9" fill="#00b4d8" opacity="0.28">
+                    <animate attributeName="rx" values="20;31;20" dur="1.8s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.34;0.10;0.34" dur="1.8s" repeatCount="indefinite"/>
+                </ellipse>
+                <!-- detailed avatar, scaled up a touch -->
+                <g transform="scale(1.2)">
+                    <ellipse cx="0" cy="20" rx="16" ry="6" fill="rgba(0,0,0,0.35)"/>
+                    <ellipse cx="0" cy="0" rx="13" ry="16" fill="#00b4d8"/>
+                    <ellipse cx="4" cy="2" rx="7" ry="10" fill="#0097b8" opacity="0.4"/>
+                    <rect x="-8" y="12" width="6" height="14" rx="3" fill="#0077b6"/>
+                    <rect x="2" y="12" width="6" height="14" rx="3" fill="#0077b6"/>
+                    <rect x="-18" y="-6" width="8" height="6" rx="3" fill="#0077b6"/>
+                    <rect x="10" y="-6" width="8" height="6" rx="3" fill="#0077b6"/>
+                    <circle cx="0" cy="-21" r="14" fill="#f1c27d"/>
+                    <path d="M-12,-30 Q0,-42 12,-30 Q10,-22 -10,-22" fill="#5c3a1e"/>
+                    <circle cx="-4.5" cy="-22" r="3" fill="#1a1a1a"/>
+                    <circle cx="4.5" cy="-22" r="3" fill="#1a1a1a"/>
+                    <circle cx="-3.5" cy="-23" r="1.2" fill="white"/>
+                    <circle cx="5.5" cy="-23" r="1.2" fill="white"/>
+                    <path d="M-4.5,-16 Q0,-13 4.5,-16" fill="none" stroke="#5c3a1e" stroke-width="1.8" stroke-linecap="round"/>
+                </g>
+                <!-- floating "YOU" marker above the head -->
+                <g>
+                    <rect x="-20" y="-66" width="40" height="19" rx="9" fill="#ffd166"/>
+                    <text x="0" y="-52" font-family="'Orbitron', sans-serif" font-size="12" font-weight="bold" fill="#03111e" text-anchor="middle">YOU</text>
+                    <path d="M-6,-47 L6,-47 L0,-40 Z" fill="#ffd166"/>
+                    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -4; 0 0" dur="1.6s" repeatCount="indefinite"/>
+                </g>
             </g>
         </svg>
         <!-- Area enter prompt (for explore map) -->
@@ -675,7 +713,7 @@
         <!-- floating instruction header -->
         <div class="t3-header">
             <div class="task-title-text">🔧 Stop Oil Leak</div>
-            <div class="task-instruction" id="t3-instruction">Apply glue around all 4 edges of the patch plate</div>
+            <div class="task-instruction" id="t3-instruction">Take bolts from the toolbox and drag them onto the patch to seal the leak!</div>
         </div>
 
         <!-- ====  UNDERWATER SCENE  ==== -->
@@ -749,23 +787,21 @@
                 <div class="t3-dropzone" id="t3-dropzone" title="Drop plate here"></div>
             </div>
 
-            <!-- ====  STEP 1: GLUE APPLICATION PANEL  ==== -->
-            <div class="t3-glue-panel" id="t3-glue-panel">
-                <div class="t3-panel-title">🔩 Patch Plate</div>
-                <div class="t3-panel-hint" id="t3-glue-hint">Click each edge to apply glue (0/4)</div>
-                <div class="t3-plate-box" id="t3-plate-box">
-                    <div class="t3-edge t3-edge-top"    id="t3-edge-top"    data-edge="top">TOP</div>
-                    <div class="t3-edge t3-edge-right"  id="t3-edge-right"  data-edge="right">RIGHT</div>
-                    <div class="t3-edge t3-edge-bottom" id="t3-edge-bottom" data-edge="bottom">BOTTOM</div>
-                    <div class="t3-edge t3-edge-left"   id="t3-edge-left"   data-edge="left">LEFT</div>
-                    <div class="t3-plate-center">PLATE</div>
+            <!-- ====  Repair patch over the crack — bolt it down  ==== -->
+            <div class="t3-patch" id="t3-patch">
+                <div class="t3-patch-plate">
+                    <div class="t3-bolt-slot" data-slot="0" style="top:12px; left:12px;"></div>
+                    <div class="t3-bolt-slot" data-slot="1" style="top:12px; right:12px;"></div>
+                    <div class="t3-bolt-slot" data-slot="2" style="bottom:12px; left:12px;"></div>
+                    <div class="t3-bolt-slot" data-slot="3" style="bottom:12px; right:12px;"></div>
                 </div>
             </div>
 
-            <!-- ====  STEP 2: Draggable patched plate  ==== -->
-            <div class="t3-draggable-plate hidden" id="t3-draggable-plate">
-                <div class="t3-drag-plate-inner">🔩</div>
-                <div class="t3-drag-hint">Drag to the crack!</div>
+            <!-- ====  Toolbox with bolts to drag onto the patch  ==== -->
+            <div class="t3-toolbox-panel" id="t3-toolbox-panel">
+                <div class="t3-panel-title">🧰 Toolbox</div>
+                <div class="t3-panel-hint" id="t3-toolbox-hint">Drag the bolts onto the patch (0/4)</div>
+                <div class="t3-toolbox-bolts" id="t3-toolbox"></div>
             </div>
 
             <!-- Fix progress (used in step 2 snap animation) -->
@@ -777,7 +813,7 @@
     </div>
 
 
-    <div class="scene task-scene" id="scene-task4" style="background: linear-gradient(180deg, #02111b 0%, #062b40 100%);">
+    <div class="scene task-scene" id="scene-task4" style="background: linear-gradient(180deg, #1187c4 0%, #0a5f93 55%, #074a73 100%);">
         <div class="task-header">
             <div class="task-title-text">🛢️ Clean Oil Spill</div>
             <div class="task-step-indicator" id="t4-step-indicator" style="font-size: 0.85rem; color: var(--yellow); margin-top: 4px; font-family: 'Orbitron', sans-serif;"></div>
@@ -916,13 +952,9 @@
             <div class="t4-method-selection" id="t4-method-selection">
                 <div class="t4-method-card" id="btn-method-a">
                     <div class="t4-card-title" data-lang-key="t4_method_a_title">🔥 In-Situ Burning</div>
-                    <div class="t4-card-stats" data-lang-key="t4_method_a_stats">Water +25 | Bio +5</div>
-                    <div class="t4-card-tag recommended" data-lang-key="t4_method_a_tag">Recommended</div>
                 </div>
                 <div class="t4-method-card" id="btn-method-b">
                     <div class="t4-card-title" data-lang-key="t4_method_b_title">🧪 Corexit Dispersant</div>
-                    <div class="t4-card-stats" data-lang-key="t4_method_b_stats">Water +20 | Bio -15</div>
-                    <div class="t4-card-tag warning" data-lang-key="t4_method_b_tag">⚠ May harm marine life</div>
                 </div>
             </div>
         </div>
@@ -954,7 +986,9 @@
                     </path>
                 </g>
             </svg>
-            <div id="farm-scan-area" class="alert-pulse" style="position:absolute; top:45%; left:30%; width:150px; height:100px; transform:translate(-50%, -50%); border:4px dashed red; border-radius:10px; cursor:pointer;"></div>
+            <div id="farm-scan-area" class="alert-pulse" style="position:absolute; top:45%; left:30%; width:160px; height:110px; transform:translate(-50%, -50%); border:4px dashed red; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <div class="scan-area-label"><span class="scan-emoji">🔍</span><span class="scan-text" data-lang-key="scan_click_hint">Click here to scan</span></div>
+            </div>
             <div class="help-progress" id="scan-progress" style="position:absolute; top:60%; left:50%; transform:translateX(-50%); display:none;">
                 <div class="help-progress-fill" id="scan-progress-fill"></div>
             </div>
@@ -1067,17 +1101,50 @@
         </div>
         <div class="ind-factory-scene" style="position:relative; width:100%; height:100%;">
             <svg class="ind-bg-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; position:absolute; top:0; left:0;">
-                <rect width="800" height="600" fill="#2c3e50" />
-                <rect x="50" y="200" width="200" height="250" fill="#7f8c8d" />
-                <rect x="250" y="150" width="150" height="300" fill="#95a5a6" />
-                <path d="M 450,200 Q 550,400 800,500 L800,600 L400,600 Z" fill="#2980b9" />
-                <path id="ind-river-dirty" d="M 450,200 Q 550,400 800,500 L800,600 L400,600 Z" fill="#2c3e50" opacity="0.8" />
+                <!-- Industrial sky -->
+                <rect width="800" height="600" fill="#46586a" />
+                <rect width="800" height="220" fill="#3c4d5e" />
+                <rect y="150" width="800" height="90" fill="#5a6b7a" opacity="0.35" />
+                <!-- Ground -->
+                <rect y="430" width="800" height="170" fill="#3a4636" />
+                <!-- Factory hall with sawtooth roof -->
+                <rect x="55" y="250" width="330" height="200" fill="#6b7a85" />
+                <g fill="#586671">
+                    <polygon points="55,250 105,218 105,250" />
+                    <polygon points="105,250 155,218 155,250" />
+                    <polygon points="155,250 205,218 205,250" />
+                    <polygon points="205,250 255,218 255,250" />
+                    <polygon points="255,250 305,218 305,250" />
+                    <polygon points="305,250 355,218 355,250" />
+                </g>
+                <!-- Lit windows -->
+                <g fill="#f4d35e" opacity="0.85">
+                    <rect x="85" y="300" width="34" height="46" /><rect x="140" y="300" width="34" height="46" />
+                    <rect x="195" y="300" width="34" height="46" /><rect x="250" y="300" width="34" height="46" />
+                    <rect x="305" y="300" width="34" height="46" />
+                </g>
+                <!-- Smokestacks -->
+                <rect x="150" y="120" width="34" height="135" fill="#4f5a63" />
+                <rect x="150" y="120" width="34" height="14" fill="#e74c3c" />
+                <rect x="255" y="90" width="30" height="165" fill="#4f5a63" />
+                <rect x="255" y="90" width="30" height="13" fill="#e74c3c" />
+                <!-- Animated smoke -->
+                <g fill="#aeb9c2">
+                    <circle cx="167" cy="120" r="12" opacity="0.7"><animate attributeName="cy" values="120;70;30" dur="4.5s" repeatCount="indefinite"/><animate attributeName="r" values="10;18;26" dur="4.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0.4;0" dur="4.5s" repeatCount="indefinite"/></circle>
+                    <circle cx="167" cy="120" r="12" opacity="0.6"><animate attributeName="cy" values="120;70;30" dur="4.5s" begin="2.2s" repeatCount="indefinite"/><animate attributeName="r" values="10;18;26" dur="4.5s" begin="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0.35;0" dur="4.5s" begin="2.2s" repeatCount="indefinite"/></circle>
+                    <circle cx="270" cy="90" r="13" opacity="0.7"><animate attributeName="cy" values="90;45;8" dur="5s" begin="1s" repeatCount="indefinite"/><animate attributeName="r" values="11;20;28" dur="5s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0.4;0" dur="5s" begin="1s" repeatCount="indefinite"/></circle>
+                </g>
+                <!-- River -->
+                <path d="M 450,250 Q 560,420 800,520 L800,600 L420,600 Z" fill="#2980b9" />
+                <path id="ind-river-dirty" d="M 450,250 Q 560,420 800,520 L800,600 L420,600 Z" fill="#3a2f1a" opacity="0.78" style="transition: opacity 1.5s ease;" />
+                <!-- Discharge pipe oozing into the river -->
+                <rect x="360" y="392" width="150" height="26" fill="#3f4a54" />
+                <rect x="360" y="386" width="150" height="7" fill="#566069" />
+                <ellipse cx="508" cy="406" rx="17" ry="14" fill="#1a1a0a" />
             </svg>
-            <div id="ind-pipe-area" class="alert-pulse" style="position:absolute; top:45%; left:50%; width:100px; height:80px; transform:translate(-50%, -50%); border:4px dashed red; border-radius:10px; cursor:pointer;">
-               <svg viewBox="0 0 100 80" style="width:100%;height:100%">
-                   <rect x="20" y="20" width="60" height="40" fill="#34495e"/>
-                   <rect x="80" y="30" width="20" height="20" fill="#e74c3c"/>
-               </svg>
+            <!-- Clickable pollution source over the discharge outlet -->
+            <div id="ind-pipe-area" class="alert-pulse" style="position:absolute; top:64%; left:61%; width:124px; height:98px; transform:translate(-50%, -50%); border:4px dashed red; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <div class="scan-area-label"><span class="scan-emoji">🏭</span><span class="scan-text" data-lang-key="ind1_click_hint">Click the discharge pipe</span></div>
             </div>
             <div id="ind1-typing-text" class="typing-text hidden" style="position:absolute; bottom:15%; left:50%; transform:translateX(-50%); max-width:80%;\"></div>
             <button class="modal-btn hidden" id="btn-ind1-next" style="position:absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index:100;" data-lang-key="btn_next_task">Next Task →</button>
@@ -1087,22 +1154,29 @@
     <div class="scene task-scene" id="scene-ind-task2">
         <div class="task-header">
             <div class="task-title-text">🔧 Stop Direct Discharge</div>
-            <div class="task-instruction" id="ind2-instruction">Fix the leaking pipe joint. Drag missing bolts and tighten all.</div>
+            <div class="task-instruction" id="ind2-instruction">Drag each missing bolt onto the pipe flange, then click the 🔧 wrench to tighten all the bolts.</div>
         </div>
         <div class="ind-pipe-scene" style="position:relative; width:100%; height:100%;">
             <svg class="ind-bg-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; position:absolute; top:0; left:0;">
                 <rect width="800" height="600" fill="#1a1a1a" />
-                <rect x="100" y="250" width="280" height="100" fill="#555" />
-                <rect x="420" y="250" width="280" height="100" fill="#555" />
-                <rect x="360" y="220" width="20" height="160" fill="#777" rx="5" />
-                <rect x="420" y="220" width="20" height="160" fill="#777" rx="5" />
-                <g id="ind2-leak-anim">
-                    <path d="M 395,350 Q 380,450 400,600" stroke="#8b9264" stroke-width="15" fill="none" opacity="0.8">
-                         <animate attributeName="stroke-dasharray" values="10, 10; 20, 20" dur="0.2s" repeatCount="indefinite" />
-                    </path>
+                <!-- subtle industrial wall panels -->
+                <g opacity="0.5">
+                    <rect x="40" y="60" width="180" height="120" fill="#242424" rx="6" />
+                    <rect x="580" y="60" width="180" height="120" fill="#242424" rx="6" />
+                    <circle cx="60" cy="80" r="4" fill="#3a3a3a" /><circle cx="200" cy="80" r="4" fill="#3a3a3a" />
+                    <circle cx="600" cy="80" r="4" fill="#3a3a3a" /><circle cx="740" cy="80" r="4" fill="#3a3a3a" />
                 </g>
             </svg>
-            <div id="ind2-bolts-container"></div>
+            <!-- Horizontal pipe running across, broken by the flange joint -->
+            <div class="ind2-pipe-run"></div>
+            <!-- Pipe-joint flange assembly: bolts sit ON these flange plates -->
+            <div id="ind2-joint" class="ind2-joint">
+                <div class="ind2-flange ind2-flange-left"></div>
+                <div class="ind2-flange ind2-flange-right"></div>
+                <div class="ind2-seam"></div>
+                <div id="ind2-leak-anim" class="ind2-leak"></div>
+                <div id="ind2-bolts-container"></div>
+            </div>
             
             <div class="tools-panel" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:15px; border-radius:10px; display:flex; gap:20px; align-items:center;">
                 <div id="ind2-toolbox" style="display:flex; gap:10px;"></div>
@@ -1162,16 +1236,12 @@
             <div id="ind3-method-selection" class="t4-method-selection" style="display:flex; gap:20px; margin-top:20px;">
                 <div class="t4-method-card" id="btn-ind-method1" style="cursor:pointer; background:rgba(10,25,35,0.85);">
                     <div class="t4-card-title">🪨 Filtration</div>
-                    <div class="t4-card-stats">Water +15</div>
                 </div>
                 <div class="t4-method-card" id="btn-ind-method2" style="cursor:pointer; background:rgba(10,25,35,0.85);">
                     <div class="t4-card-title">🧪 Chemical</div>
-                    <div class="t4-card-stats">Water +20</div>
                 </div>
                 <div class="t4-method-card" id="btn-ind-method3" style="cursor:pointer; background:rgba(10,25,35,0.85);">
                     <div class="t4-card-title">🦠 Bacteria</div>
-                    <div class="t4-card-stats">Water +15 | Bio +15</div>
-                    <div class="t4-card-tag recommended">Best ⭐</div>
                 </div>
             </div>
             
@@ -1328,6 +1398,6 @@
         </div>
     </div>
 
-    <script src="js/game.js"></script>
+    <script src="js/game.js?v=20260609b"></script>
 
 </html>
