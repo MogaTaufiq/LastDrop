@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Last Drop: Water Survival 0009</title>
-    <link rel="stylesheet" href="css/style.css?v=20260609b" />
+    <link rel="stylesheet" href="css/style.css?v=20260623d" />
 </head>
 
 <body>
@@ -41,12 +41,24 @@
         </div>
     </div>
 
+    <!-- Persistent global controls: sound toggle + language, visible on every scene -->
+    <div id="global-controls">
+        <button id="btn-music-toggle" class="global-ctrl-btn" aria-label="Toggle sound" title="Sound on/off">🔊</button>
+        <div class="global-lang">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="id">ID</button>
+        </div>
+    </div>
+
     <!-- Global Back button (per-scene navigation: opening → end) -->
     <button id="btn-back" class="btn-back hidden" aria-label="Back">
         <span class="btn-back-arrow">←</span><span data-lang-key="btn_back_nav">Back</span>
     </button>
 
     <div id="areas-counter" class="hidden">2 areas left to solve</div>
+
+    <!-- Appears only after all three areas are restored; player clicks to view the ending -->
+    <button id="btn-finish-game" class="btn-finish hidden" data-lang-key="btn_finish">✅ Finish — View Results</button>
 
     <div id="todo-panel">
         <button class="ui-toggle-btn" id="btn-todo-toggle">➖</button>
@@ -117,8 +129,8 @@
         </div>
         <div class="tap-to-start" data-lang-key="tap_to_start">⋆ tap anywhere to start ⋆</div>
         <div class="lang-selector-container">
-            <button id="btn-lang-en" class="lang-btn active">EN</button>
-            <button id="btn-lang-id" class="lang-btn">ID</button>
+            <button id="btn-lang-en" class="lang-btn active" data-lang="en">EN</button>
+            <button id="btn-lang-id" class="lang-btn" data-lang="id">ID</button>
         </div>
         <div class="landing-credit">crafted by <span>moviq</span></div>
     </div>
@@ -458,8 +470,8 @@
                 <path d="M-4.5,-16 Q0,-13 4.5,-16" fill="none" stroke="#5c3a1e" stroke-width="1.8" stroke-linecap="round"/>
             </g>
 
-            <!-- INTERACTION RING -->
-            <circle id="res-interact-ring" cx="0" cy="0" r="62" fill="none" stroke="#00b4d8" stroke-width="2.5" stroke-dasharray="8,5" opacity="0" style="pointer-events:none;"/>
+            <!-- INTERACTION RING — subtle highlight that marks the nearest object you can interact with -->
+            <circle id="res-interact-ring" cx="0" cy="0" r="56" fill="none" stroke="#8fe9ff" stroke-width="2" opacity="0" style="pointer-events:none; transition:opacity 0.3s ease;"/>
         </svg>
 
         <!-- Interaction Prompt -->
@@ -1398,6 +1410,6 @@
         </div>
     </div>
 
-    <script src="js/game.js?v=20260609b"></script>
+    <script src="js/game.js?v=20260623d"></script>
 
 </html>

@@ -14,6 +14,7 @@ const GameState = {
     tasksCompleted: [false, false, false, false],
     agriCompleted: false,
     indCompleted: false,
+    endingTriggered: false,
     coastalAlertShown: false,
     agriAlertShown: false,
     isMapOpen: false,
@@ -137,6 +138,9 @@ const TRANSLATIONS = {
         'report_industrial_effluent': 'Industrial Effluent:',
         'btn_play_again': 'Play Again',
         'btn_exit': 'Exit',
+
+        // ---- Finish button ----
+        'btn_finish': '✅ Finish — View Results',
     },
     id: {
         // ---- Landing ----
@@ -249,6 +253,8 @@ const TRANSLATIONS = {
         'Agricultural Area is already safe!': 'Area Pertanian sudah aman!',
         'Industrial Area is already safe!': 'Area Industri sudah aman!',
         'Solve Coastal Area first!': 'Selesaikan Area Pesisir terlebih dahulu!',
+        'Agricultural Area is still safe. Resolve the Coastal Area crisis first!': 'Area Pertanian masih aman. Selesaikan dulu krisis di Area Pesisir!',
+        'Industrial Area is still safe. Resolve the Coastal Area crisis first!': 'Area Industri masih aman. Selesaikan dulu krisis di Area Pesisir!',
         '🚨 Crisis Detected! Walk to the Coastal Area to start your mission.': '🚨 Krisis Terdeteksi! Jalan ke Area Pesisir untuk memulai misi.',
         '🚨 New crisis zones detected! Check Agricultural & Industrial areas.': '🚨 Zona krisis baru terdeteksi! Periksa area Pertanian & Industri.',
         'Area is locked.': 'Area dikunci.',
@@ -424,6 +430,13 @@ const TRANSLATIONS = {
         'Factories are releasing untreated waste into the water.': 'Pabrik-pabrik membuang limbah tanpa diolah ke dalam air.',
         ' Industrial waste may contain toxic chemicals and heavy metals.': ' Limbah industri mungkin mengandung bahan kimia beracun dan logam berat.',
         'Fix the leaking pipe joint. Drag missing bolts and tighten all.': 'Perbaiki sambungan pipa yang bocor. Seret baut yang hilang dan kencangkan semua.',
+        'Step 1: Drag the 4 missing bolts onto the flange.': 'Langkah 1: Seret 4 baut yang hilang ke flense pipa.',
+        'All bolts placed! Step 2: tap the 🔧 wrench, then tap each bolt to tighten.': 'Semua baut terpasang! Langkah 2: ketuk kunci 🔧, lalu ketuk tiap baut untuk mengencangkan.',
+        'Now tap each bolt one by one to tighten it.': 'Sekarang ketuk tiap baut satu per satu untuk mengencangkannya.',
+        'Place all 4 bolts onto the flange first.': 'Pasang dulu keempat baut ke flense.',
+        'Tap the 🔧 wrench first, then tap each bolt.': 'Ketuk kunci 🔧 dulu, lalu ketuk tiap baut.',
+        'Bolts placed': 'Baut terpasang',
+        'Bolts tightened': 'Baut dikencangkan',
         'Discharge successfully stopped.': 'Pembuangan berhasil dihentikan.',
         'Choose a method to treat the remaining wastewater.': 'Pilih metode untuk mengolah sisa air limbah.',
         'Filtration': 'Filtrasi',
@@ -432,6 +445,79 @@ const TRANSLATIONS = {
         'complete. Water quality restored.': 'selesai. Kualitas air dipulihkan.',
         ' Biodiversity improved!': ' Keanekaragaman hayati meningkat!',
         'All pollution sources have been successfully managed.': 'Semua sumber polusi telah berhasil dikelola.',
+
+        // ---- Finish button ----
+        'btn_finish': '✅ Selesai — Lihat Hasil',
+
+        // ---- Residential explore + crisis ----
+        'One more area to restore! Click the minimap to explore.': 'Tinggal satu area lagi untuk dipulihkan! Klik minimap untuk menjelajah.',
+        'Injections': 'Injeksi',
+        '🚨 Crisis Detected! Click the minimap to explore and reach the Coastal Area.': '🚨 Krisis Terdeteksi! Klik minimap untuk menjelajah dan menuju Area Pesisir.',
+        '🚨 New crisis zones detected! Click the minimap to explore.': '🚨 Zona krisis baru terdeteksi! Klik minimap untuk menjelajah.',
+
+        // ---- Residential interactable hints ----
+        '💡 Lighthouses guided sailors for centuries. Today, sustainable choices are the light that guides humanity toward a healthier ocean.': '💡 Mercusuar telah memandu pelaut selama berabad-abad. Kini, pilihan berkelanjutan adalah cahaya yang memandu manusia menuju laut yang lebih sehat.',
+        '🏠 This is your home — and so is our ocean. Every sustainable choice ripples outward to protect our shared world.': '🏠 Ini rumahmu — begitu pula laut kita. Setiap pilihan berkelanjutan beriak ke luar untuk melindungi dunia bersama kita.',
+        '🦋 Healthy pollinator populations signal a thriving ecosystem. Riparian buffer strips in agricultural areas protect vibrant habitats like this garden!': '🦋 Populasi penyerbuk yang sehat menandakan ekosistem yang subur. Jalur penyangga riparian di area pertanian melindungi habitat semarak seperti taman ini!',
+        '🪑 Taking a moment... 2.2 billion people worldwide still lack access to safe drinking water. Our environmental choices today shape the ocean of tomorrow.': '🪑 Sejenak merenung... 2,2 miliar orang di dunia masih kekurangan akses air minum yang aman. Pilihan lingkungan kita hari ini membentuk laut di masa depan.',
+        '🦪 Tide pools shelter hundreds of species in a single pool of water. Industrial and agricultural runoff devastates these fragile micro-ecosystems.': '🦪 Kolam pasang surut menampung ratusan spesies dalam satu genangan air. Limpasan industri dan pertanian menghancurkan mikro-ekosistem rapuh ini.',
+        '⛵ Local fishing communities depend entirely on ocean health. Pollution destroys livelihoods and threatens food security for hundreds of millions of people worldwide.': '⛵ Komunitas nelayan lokal sepenuhnya bergantung pada kesehatan laut. Polusi menghancurkan mata pencaharian dan mengancam ketahanan pangan ratusan juta orang di dunia.',
+        '🌲 Coastal forests are natural pollution barriers. Their root systems can reduce runoff entering the ocean by up to 85%, protecting marine habitats.': '🌲 Hutan pesisir adalah penghalang polusi alami. Sistem akarnya dapat mengurangi limpasan yang masuk ke laut hingga 85%, melindungi habitat laut.',
+
+        // ---- Mailbox letter ----
+        '📬 A Letter from Nature': '📬 Surat dari Alam',
+        '<em style="line-height:1.9;color:#90e0ef;font-style:italic;">\"Dear Friend,<br><br>Thank you for caring about our waters. The rivers remember every kind act — every buffer strip planted, every waste pipe sealed, every spill cleaned up.<br><br>The ocean and I are watching, and we are deeply grateful.<br><br>— The Coastal Ecosystem\"</em>': '<em style="line-height:1.9;color:#90e0ef;font-style:italic;">\"Sahabat terkasih,<br><br>Terima kasih telah peduli pada perairan kita. Sungai mengingat setiap kebaikan — setiap jalur penyangga yang ditanam, setiap pipa limbah yang ditutup, setiap tumpahan yang dibersihkan.<br><br>Lautan dan aku menyaksikan, dan kami sangat bersyukur.<br><br>— Ekosistem Pesisir\"</em>',
+        'Close Letter 💙': 'Tutup Surat 💙',
+
+        // ---- Decision board: In-Situ Burning ----
+        'In-Situ Burning involves containing the oil slick with a fire-resistant boom and igniting it to burn the oil directly off the water surface. This is a rapid physical removal technique.': 'Pembakaran In-Situ melibatkan pengurungan tumpahan minyak dengan boom tahan api lalu menyalakannya untuk membakar minyak langsung dari permukaan air. Ini teknik penghilangan fisik yang cepat.',
+        'Removes up to 90% of surface oil very quickly, preventing it from reaching shorelines.': 'Menghilangkan hingga 90% minyak permukaan dengan sangat cepat, mencegahnya mencapai garis pantai.',
+        'Eliminates the need for long-term waste storage and disposal of liquid oil.': 'Menghilangkan kebutuhan penyimpanan dan pembuangan minyak cair jangka panjang.',
+        'Reduces the exposure of marine organisms on the surface to toxic oil slicks.': 'Mengurangi paparan organisme laut di permukaan terhadap tumpahan minyak beracun.',
+        'Produces large plumes of toxic black smoke containing particulate matter and greenhouse gases.': 'Menghasilkan gumpalan asap hitam beracun yang mengandung partikel dan gas rumah kaca.',
+        'A small fraction of heavy oil residues will sink to the seabed, potentially smothering benthic organisms.': 'Sebagian kecil residu minyak berat akan tenggelam ke dasar laut, berpotensi menutupi organisme bentik.',
+        'Highly dependent on calm weather and thick oil patches to maintain combustion.': 'Sangat bergantung pada cuaca tenang dan lapisan minyak tebal untuk menjaga pembakaran.',
+        'High immediate recovery. While it causes short-term air quality issues, it prevents catastrophic oiling of beaches and wetlands. Marine populations recovery time is faster (approx. 2-5 years).': 'Pemulihan langsung yang tinggi. Meski menimbulkan masalah kualitas udara jangka pendek, cara ini mencegah pencemaran parah di pantai dan lahan basah. Waktu pemulihan populasi laut lebih cepat (sekitar 2-5 tahun).',
+
+        // ---- Decision board: Corexit Dispersant ----
+        'Chemical dispersants are sprayed onto the slick to break the oil into tiny droplets. The droplets disperse into the water column, where they are diluted and degraded by microbes.': 'Dispersan kimia disemprotkan ke tumpahan untuk memecah minyak menjadi tetesan kecil. Tetesan menyebar ke kolom air, lalu diencerkan dan diuraikan oleh mikroba.',
+        'Removes oil from the surface rapidly, protecting sea birds and mammals.': 'Menghilangkan minyak dari permukaan dengan cepat, melindungi burung dan mamalia laut.',
+        'Allows microbial populations to degrade the oil droplets faster due to increased surface area.': 'Memungkinkan populasi mikroba menguraikan tetesan minyak lebih cepat karena luas permukaan bertambah.',
+        'Effective in rougher seas where mechanical containment and burning are impossible.': 'Efektif di laut yang lebih berombak di mana pengurungan mekanis dan pembakaran mustahil dilakukan.',
+        'Does not remove oil; it shifts it into the water column, making it highly toxic to marine life.': 'Tidak menghilangkan minyak; hanya memindahkannya ke kolom air, membuatnya sangat beracun bagi kehidupan laut.',
+        'The dispersant (Corexit) combined with oil is more toxic to corals, fish, and zooplankton than oil alone.': 'Dispersan (Corexit) yang bercampur minyak lebih beracun bagi karang, ikan, dan zooplankton dibanding minyak saja.',
+        'Creates a massive underwater plume of dissolved toxins that can persist for decades.': 'Menciptakan gumpalan racun terlarut bawah laut yang besar dan dapat bertahan selama puluhan tahun.',
+        'Toxic persistence. The water looks clean on the surface, but underwater biodiversity drops significantly. Coral reefs and benthic fisheries suffer long-term damage, with recovery taking 15+ years.': 'Racun yang bertahan lama. Air tampak bersih di permukaan, tetapi keanekaragaman hayati bawah laut menurun drastis. Terumbu karang dan perikanan bentik mengalami kerusakan jangka panjang, dengan pemulihan 15+ tahun.',
+
+        // ---- Decision board: Mechanical Filtration ----
+        'Uses physical layers of gravel, sand, and activated carbon to trap particulate waste and filter out sediment. A clean, mechanical approach.': 'Menggunakan lapisan fisik kerikil, pasir, dan karbon aktif untuk menjebak limbah partikel dan menyaring sedimen. Pendekatan mekanis yang bersih.',
+        'Safely removes large suspended particles, sand, and grit without adding chemicals.': 'Menghilangkan partikel tersuspensi besar, pasir, dan kerikil dengan aman tanpa menambahkan bahan kimia.',
+        'Reliable, simple, and low-maintenance technology with minimal risk of chemical spills.': 'Teknologi yang andal, sederhana, dan minim perawatan dengan risiko tumpahan kimia yang kecil.',
+        'Good pre-treatment to clear turbidity and debris.': 'Pra-pengolahan yang baik untuk menjernihkan kekeruhan dan kotoran.',
+        'Does not remove dissolved chemical pollutants, heavy metals, or pathogens.': 'Tidak menghilangkan polutan kimia terlarut, logam berat, atau patogen.',
+        'Filters clog regularly and create concentrated waste sediment that must be landfilled.': 'Filter sering tersumbat dan menghasilkan sedimen limbah pekat yang harus ditimbun.',
+        'Provides no biological cleaning for organic matter.': 'Tidak menyediakan pembersihan biologis untuk bahan organik.',
+        'Semi-stable outcome. Solid waste is successfully filtered out, but dissolved heavy metals continue to slowly accumulate in the coastal ecosystem, leading to gradual bioaccumulation.': 'Hasil semi-stabil. Limbah padat berhasil disaring, tetapi logam berat terlarut terus perlahan menumpuk di ekosistem pesisir, menyebabkan bioakumulasi bertahap.',
+
+        // ---- Decision board: Chemical Coagulation ----
+        'Adds chemical coagulants (like alum) to bind dissolved contaminants into heavy clumps that settle out of the water. High-volume chemical precipitation.': 'Menambahkan koagulan kimia (seperti tawas) untuk mengikat kontaminan terlarut menjadi gumpalan berat yang mengendap dari air. Pengendapan kimia volume tinggi.',
+        'Highly effective at removing dissolved phosphorus, heavy metals, and organic pollutants.': 'Sangat efektif menghilangkan fosfor terlarut, logam berat, dan polutan organik.',
+        'Fast processing time and high water clarity output.': 'Waktu proses cepat dan kejernihan air keluaran tinggi.',
+        'Excellent for emergency high-pollution scenarios.': 'Sangat baik untuk skenario darurat dengan polusi tinggi.',
+        'Creates massive amounts of toxic chemical sludge that is hazardous and difficult to dispose of.': 'Menghasilkan lumpur kimia beracun dalam jumlah besar yang berbahaya dan sulit dibuang.',
+        'Excess chemicals can leach back into the river, harming aquatic life (pH shocks, aluminum toxicity).': 'Kelebihan bahan kimia dapat meresap kembali ke sungai, membahayakan kehidupan air (kejutan pH, toksisitas aluminium).',
+        'High chemical dependency and operational costs.': 'Ketergantungan kimia dan biaya operasional yang tinggi.',
+        'High cost, high risk. The effluent is clear, but toxic chemical sludge storage poses a permanent hazard. Runoff leaks can cause localized toxicity spikes in the aquatic food chain.': 'Biaya tinggi, risiko tinggi. Limbah cairnya jernih, tetapi penyimpanan lumpur kimia beracun menimbulkan bahaya permanen. Kebocoran limpasan dapat memicu lonjakan toksisitas lokal pada rantai makanan air.',
+
+        // ---- Decision board: Bacterial Bioremediation ----
+        'Uses active cultures of beneficial microbes to digest and break down organic pollutants and toxic ammonia into harmless byproducts. An eco-driven solution.': 'Menggunakan kultur aktif mikroba bermanfaat untuk mencerna dan menguraikan polutan organik serta amonia beracun menjadi produk sampingan yang tidak berbahaya. Solusi berbasis ekologi.',
+        'Naturally breaks down organic compounds, nitrates, and ammonia into harmless nitrogen gas.': 'Secara alami menguraikan senyawa organik, nitrat, dan amonia menjadi gas nitrogen yang tidak berbahaya.',
+        'No toxic chemical residues or hazardous sludge are produced; creates a natural cycle.': 'Tidak menghasilkan residu kimia beracun atau lumpur berbahaya; menciptakan siklus alami.',
+        'Boosts long-term ecosystem resilience by introducing beneficial microbes.': 'Meningkatkan ketahanan ekosistem jangka panjang dengan memperkenalkan mikroba bermanfaat.',
+        'Requires precise temperature, oxygen, and pH control; bacteria can die off if conditions change.': 'Membutuhkan kontrol suhu, oksigen, dan pH yang presisi; bakteri bisa mati jika kondisi berubah.',
+        'Slower process compared to chemical treatment and filtration.': 'Proses lebih lambat dibandingkan pengolahan kimia dan filtrasi.',
+        'Does not remove heavy metals (which must be pre-filtered).': 'Tidak menghilangkan logam berat (yang harus disaring terlebih dahulu).',
+        'Sustainable recovery. The natural biological treatment restores ecological balance without toxic byproducts. Water and biodiversity metrics recover to optimal health over 5-10 years.': 'Pemulihan berkelanjutan. Pengolahan biologis alami memulihkan keseimbangan ekologi tanpa produk sampingan beracun. Metrik air dan keanekaragaman hayati pulih ke kesehatan optimal dalam 5-10 tahun.',
     }
 };
 
@@ -440,7 +526,12 @@ const TRANSLATIONS = {
 // ============================================
 function getTranslation(key) {
     if (!key) return key;
-    if (GameState.language === 'en') return key;
+    // Look the key up in the active dictionary for BOTH languages. Two key styles
+    // coexist: slug keys (e.g. 'water_quality_label', used in data-lang-key) live in
+    // both dicts, and English-sentence keys (used inline in code) live only in `id`.
+    // For English-sentence keys the `en` lookup misses and we fall back to the key
+    // itself, which IS the English text. This also makes switching ID→EN restore
+    // slug-keyed UI correctly instead of showing the raw slug.
     const dict = TRANSLATIONS[GameState.language];
     if (!dict) return key;
     return dict[key] !== undefined ? dict[key] : key;
@@ -464,18 +555,11 @@ function updateLanguageUI() {
         }
     });
 
-    // Update active lang button indicator
-    const btnEn = document.getElementById('btn-lang-en');
-    const btnId = document.getElementById('btn-lang-id');
-    if (btnEn && btnId) {
-        if (GameState.language === 'en') {
-            btnEn.classList.add('active');
-            btnId.classList.remove('active');
-        } else {
-            btnId.classList.add('active');
-            btnEn.classList.remove('active');
-        }
-    }
+    // Update active lang button indicator across ALL language toggles
+    // (landing selector + persistent global controls).
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === GameState.language);
+    });
 
     // Re-render the current cinematic slide text if in cinematic phase
     if (GameState.phase === 'cinematic' && typeof renderSlide === 'function') {
@@ -504,6 +588,31 @@ function updateTodoPanelText() {
 function changeLanguage(lang) {
     GameState.language = lang;
     updateLanguageUI();
+}
+
+// Wire the persistent controls (sound toggle + every language button) once.
+// Language buttons live both on the landing screen and in the always-on
+// #global-controls cluster, so we bind them all by class here.
+function initGlobalControls() {
+    if (typeof document === 'undefined') return;
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // don't trigger "tap anywhere to start" on landing
+            changeLanguage(btn.dataset.lang);
+        });
+    });
+
+    const musicBtn = document.getElementById('btn-music-toggle');
+    if (musicBtn) {
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const muted = Audio.toggleMute();
+            musicBtn.textContent = muted ? '🔇' : '🔊';
+            musicBtn.classList.toggle('muted', muted);
+            musicBtn.setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
+        });
+    }
 }
 
 function initTogglePanels() {
@@ -629,15 +738,15 @@ function showDecisionBoard(choiceId, onConfirm) {
     const data = DecisionData[choiceId];
     if (!data) return;
 
-    document.getElementById('decision-title').textContent = data.title;
-    document.getElementById('decision-desc').textContent = data.desc;
+    document.getElementById('decision-title').textContent = getTranslation(data.title);
+    document.getElementById('decision-desc').textContent = getTranslation(data.desc);
 
     const benefitsList = document.getElementById('decision-benefits-list');
     if (benefitsList) {
         benefitsList.innerHTML = '';
         data.benefits.forEach(benefit => {
             const li = document.createElement('li');
-            li.textContent = benefit;
+            li.textContent = getTranslation(benefit);
             benefitsList.appendChild(li);
         });
     }
@@ -647,13 +756,13 @@ function showDecisionBoard(choiceId, onConfirm) {
         risksList.innerHTML = '';
         data.risks.forEach(risk => {
             const li = document.createElement('li');
-            li.textContent = risk;
+            li.textContent = getTranslation(risk);
             risksList.appendChild(li);
         });
     }
 
     const outlookText = document.getElementById('decision-outlook-text');
-    if (outlookText) outlookText.textContent = data.outlook;
+    if (outlookText) outlookText.textContent = getTranslation(data.outlook);
 
     Modal.show('modal-sustainability-decision');
 
@@ -856,6 +965,10 @@ const Audio = {
     offsets: {},
     bgMusic: null,
     muted: false,
+    // Remember the last-requested background loop so we can resume the correct
+    // scene ambience when the player un-mutes mid-game.
+    currentBgId: null,
+    currentBgOpts: null,
 
     // Added startOffset (in seconds) to skip silence at the beginning of audio files
     load(id, src, startOffset = 0) {
@@ -868,6 +981,12 @@ const Audio = {
     },
 
     play(id, options = {}) {
+        // Track the intended background loop even while muted, so un-muting can
+        // resume the correct scene ambience (not a stale one).
+        if (options.loop) {
+            this.currentBgId = id;
+            this.currentBgOpts = options;
+        }
         if (this.muted) return;
         const snd = this.sounds[id];
         if (!snd) return;
@@ -925,6 +1044,19 @@ const Audio = {
             this.bgMusic.pause();
             this.bgMusic.currentTime = 0;
         }
+    },
+
+    // Total mute: silences every sound (background loops + SFX). SFX are gated by
+    // the `muted` check in play(); the background loop is paused/resumed here.
+    toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) {
+            if (this.bgMusic) this.bgMusic.pause();
+        } else if (this.currentBgId) {
+            // Resume the ambience that belongs to the current scene.
+            this.play(this.currentBgId, this.currentBgOpts || { loop: true, volume: 0.3 });
+        }
+        return this.muted;
     },
 
     init() {
@@ -1167,6 +1299,141 @@ function showStatGain(stats) {
 }
 
 // ============================================
+// EDUCATIONAL PANELS (shown after specific missions)
+// Water-pollution learning content tied to each mission. Stored bilingually so
+// the panel renders in the player's current language without bloating the main
+// translation dictionary.
+// ============================================
+const EDU_CONTENT = {
+    marine_rescue: {
+        en: {
+            title: '🐢 Mission Complete: Marine Rescue!',
+            sections: [
+                ['🔬 What Just Happened?', 'The animal was trapped by plastic waste. In real life, plastic pollution can injure marine animals, make it harder for them to find food, and even lead to death.'],
+                ['🔬 Science Fact', 'Over time, larger plastic items break down into tiny pieces called microplastics, which can enter the food chain and affect many aquatic organisms.'],
+                ['🌱 Why It Matters', 'Every piece of plastic removed from the environment helps protect marine biodiversity and supports healthier ecosystems.']
+            ],
+            impact: '💡 Your Impact: You helped save wildlife from one of the biggest threats in aquatic environments.'
+        },
+        id: {
+            title: '🐢 Misi Selesai: Penyelamatan Laut!',
+            sections: [
+                ['🔬 Apa yang Baru Saja Terjadi?', 'Hewan itu terjerat sampah plastik. Di dunia nyata, polusi plastik dapat melukai hewan laut, menyulitkan mereka mencari makan, bahkan menyebabkan kematian.'],
+                ['🔬 Fakta Sains', 'Seiring waktu, sampah plastik besar terurai menjadi potongan kecil bernama mikroplastik, yang dapat masuk ke rantai makanan dan memengaruhi banyak organisme air.'],
+                ['🌱 Mengapa Ini Penting', 'Setiap plastik yang dibersihkan dari lingkungan membantu melindungi keanekaragaman hayati laut dan mendukung ekosistem yang lebih sehat.']
+            ],
+            impact: '💡 Dampakmu: Kamu membantu menyelamatkan satwa liar dari salah satu ancaman terbesar di lingkungan perairan.'
+        }
+    },
+    shoreline_cleanup: {
+        en: {
+            title: '🗑️ Mission Complete: Shoreline Cleanup!',
+            sections: [
+                ['🔬 What Just Happened?', 'Plastic left on beaches can be washed into rivers and oceans. Over time, it breaks down into tiny particles called microplastics that can enter food chains.'],
+                ['🔬 Science Fact', 'Plastic waste can be carried by wind and rain into rivers and oceans. Once there, it can persist for hundreds of years and harm aquatic organisms.'],
+                ['🌱 Why It Matters', 'Reducing litter prevents pollution from spreading and helps keep ecosystems healthy for future generations.']
+            ],
+            impact: '💡 Your Impact: Small cleanup actions can create a big positive change for the environment.'
+        },
+        id: {
+            title: '🗑️ Misi Selesai: Bersih-Bersih Pantai!',
+            sections: [
+                ['🔬 Apa yang Baru Saja Terjadi?', 'Plastik yang tertinggal di pantai bisa terbawa ke sungai dan laut. Seiring waktu, plastik terurai menjadi partikel kecil bernama mikroplastik yang dapat masuk ke rantai makanan.'],
+                ['🔬 Fakta Sains', 'Sampah plastik dapat terbawa angin dan hujan ke sungai dan laut. Begitu sampai di sana, plastik bisa bertahan ratusan tahun dan membahayakan organisme air.'],
+                ['🌱 Mengapa Ini Penting', 'Mengurangi sampah mencegah polusi menyebar dan membantu menjaga ekosistem tetap sehat untuk generasi mendatang.']
+            ],
+            impact: '💡 Dampakmu: Tindakan kecil membersihkan sampah dapat menciptakan perubahan positif yang besar bagi lingkungan.'
+        }
+    },
+    oil_leak_stopped: {
+        en: {
+            title: '🛢️ Mission Complete: Oil Leak Stopped!',
+            sections: [
+                ['🌊 What Just Happened?', 'You stopped oil from spreading through the water.'],
+                ['🔬 Science Fact', 'Oil forms a layer on the water surface, reducing oxygen exchange and blocking sunlight needed by aquatic plants.'],
+                ['🌱 Why It Matters', 'Preventing pollution before it spreads is one of the most effective ways to protect ecosystems.']
+            ],
+            impact: '💡 Your Impact: You helped prevent damage to aquatic habitats and biodiversity.'
+        },
+        id: {
+            title: '🛢️ Misi Selesai: Kebocoran Minyak Dihentikan!',
+            sections: [
+                ['🌊 Apa yang Baru Saja Terjadi?', 'Kamu menghentikan minyak agar tidak menyebar ke seluruh perairan.'],
+                ['🔬 Fakta Sains', 'Minyak membentuk lapisan di permukaan air, mengurangi pertukaran oksigen dan menghalangi sinar matahari yang dibutuhkan tumbuhan air.'],
+                ['🌱 Mengapa Ini Penting', 'Mencegah polusi sebelum menyebar adalah salah satu cara paling efektif untuk melindungi ekosistem.']
+            ],
+            impact: '💡 Dampakmu: Kamu membantu mencegah kerusakan pada habitat air dan keanekaragaman hayati.'
+        }
+    },
+    direct_discharge: {
+        en: {
+            title: '🚫 Mission Complete: Direct Discharge Prevented!',
+            sections: [
+                ['🌊 What Just Happened?', 'Untreated waste can no longer flow directly into the water.'],
+                ['🔬 Science Fact', 'Wastewater may contain harmful chemicals, bacteria, and excess nutrients that reduce water quality and threaten aquatic life.'],
+                ['🌱 Why It Matters', 'Clean water is essential for healthy ecosystems and sustainable communities.']
+            ],
+            impact: '💡 Your Impact: You helped protect a valuable freshwater resource.'
+        },
+        id: {
+            title: '🚫 Misi Selesai: Pembuangan Langsung Dicegah!',
+            sections: [
+                ['🌊 Apa yang Baru Saja Terjadi?', 'Limbah yang tidak diolah kini tidak bisa lagi mengalir langsung ke air.'],
+                ['🔬 Fakta Sains', 'Air limbah dapat mengandung bahan kimia berbahaya, bakteri, dan kelebihan nutrisi yang menurunkan kualitas air dan mengancam kehidupan air.'],
+                ['🌱 Mengapa Ini Penting', 'Air bersih sangat penting bagi ekosistem yang sehat dan masyarakat yang berkelanjutan.']
+            ],
+            impact: '💡 Dampakmu: Kamu membantu melindungi sumber air tawar yang berharga.'
+        }
+    },
+    buffer_strip: {
+        en: {
+            title: '🌿 Mission Complete: Buffer Strip Established!',
+            sections: [
+                ['🌊 What Just Happened?', 'A protective vegetation zone now helps filter pollutants before they reach the water.'],
+                ['🔬 Science Fact', 'Plants in buffer strips trap sediments and absorb excess nutrients, reducing water pollution from runoff.'],
+                ['🌱 Why It Matters', 'Nature-based solutions can improve water quality while supporting biodiversity.']
+            ],
+            impact: '💡 Your Impact: You used the power of nature to protect the ecosystem.'
+        },
+        id: {
+            title: '🌿 Misi Selesai: Jalur Penyangga Terbentuk!',
+            sections: [
+                ['🌊 Apa yang Baru Saja Terjadi?', 'Zona vegetasi pelindung kini membantu menyaring polutan sebelum mencapai air.'],
+                ['🔬 Fakta Sains', 'Tanaman pada jalur penyangga menjebak sedimen dan menyerap kelebihan nutrisi, mengurangi pencemaran air akibat limpasan.'],
+                ['🌱 Mengapa Ini Penting', 'Solusi berbasis alam dapat meningkatkan kualitas air sekaligus mendukung keanekaragaman hayati.']
+            ],
+            impact: '💡 Dampakmu: Kamu memanfaatkan kekuatan alam untuk melindungi ekosistem.'
+        }
+    }
+};
+
+// Shows a post-mission educational panel, then runs onContinue (the normal flow).
+function showEduPanel(key, buttonLabel, onContinue) {
+    const data = EDU_CONTENT[key];
+    if (!data) { if (onContinue) onContinue(); return; }
+    const content = data[GameState.language] || data.en;
+
+    const sectionsHtml = content.sections.map(([heading, body]) =>
+        `<div class="edu-section"><div class="edu-heading">${heading}</div><div class="edu-body">${body}</div></div>`
+    ).join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay visible edu-overlay';
+    overlay.innerHTML = `
+        <div class="modal-box edu-box">
+            <div class="edu-title">${content.title}</div>
+            <div class="edu-sections">${sectionsHtml}</div>
+            <div class="edu-impact">${content.impact}</div>
+            <button class="modal-btn" id="edu-continue-btn">${getTranslation(buttonLabel)}</button>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#edu-continue-btn').addEventListener('click', () => {
+        overlay.remove();
+        if (onContinue) onContinue();
+    }, { once: true });
+}
+
+// ============================================
 // PARTICLE EFFECTS
 // ============================================
 const Particles = {
@@ -1224,21 +1491,8 @@ function initLanding() {
         starsContainer.appendChild(star);
     }
 
-    // Language selector buttons — must stop propagation so they don't trigger the scene start
-    const btnLangEn = document.getElementById('btn-lang-en');
-    const btnLangId = document.getElementById('btn-lang-id');
-    if (btnLangEn) {
-        btnLangEn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            changeLanguage('en');
-        });
-    }
-    if (btnLangId) {
-        btnLangId.addEventListener('click', function(e) {
-            e.stopPropagation();
-            changeLanguage('id');
-        });
-    }
+    // Language selector buttons are wired globally in initGlobalControls()
+    // (they live both here and in the persistent #global-controls cluster).
 
     // Click anywhere else to start
     document.getElementById('scene-landing').addEventListener('click', () => {
@@ -1776,13 +2030,13 @@ function interactLighthouse() {
     if (beacon) { beacon.style.transition='all 0.3s'; beacon.setAttribute('r','38'); beacon.setAttribute('fill','#fff8d0'); setTimeout(() => { beacon.setAttribute('r','26'); beacon.setAttribute('fill','#ffd166'); beacon.style.transition=''; }, 550); }
     if (glow)   { glow.setAttribute('r','90'); setTimeout(() => glow.setAttribute('r','55'), 600); }
     Particles.burst(1283*window.innerWidth/1600, 108*window.innerHeight/900, 10, ['\u2728','\uD83D\uDCAB','\u2B50','\uD83D\uDD06']);
-    Toast.show('\uD83D\uDCA1 Lighthouses guided sailors for centuries. Today, sustainable choices are the light that guides humanity toward a healthier ocean.', '', 5500);
+    Toast.show(getTranslation('\uD83D\uDCA1 Lighthouses guided sailors for centuries. Today, sustainable choices are the light that guides humanity toward a healthier ocean.'), '', 5500);
 }
 function interactHouse() {
     const knob = document.getElementById('res-door-knob');
     if (knob) { knob.setAttribute('r','8'); knob.setAttribute('fill','#fff'); setTimeout(() => { knob.setAttribute('r','5'); knob.setAttribute('fill','#ffd166'); }, 450); }
     Particles.burst(610*window.innerWidth/1600, 458*window.innerHeight/900, 8, ['\uD83D\uDC9A','\uD83C\uDFE0','\u2764\uFE0F','\u2728']);
-    Toast.show('\uD83C\uDFE0 This is your home \u2014 and so is our ocean. Every sustainable choice ripples outward to protect our shared world.', '', 5500);
+    Toast.show(getTranslation('\uD83C\uDFE0 This is your home \u2014 and so is our ocean. Every sustainable choice ripples outward to protect our shared world.'), '', 5500);
 }
 function interactMailbox() {
     Particles.burst(763*window.innerWidth/1600, 510*window.innerHeight/900, 8, ['\uD83D\uDC8C','\u2709\uFE0F','\uD83D\uDC99']);
@@ -1792,11 +2046,11 @@ function interactMailbox() {
 }
 function interactFlowers() {
     Particles.burst(440*window.innerWidth/1600, 490*window.innerHeight/900, 16, ['\uD83E\uDD8B','\uD83C\uDF38','\uD83C\uDF3A','\uD83C\uDF3C','\uD83D\uDC90','\uD83C\uDF3B']);
-    Toast.show('\uD83E\uDD8B Healthy pollinator populations signal a thriving ecosystem. Riparian buffer strips in agricultural areas protect vibrant habitats like this garden!', '', 5500);
+    Toast.show(getTranslation('\uD83E\uDD8B Healthy pollinator populations signal a thriving ecosystem. Riparian buffer strips in agricultural areas protect vibrant habitats like this garden!'), '', 5500);
 }
 function interactBench() {
     Particles.burst(855*window.innerWidth/1600, 510*window.innerHeight/900, 8, ['\u2B50','\uD83C\uDF19','\uD83D\uDCAD','\uD83C\uDF0A','\uD83C\uDF3F']);
-    Toast.show('\uD83E\uDE91 Taking a moment... 2.2 billion people worldwide still lack access to safe drinking water. Our environmental choices today shape the ocean of tomorrow.', '', 5500);
+    Toast.show(getTranslation('\uD83E\uDE91 Taking a moment... 2.2 billion people worldwide still lack access to safe drinking water. Our environmental choices today shape the ocean of tomorrow.'), '', 5500);
 }
 function interactTidepool() {
     const crab = document.getElementById('res-crab-svg');
@@ -1809,7 +2063,7 @@ function interactTidepool() {
         }, 75);
     }
     Particles.burst(168*window.innerWidth/1600, 640*window.innerHeight/900, 10, ['\uD83E\uDDAA','\uD83D\uDC1A','\uD83C\uDF0A','\uD83D\uDCA7','\uD83D\uDC20','\u2B50']);
-    Toast.show('\uD83E\uDDAA Tide pools shelter hundreds of species in a single pool of water. Industrial and agricultural runoff devastates these fragile micro-ecosystems.', '', 5500);
+    Toast.show(getTranslation('\uD83E\uDDAA Tide pools shelter hundreds of species in a single pool of water. Industrial and agricultural runoff devastates these fragile micro-ecosystems.'), '', 5500);
 }
 function interactBoat() {
     const boat = document.getElementById('res-boat-group');
@@ -1823,11 +2077,11 @@ function interactBoat() {
         }, 60);
     }
     Particles.burst(338*window.innerWidth/1600, 678*window.innerHeight/900, 8, ['\u26F5','\uD83D\uDC1F','\uD83C\uDF0A','\uD83C\uDFA3']);
-    Toast.show('\u26F5 Local fishing communities depend entirely on ocean health. Pollution destroys livelihoods and threatens food security for hundreds of millions of people worldwide.', '', 5500);
+    Toast.show(getTranslation('\u26F5 Local fishing communities depend entirely on ocean health. Pollution destroys livelihoods and threatens food security for hundreds of millions of people worldwide.'), '', 5500);
 }
 function interactTree() {
     Particles.burst(220*window.innerWidth/1600, 390*window.innerHeight/900, 12, ['\uD83D\uDC26','\uD83C\uDF43','\uD83C\uDF32','\uD83C\uDF3F','\u2728']);
-    Toast.show('\uD83C\uDF32 Coastal forests are natural pollution barriers. Their root systems can reduce runoff entering the ocean by up to 85%, protecting marine habitats.', '', 5500);
+    Toast.show(getTranslation('\uD83C\uDF32 Coastal forests are natural pollution barriers. Their root systems can reduce runoff entering the ocean by up to 85%, protecting marine habitats.'), '', 5500);
 }
 
 function initJoystick() {
@@ -1960,14 +2214,16 @@ function updateMapCrisis() {
     } else if (GameState.allTasksDone()) {
         setAreaState(agri, agriStatus, 'crisis', '\uD83D\uDEA8 CRISIS');
     } else {
-        setAreaState(agri, agriStatus, 'neutral', '\uD83D\uDD12 LOCKED');
+        // Coastal is still the active crisis \u2014 Agricultural stays safe for now.
+        setAreaState(agri, agriStatus, 'done', '\u2705 SAFE');
     }
     if (GameState.indCompleted) {
         setAreaState(industrial, indStatus, 'done', '\u2705 SAFE');
     } else if (GameState.allTasksDone()) {
         setAreaState(industrial, indStatus, 'crisis', '\uD83D\uDEA8 CRISIS');
     } else {
-        setAreaState(industrial, indStatus, 'neutral', '\uD83D\uDD12 LOCKED');
+        // Coastal is still the active crisis \u2014 Industrial stays safe for now.
+        setAreaState(industrial, indStatus, 'done', '\u2705 SAFE');
     }
     // Minimap blinking
     const allDone = GameState.allTasksDone() && GameState.agriCompleted && GameState.indCompleted;
@@ -2046,7 +2302,7 @@ function checkResProximity() {
         resNearInteractable = closest;
         if (prompt) prompt.classList.remove('hidden');
         if (icon) icon.textContent = closest.icon;
-        if (ring) { ring.setAttribute('cx', closest.x); ring.setAttribute('cy', closest.y); ring.setAttribute('opacity', '0.65'); }
+        if (ring) { ring.setAttribute('cx', closest.x); ring.setAttribute('cy', closest.y); ring.setAttribute('opacity', '0.4'); }
     } else {
         resNearInteractable = null;
         if (prompt) prompt.classList.add('hidden');
@@ -2098,7 +2354,7 @@ function triggerFirstCrisis() {
     Modal.show('modal-map-alert');
     document.getElementById('btn-start-mission').onclick = () => {
         Modal.hide('modal-map-alert');
-        Toast.show('\uD83D\uDEA8 Crisis Detected! Click the minimap to explore and reach the Coastal Area.', '', 6000);
+        Toast.show(getTranslation('\uD83D\uDEA8 Crisis Detected! Click the minimap to explore and reach the Coastal Area.'), '', 6000);
         showMiniMap();
         const mc = document.getElementById('mini-map-container');
         if (mc) {
@@ -2117,6 +2373,7 @@ function openExploreMap() {
     exploreMapActive = true;
     resLoopActive = false;
     joystickActive = false; // Prevent stuck drift
+    hideFinishButton(); // re-shown by checkAllAreasDone() when back in residential
     
     GameState.phase = 'explore-map';
     SceneManager.show('scene-explore-map', () => {
@@ -2189,22 +2446,35 @@ function enterArea(areaName) {
         closeExploreMap();
         return;
     }
-    if (exploreMapActive) {
+
+    // Only tear the explore map down when we actually commit to entering a mission.
+    // Doing it unconditionally (the old behaviour) left the player frozen in a dead
+    // explore map whenever they tapped an area that isn't enterable yet.
+    function leaveExploreMap() {
+        if (!exploreMapActive) return;
         exploreMapActive = false;
         worldLoopActive = false;
         const prompt = document.getElementById('world-enter-prompt');
         if (prompt) prompt.classList.add('hidden');
         worldNearArea = null;
     }
+
+    // Story gating: only the Coastal area is in crisis at first. Agricultural and
+    // Industrial stay "safe" until Coastal is resolved \u2014 tapping them just nudges
+    // the player back to the active crisis instead of locking up the game.
+    const coastalDone = GameState.allTasksDone();
+
     if (areaName === 'coastal') {
-        if (!GameState.allTasksDone()) {
+        if (!coastalDone) {
+            leaveExploreMap();
             showMissionIntro('Coastal Area', 'A pollution crisis has been detected in the Coastal Area! Complete all tasks to restore environmental balance.', () => {
                 GameState.currentArea = areaName; TodoPanel.show();
                 GameState.phase = 'task1'; SceneManager.show('scene-task1', () => initTask1());
             });
         } else { Toast.show(getTranslation('Coastal Area is already safe!'), '\u2705', 2000); }
     } else if (areaName === 'agricultural') {
-        if (GameState.allTasksDone() && !GameState.agriCompleted) {
+        if (coastalDone && !GameState.agriCompleted) {
+            leaveExploreMap();
             showMissionIntro('Agricultural Area', 'Pollution detected in the Agricultural Area. Excess nutrients are affecting water quality.', () => {
                 GameState.currentArea = areaName; TodoPanel.show();
                 document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
@@ -2216,9 +2486,10 @@ function enterArea(areaName) {
                 GameState.phase = 'agri1'; SceneManager.show('scene-agri-task1', () => initAgriTask1());
             });
         } else if (GameState.agriCompleted) { Toast.show(getTranslation('Agricultural Area is already safe!'), '\u2705', 2000); }
-        else { Toast.show(getTranslation('Solve Coastal Area first!'), '\uD83D\uDD12', 2000); }
+        else { Toast.show(getTranslation('Agricultural Area is still safe. Resolve the Coastal Area crisis first!'), '\u2705', 2800); }
     } else if (areaName === 'industrial') {
-        if (GameState.allTasksDone() && !GameState.indCompleted) {
+        if (coastalDone && !GameState.indCompleted) {
+            leaveExploreMap();
             showMissionIntro('Industrial Area', 'Pollution detected in the Industrial Area. Untreated wastewater is being released into the river.', () => {
                 GameState.currentArea = areaName; Audio.stopBg(); Audio.play('ambient_factory', { volume: 0.3, loop: true }); TodoPanel.show();
                 document.getElementById('todo-0').innerHTML = `<span class="todo-check"></span>${getTranslation('Identify pollution source')}`;
@@ -2231,7 +2502,7 @@ function enterArea(areaName) {
                 GameState.phase = 'ind1'; SceneManager.show('scene-ind-task1', () => initIndTask1());
             });
         } else if (GameState.indCompleted) { Toast.show(getTranslation('Industrial Area is already safe!'), '\u2705', 2000); }
-        else { Toast.show(getTranslation('Solve Coastal Area first!'), '\uD83D\uDD12', 2000); }
+        else { Toast.show(getTranslation('Industrial Area is still safe. Resolve the Coastal Area crisis first!'), '\u2705', 2800); }
     }
 }
 
@@ -2332,13 +2603,16 @@ function initResidential() {
     } else if (GameState.allTasksDone() && !GameState.agriAlertShown && (!GameState.agriCompleted || !GameState.indCompleted)) {
         GameState.agriAlertShown = true;
         setTimeout(() => {
-            if (GameState.phase === 'residential') Toast.show('\uD83D\uDEA8 New crisis zones detected! Click the minimap to explore.', '', 5000);
+            if (GameState.phase === 'residential') Toast.show(getTranslation('\uD83D\uDEA8 New crisis zones detected! Click the minimap to explore.'), '', 5000);
         }, 1200);
     } else if (GameState.allTasksDone() && (GameState.agriCompleted || GameState.indCompleted) && (!GameState.agriCompleted || !GameState.indCompleted)) {
         setTimeout(() => {
-            if (GameState.phase === 'residential') Toast.show('One more area to restore! Click the minimap to explore.', '\uD83D\uDDFA\uFE0F', 3000);
+            if (GameState.phase === 'residential') Toast.show(getTranslation('One more area to restore! Click the minimap to explore.'), '\uD83D\uDDFA\uFE0F', 3000);
         }, 1500);
     }
+
+    // All areas done — trigger ending regardless of which area was finished last.
+    checkAllAreasDone();
 }
 
 
@@ -2465,12 +2739,7 @@ function initTask1() {
             Toast.show(getTranslation('Good action! Biodiversity improved.'), getTranslation('🦋 Biodiversity +10'), 3000);
             showStatGain([{ icon: '🦋', label: 'Biodiversity', delta: 10 }]);
 
-            showContinueModal(
-                getTranslation('Task 1 Completed'),
-                getTranslation('Great! Marine animal saved. Continue to Task 2: Clean beach plastic.'),
-                getTranslation('Next Task →'),
-                goToTask2
-            );
+            showEduPanel('marine_rescue', 'Next Task →', goToTask2);
         }, 1000);
     }
 
@@ -2510,6 +2779,17 @@ function initTask2() {
         return;
     }
 
+    // Sand gradually brightens from dirty/muddy to clean/golden as trash is removed.
+    const sandEl = scene.querySelector('.b-sand');
+    function brightenSand() {
+        if (!sandEl) return;
+        const f = total > 0 ? collected / total : 0; // 0 = dirty, 1 = fully clean
+        const c1 = interpolateColor('#e09848', '#f7e6b4', f);
+        const c2 = interpolateColor('#cc8030', '#eed493', f);
+        const c3 = interpolateColor('#c07828', '#e7cb82', f);
+        sandEl.style.background = `linear-gradient(180deg, ${c1} 0%, ${c2} 60%, ${c3} 100%)`;
+    }
+
     // Clean stale trash items if task re-initialized
     scene.querySelectorAll('.trash-item').forEach((el) => el.remove());
 
@@ -2541,6 +2821,7 @@ function initTask2() {
 
         collected++;
         updateCounter();
+        brightenSand();
 
         if (collected >= total) {
             setTimeout(completeTask2, 800);
@@ -2565,17 +2846,12 @@ function initTask2() {
         const bin = document.getElementById('trash-bin');
         if (bin) bin.classList.add('shake');
 
-        showContinueModal(
-            getTranslation('Task 2 Completed'),
-            getTranslation('Beach cleaned successfully. Continue to Task 3: Stop oil leak source.'),
-            getTranslation('Next Task →'),
-            () => {
-                GameState.phase = 'task3';
-                SceneManager.show('scene-task3', () => {
-                    initTask3();
-                });
-            }
-        );
+        showEduPanel('shoreline_cleanup', 'Next Task →', () => {
+            GameState.phase = 'task3';
+            SceneManager.show('scene-task3', () => {
+                initTask3();
+            });
+        });
     }
 }
 
@@ -2703,15 +2979,10 @@ function initTask3() {
         // Play metal_snap for the satisfying pipe-sealed moment
         Audio.play('metal_snap', { volume: 0.7 });
         Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 12, ['🔧', '✅', '✨', '🌊']);
-        showContinueModal(
-            getTranslation('Task 3 Completed'),
-            getTranslation('Great work! The oil leak has been patched. Continue to Task 4: Clean the oil spill.'),
-            getTranslation('Next Task →'),
-            () => {
-                GameState.phase = 'task4';
-                SceneManager.show('scene-task4', () => { initTask4(); });
-            }
-        );
+        showEduPanel('oil_leak_stopped', 'Next Task →', () => {
+            GameState.phase = 'task4';
+            SceneManager.show('scene-task4', () => { initTask4(); });
+        });
     }
 }
 
@@ -2723,7 +2994,7 @@ function initTask3() {
 function initTask4() {
     if (GameState.phase !== 'task4') return;
     const instructionEl = document.getElementById('t4-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Choose a method to clean up the oil spill', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Choose a method to clean up the oil spill'), 40);
 
     const stepIndicator = document.getElementById('t4-step-indicator');
     const instruction = document.getElementById('t4-instruction');
@@ -2749,8 +3020,8 @@ function initTask4() {
         GameState.task4Choice = 'burning';
 
         // Step 1: Localize
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Containment';
-        typeWriter(instruction, 'Draw a containment boom around the oil spill!', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 1/3 — Containment');
+        typeWriter(instruction, getTranslation('Draw a containment boom around the oil spill!'), 30);
 
         const canvas = document.getElementById('t4-boom-canvas');
         canvas.classList.remove('hidden');
@@ -2869,30 +3140,30 @@ function initTask4() {
             canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = canvas.onmouseleave = null;
             canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = null;
 
-            typeWriter(instruction, '✔ Boom deployed! Oil contained.', 30);
+            typeWriter(instruction, getTranslation('✔ Boom deployed! Oil contained.'), 30);
             setTimeout(() => methodA_Step2(), 1200);
         } else {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             if (!closed) {
-                typeWriter(instruction, 'Loop not closed! Bring the line back to start. Try again!', 30);
+                typeWriter(instruction, getTranslation('Loop not closed! Bring the line back to start. Try again!'), 30);
             } else if (!enclosesOil) {
-                typeWriter(instruction, 'Loop missed the oil spill! Draw around the dark blob. Try again!', 30);
+                typeWriter(instruction, getTranslation('Loop missed the oil spill! Draw around the dark blob. Try again!'), 30);
             } else {
-                typeWriter(instruction, 'Loop too small! Draw a bigger circle. Try again!', 30);
+                typeWriter(instruction, getTranslation('Loop too small! Draw a bigger circle. Try again!'), 30);
             }
         }
     }
 
     function methodA_Step2() {
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Ignition';
-        typeWriter(instruction, 'The oil is contained. Click IGNITE to start controlled burning!', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 2/3 — Ignition');
+        typeWriter(instruction, getTranslation('The oil is contained. Click IGNITE to start controlled burning!'), 30);
 
         const igniteBtn = document.getElementById('btn-t4-ignite');
         igniteBtn.classList.remove('hidden');
 
         igniteBtn.onclick = () => {
             igniteBtn.classList.add('hidden');
-            typeWriter(instruction, '🔥 Burning in progress...', 30);
+            typeWriter(instruction, getTranslation('🔥 Burning in progress...'), 30);
 
             // Get viewport coords of ocean container center for particles
             const rect = oceanContainer.getBoundingClientRect();
@@ -2944,16 +3215,16 @@ function initTask4() {
     }
 
     function methodA_Step3() {
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
-        typeWriter(instruction, 'Cleanup complete.', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 3/3 — Result');
+        typeWriter(instruction, getTranslation('Cleanup complete.'), 30);
         oceanContainer.style.background = 'linear-gradient(180deg, #0a4f7a 0%, #0d3a5c 100%)';
 
         resultCard.classList.remove('hidden');
         document.getElementById('t4-result-icon').textContent = '✅';
-        document.getElementById('t4-result-title').textContent = 'Oil successfully removed by combustion.';
+        document.getElementById('t4-result-title').textContent = getTranslation('Oil successfully removed by combustion.');
         document.getElementById('t4-r-water').textContent = '+25';
         document.getElementById('t4-r-bio').textContent = '+5';
-        document.getElementById('t4-result-info').textContent = 'In-situ burning physically removes oil from the water surface. Some air pollution occurs but marine ecosystem impact is minimal.';
+        document.getElementById('t4-result-info').textContent = getTranslation('In-situ burning physically removes oil from the water surface. Some air pollution occurs but marine ecosystem impact is minimal.');
 
         document.getElementById('btn-t4-complete').onclick = () => finishTask4('burning');
     }
@@ -2965,8 +3236,8 @@ function initTask4() {
         methodSelection.classList.add('hidden');
         GameState.task4Choice = 'chemical';
 
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 1/3 — Surface Spraying';
-        typeWriter(instruction, 'Drag the boat across the oil spill to spray dispersant!', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 1/3 — Surface Spraying');
+        typeWriter(instruction, getTranslation('Drag the boat across the oil spill to spray dispersant!'), 30);
 
         const boat = document.getElementById('t4-boat');
         const canvas = document.getElementById('t4-spray-canvas');
@@ -3003,7 +3274,7 @@ function initTask4() {
             document.removeEventListener('mouseup', onMouseUp);
             boat.ontouchstart = boat.ontouchmove = boat.ontouchend = null;
             boat.onmousedown = null;
-            typeWriter(instruction, '✔ Surface spraying complete!', 30);
+            typeWriter(instruction, getTranslation('✔ Surface spraying complete!'), 30);
             progContainer.classList.add('hidden');
             setTimeout(() => methodB_Step2(), 1000);
         }
@@ -3064,8 +3335,8 @@ function initTask4() {
     }
 
     function methodB_Step2() {
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 2/3 — Submarine Injection';
-        typeWriter(instruction, 'Click the injection point 3 times to inject dispersant into the leak source!', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 2/3 — Submarine Injection');
+        typeWriter(instruction, getTranslation('Click the injection point 3 times to inject dispersant into the leak source!'), 30);
 
         document.getElementById('t4-boat').classList.add('hidden');
         document.getElementById('t4-spray-canvas').classList.add('hidden');
@@ -3083,12 +3354,12 @@ function initTask4() {
 
         const injectTarget = document.getElementById('t4-inject-target');
         const counter = document.getElementById('t4-inject-counter');
-        counter.textContent = 'Injections: 0/3';
+        counter.textContent = `${getTranslation('Injections')}: 0/3`;
 
         let clicks = 0;
         injectTarget.onclick = () => {
             clicks++;
-            counter.textContent = `Injections: ${clicks}/3`;
+            counter.textContent = `${getTranslation('Injections')}: ${clicks}/3`;
 
             // Animate inject target briefly
             injectTarget.style.background = 'rgba(156,39,176,0.4)';
@@ -3105,15 +3376,15 @@ function initTask4() {
                 injectTarget.onclick = null;
                 injectTarget.style.animation = 'none';
                 injectTarget.style.borderColor = '#4caf50';
-                typeWriter(instruction, '✔ Injection complete. Dispersant deployed!', 30);
+                typeWriter(instruction, getTranslation('✔ Injection complete. Dispersant deployed!'), 30);
                 setTimeout(() => methodB_Step3(), 1200);
             }
         };
     }
 
     function methodB_Step3() {
-        if (stepIndicator) stepIndicator.textContent = 'Task 4: Step 3/3 — Result';
-        typeWriter(instruction, 'Cleanup complete.', 30);
+        if (stepIndicator) stepIndicator.textContent = getTranslation('Task 4: Step 3/3 — Result');
+        typeWriter(instruction, getTranslation('Cleanup complete.'), 30);
 
         // Show sick fish
         const fishContainer = document.getElementById('t4-fish-container');
@@ -3126,7 +3397,7 @@ function initTask4() {
 
         resultCard.classList.remove('hidden');
         document.getElementById('t4-result-icon').textContent = '⚠️';
-        document.getElementById('t4-result-title').textContent = 'Oil dispersed — but not removed.';
+        document.getElementById('t4-result-title').textContent = getTranslation('Oil dispersed — but not removed.');
 
         document.getElementById('t4-r-water').textContent = '+20';
 
@@ -3136,9 +3407,9 @@ function initTask4() {
 
         const warning = document.getElementById('t4-result-warning');
         warning.classList.remove('hidden');
-        warning.innerHTML = 'Chemical dispersants break oil into tiny droplets that remain in the water column, making them more accessible to marine life. Toxic to fish, coral, and plankton.';
+        warning.innerHTML = getTranslation('Chemical dispersants break oil into tiny droplets that remain in the water column, making them more accessible to marine life. Toxic to fish, coral, and plankton.');
 
-        document.getElementById('t4-result-info').textContent = 'Used in Deepwater Horizon (2010) — still debated by scientists.';
+        document.getElementById('t4-result-info').textContent = getTranslation('Used in Deepwater Horizon (2010) — still debated by scientists.');
 
         document.getElementById('btn-t4-complete').onclick = () => finishTask4('chemical');
     }
@@ -3217,7 +3488,7 @@ function initAgriTask1() {
 
         typingText.classList.remove('hidden');
         typingText.innerHTML = '';
-        const msg = "Fertilizers from farms are flowing into the water. These nutrients can pollute water and harm the ecosystem.";
+        const msg = getTranslation("Fertilizers from farms are flowing into the water. These nutrients can pollute water and harm the ecosystem.");
 
         let i = 0;
         const typeInterval = setInterval(() => {
@@ -3226,7 +3497,7 @@ function initAgriTask1() {
             if (i >= msg.length) {
                 clearInterval(typeInterval);
                 setTimeout(() => {
-                    Toast.show('Source identified.', '☑', 3000);
+                    Toast.show(getTranslation('Source identified.'), '☑', 3000);
                     Audio.play('task_complete', { volume: 0.8 });
                     GameState.completeTask(0, true);
                     nextBtn.classList.remove('hidden');
@@ -3301,17 +3572,12 @@ function initAgriTask2() {
 
         Audio.play('task_complete', { volume: 0.8 });
         Particles.burst(window.innerWidth / 2, window.innerHeight / 2, 15, ['🌱', '🌊', '🦋']);
-        Toast.show('Runoff successfully reduced.', '💧+15 🦋+10', 3500);
+        Toast.show(getTranslation('Runoff successfully reduced.'), '💧+15 🦋+10', 3500);
 
-        showContinueModal(
-            'Mission Complete',
-            'Runoff successfully reduced. Return to the residential area.',
-            'Return to World',
-            () => {
-                GameState.phase = 'residential';
-                SceneManager.show('scene-residential', () => initResidential());
-            }
-        );
+        showEduPanel('buffer_strip', 'Return to World', () => {
+            GameState.phase = 'residential';
+            SceneManager.show('scene-residential', () => initResidential());
+        });
     }
 }
 
@@ -3339,14 +3605,14 @@ function initIndTask1() {
         Particles.burst(e.clientX, e.clientY, 5, ['🔎', '✨']);
         Audio.play('click_success', { volume: 0.5 });
 
-        Toast.show('Source identified.', '☑', 3000);
+        Toast.show(getTranslation('Source identified.'), '☑', 3000);
         GameState.completeTask(0, true);
 
         typingText.classList.remove('hidden');
         typingText.innerHTML = '';
 
-        const msg1 = "Factories are releasing untreated waste into the water.";
-        const msg2 = " Industrial waste may contain toxic chemicals and heavy metals.";
+        const msg1 = getTranslation("Factories are releasing untreated waste into the water.");
+        const msg2 = getTranslation(" Industrial waste may contain toxic chemicals and heavy metals.");
         const fullMsg = msg1 + msg2;
 
         let i = 0;
@@ -3374,7 +3640,7 @@ function initIndTask1() {
 function initIndTask2() {
     if (GameState.phase !== 'ind2') return;
     const instructionEl = document.getElementById('ind2-instruction');
-    if (instructionEl) typeWriter(instructionEl, getTranslation('Drag each missing bolt onto the pipe flange, then click the 🔧 wrench to tighten all the bolts.'), 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Step 1: Drag the 4 missing bolts onto the flange.'), 40);
 
     const container = document.getElementById('ind2-bolts-container');
     const toolbox = document.getElementById('ind2-toolbox');
@@ -3386,6 +3652,43 @@ function initIndTask2() {
     toolbox.innerHTML = '';
     successMsg.classList.add('hidden');
 
+    // Step/progress badge so the player always knows what to do next.
+    const pipeScene = document.querySelector('#scene-ind-task2 .ind-pipe-scene');
+    let badge = document.getElementById('ind2-progress-badge');
+    if (!badge && pipeScene) {
+        badge = document.createElement('div');
+        badge.id = 'ind2-progress-badge';
+        badge.className = 'ind2-progress-badge';
+        pipeScene.appendChild(badge);
+    }
+
+    // Sets the instruction text directly (no typewriter) for snappy stage changes.
+    function setInd2Instruction(text) {
+        if (!instructionEl) return;
+        if (instructionEl.typewriterInterval) {
+            clearInterval(instructionEl.typewriterInterval);
+            instructionEl.typewriterInterval = null;
+        }
+        instructionEl.textContent = text;
+    }
+
+    // Keeps instruction + badge + wrench affordance in sync with progress.
+    function updateInd2Stage() {
+        const allPlaced = boltsPlaced >= 4;
+        if (badge) {
+            badge.textContent = allPlaced
+                ? `🔧 ${getTranslation('Bolts tightened')}: ${boltsTightened}/8`
+                : `🔩 ${getTranslation('Bolts placed')}: ${boltsPlaced}/4`;
+        }
+        if (!allPlaced) {
+            wrench.classList.remove('wrench-ready');
+        } else if (!selectedWrench && boltsTightened < 8) {
+            // All bolts seated — spotlight the wrench and explain step 2.
+            wrench.classList.add('wrench-ready');
+            setInd2Instruction(getTranslation('All bolts placed! Step 2: tap the 🔧 wrench, then tap each bolt to tighten.'));
+        }
+    }
+
     // Coordinates are relative to the #ind2-joint flange plate (180x240) so the
     // bolts visibly sit on the two flange columns of the pipe joint.
     const slotPositions = [
@@ -3396,7 +3699,15 @@ function initIndTask2() {
     ];
 
     let boltsTightened = 0;
+    let boltsPlaced = 0;
+    let selectedWrench = false;
     let selectedBoltElement = null;
+
+    // Called after each missing bolt is seated into a slot.
+    function afterPlace() {
+        boltsPlaced++;
+        updateInd2Stage();
+    }
 
     // Create missing bolts in toolbox
     for (let i = 0; i < 4; i++) {
@@ -3458,6 +3769,7 @@ function initIndTask2() {
                     slot.appendChild(bolt);
                     slot.classList.add('filled');
                     Audio.play('click_success', { volume: 0.5 });
+                    afterPlace();
                 }
             }
         };
@@ -3474,33 +3786,56 @@ function initIndTask2() {
                 slot.appendChild(bolt);
                 slot.classList.add('filled');
                 Audio.play('click_success', { volume: 0.5 });
+                afterPlace();
             }
         };
 
         container.appendChild(slot);
     });
 
-    let selectedWrench = false;
     wrench.onclick = () => {
+        // Guide the player: bolts must be seated before the wrench does anything.
+        if (boltsPlaced < 4) {
+            Toast.show(getTranslation('Place all 4 bolts onto the flange first.'), '🔩', 2200);
+            return;
+        }
         selectedWrench = !selectedWrench;
         wrench.style.background = selectedWrench ? '#2980b9' : '#222';
+        wrench.classList.toggle('wrench-active', selectedWrench);
+        if (selectedWrench) {
+            wrench.classList.remove('wrench-ready');
+            setInd2Instruction(getTranslation('Now tap each bolt one by one to tighten it.'));
+            // Pulse every bolt that still needs tightening so the target is obvious.
+            container.querySelectorAll('.ind-bolt:not(.tightened)').forEach(b => b.classList.add('needs-tighten'));
+        } else {
+            container.querySelectorAll('.ind-bolt').forEach(b => b.classList.remove('needs-tighten'));
+        }
+        updateInd2Stage();
     };
 
     container.onclick = (e) => {
-        if (!selectedWrench) return;
+        if (!selectedWrench) {
+            if (boltsPlaced >= 4) Toast.show(getTranslation('Tap the 🔧 wrench first, then tap each bolt.'), '🔧', 2200);
+            return;
+        }
         const target = e.target;
         if (target.classList.contains('ind-bolt') && !target.classList.contains('tightened')) {
             target.classList.add('tightened');
+            target.classList.remove('needs-tighten');
             target.textContent = '✅';
             Audio.play('wrench_ratchet', { volume: 0.7 });
             Particles.burst(e.clientX, e.clientY, 4, ['🔧', '✨']);
 
             boltsTightened++;
+            updateInd2Stage();
             if (boltsTightened === 8) {
                 completeInd2();
             }
         }
     };
+
+    // Initialise the badge/instruction for the starting (placing) stage.
+    updateInd2Stage();
 
     function completeInd2() {
         leakAnim.style.display = 'none';
@@ -3510,7 +3845,7 @@ function initIndTask2() {
         successMsg.classList.remove('hidden');
         successMsg.innerHTML = '';
 
-        const msg = "Discharge successfully stopped.";
+        const msg = getTranslation('Discharge successfully stopped.');
         let i = 0;
         const typeInterval = setInterval(() => {
             successMsg.innerHTML += msg.charAt(i);
@@ -3518,9 +3853,11 @@ function initIndTask2() {
             if (i >= msg.length) {
                 clearInterval(typeInterval);
                 setTimeout(() => {
-                    GameState.phase = 'ind3';
-                    SceneManager.show('scene-ind-task3', () => initIndTask3());
-                }, 2000);
+                    showEduPanel('direct_discharge', 'Next Task →', () => {
+                        GameState.phase = 'ind3';
+                        SceneManager.show('scene-ind-task3', () => initIndTask3());
+                    });
+                }, 1200);
             }
         }, 50);
     }
@@ -3532,7 +3869,7 @@ function initIndTask2() {
 function initIndTask3() {
     if (GameState.phase !== 'ind3') return;
     const instructionEl = document.getElementById('ind3-instruction');
-    if (instructionEl) typeWriter(instructionEl, 'Choose a method to treat the remaining wastewater.', 40);
+    if (instructionEl) typeWriter(instructionEl, getTranslation('Choose a method to treat the remaining wastewater.'), 40);
 
     const btn1 = document.getElementById('btn-ind-method1');
     const btn2 = document.getElementById('btn-ind-method2');
@@ -3698,7 +4035,7 @@ function initIndTask3() {
                 }, 1000);
             } else {
                 isDropped = false;
-                Toast.show('Drag the bottle to the treatment pool!', '🧪', 2000);
+                Toast.show(getTranslation('Drag the bottle to the treatment pool!'), '🧪', 2000);
             }
         });
     }
@@ -3817,25 +4154,51 @@ function initIndTask3() {
     };
 }
 
+// Called whenever the player returns to the residential base. Instead of auto-
+// triggering the ending, it reveals a manual "Finish" button once every area is
+// restored — the player decides when to view the results. This also makes the
+// ending reliable regardless of which area was completed last.
 function checkAllAreasDone() {
+    if (GameState.endingTriggered) return;
     if (GameState.allTasksDone() && GameState.agriCompleted && GameState.indCompleted) {
-        setTimeout(() => {
-            const resSvg = document.querySelector('.residential-bg-svg');
-            if (resSvg) {
-                const grass = resSvg.querySelector('path[fill="#2d9e4f"]');
-                if (grass) grass.setAttribute('fill', '#2ecc71');
-                const sky = resSvg.querySelector('rect[fill="#8ecae6"]');
-                if (sky) sky.setAttribute('fill', '#3498db');
-            }
-
-            Toast.show('All pollution sources have been successfully managed.', '✅', 4000);
-
-            setTimeout(() => {
-                GameState.phase = 'reflection';
-                SceneManager.show('scene-reflection', () => initReflection());
-            }, 4000);
-        }, 1000);
+        showFinishButton();
+    } else {
+        hideFinishButton();
     }
+}
+
+function showFinishButton() {
+    const btn = document.getElementById('btn-finish-game');
+    if (!btn) return;
+    btn.classList.remove('hidden');
+    btn.onclick = () => {
+        if (GameState.endingTriggered) return;
+        GameState.endingTriggered = true;
+        hideFinishButton();
+        runEndingSequence();
+    };
+}
+
+function hideFinishButton() {
+    const btn = document.getElementById('btn-finish-game');
+    if (btn) btn.classList.add('hidden');
+}
+
+function runEndingSequence() {
+    const resSvg = document.querySelector('.residential-bg-svg');
+    if (resSvg) {
+        const grass = resSvg.querySelector('path[fill="#2d9e4f"]');
+        if (grass) grass.setAttribute('fill', '#2ecc71');
+        const sky = resSvg.querySelector('rect[fill="#8ecae6"]');
+        if (sky) sky.setAttribute('fill', '#3498db');
+    }
+
+    Toast.show(getTranslation('All pollution sources have been successfully managed.'), '✅', 4000);
+
+    setTimeout(() => {
+        GameState.phase = 'reflection';
+        SceneManager.show('scene-reflection', () => initReflection());
+    }, 2500);
 }
 
 // ============================================
@@ -3906,6 +4269,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize toggle panel buttons for minimap and todo
     initTogglePanels();
+
+    // Wire persistent sound + language controls (visible on every scene)
+    initGlobalControls();
 
     // Global Back button (per-scene navigation)
     const backBtn = document.getElementById('btn-back');

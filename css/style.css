@@ -754,6 +754,67 @@ body {
     transform: scale(1);
 }
 
+/* ---- Educational post-mission panel ---- */
+.edu-box {
+    max-width: 540px;
+    max-height: 86vh;
+    overflow-y: auto;
+    text-align: left;
+}
+.edu-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: var(--teal-light, #7fe3ff);
+    text-align: center;
+    margin-bottom: 18px;
+    line-height: 1.3;
+}
+.edu-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.edu-section {
+    background: rgba(0, 0, 0, 0.22);
+    border-left: 3px solid var(--teal, #00b4d8);
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+.edu-heading {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #ffe39a;
+    margin-bottom: 5px;
+}
+.edu-body {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba(240, 248, 255, 0.92);
+}
+.edu-impact {
+    margin: 16px 0 20px;
+    padding: 12px 14px;
+    background: rgba(45, 158, 79, 0.18);
+    border: 1px solid rgba(46, 204, 113, 0.5);
+    border-radius: 8px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #c8f7d4;
+}
+.edu-box .modal-btn {
+    display: block;
+    margin: 0 auto;
+}
+@media (max-width: 640px) {
+    .edu-title { font-size: 1rem; }
+    .edu-body { font-size: 0.8rem; }
+}
+
 .modal-icon {
     font-size: 3rem;
     margin-bottom: 16px;
@@ -1114,6 +1175,8 @@ body {
     background: linear-gradient(180deg, #e09848 0%, #cc8030 60%, #c07828 100%);
     position: relative;
     overflow: hidden;
+    /* Sand brightens as the player collects trash (driven from JS) */
+    transition: background 0.7s ease;
 }
 
 .b-shell {
@@ -2261,7 +2324,7 @@ body {
    ============================================ */
 .mini-map-container {
     position: fixed;
-    top: 20px;
+    top: 64px; /* sits below the persistent sound/language controls */
     right: 20px;
     width: 250px;
     height: 180px;
@@ -2312,7 +2375,7 @@ body {
    ============================================ */
 #areas-counter {
     position: fixed;
-    top: 110px; left: 20px;
+    top: 124px; left: 20px;
     background: rgba(230, 57, 70, 0.85);
     border: 1px solid #ff6b6b;
     color: white;
@@ -2324,6 +2387,44 @@ body {
     backdrop-filter: blur(5px);
     box-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
     transition: opacity 0.3s;
+}
+
+/* Finish button — revealed once all three areas are restored */
+.btn-finish {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--green, #2d9e4f), var(--teal, #00b4d8));
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    padding: 14px 30px;
+    border-radius: 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    z-index: 150;
+    box-shadow: 0 6px 24px rgba(45, 158, 79, 0.55);
+    animation: finishPulse 1.8s ease-in-out infinite;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-finish:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 8px 30px rgba(0, 180, 216, 0.7);
+}
+.btn-finish.hidden { display: none; }
+@keyframes finishPulse {
+    0%, 100% { box-shadow: 0 6px 24px rgba(45, 158, 79, 0.45); }
+    50% { box-shadow: 0 6px 34px rgba(0, 180, 216, 0.85); }
+}
+@media (max-width: 640px) {
+    .btn-finish {
+        bottom: 18px;
+        padding: 12px 22px;
+        font-size: 0.85rem;
+    }
 }
 
 /* ============================================
@@ -2362,6 +2463,45 @@ body {
 .tool-wrench:hover {
     transform: scale(1.1);
     box-shadow: 0 0 15px var(--teal);
+}
+/* Wrench glows/pulses once all bolts are placed, signalling the tighten step */
+.tool-wrench.wrench-ready {
+    animation: wrenchPulse 1.1s ease-in-out infinite;
+    border-color: var(--yellow, #ffd166) !important;
+}
+.tool-wrench.wrench-active {
+    background: #2980b9 !important;
+    box-shadow: 0 0 16px var(--teal);
+}
+@keyframes wrenchPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 8px var(--teal); }
+    50% { transform: scale(1.18); box-shadow: 0 0 22px var(--yellow, #ffd166); }
+}
+/* Placed-but-not-yet-tightened bolts pulse to invite a tap while the wrench is active */
+.ind-bolt.needs-tighten {
+    animation: boltNeedsTighten 1s ease-in-out infinite;
+    cursor: pointer;
+}
+@keyframes boltNeedsTighten {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.7); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
+}
+/* Step / progress badge for the bolt-tightening task */
+.ind2-progress-badge {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid var(--teal);
+    color: var(--teal-light);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 60;
+    backdrop-filter: blur(4px);
 }
 
 /* Industrial Task 2 — pipe joint flange assembly (bolts sit ON the flange) */
@@ -2590,29 +2730,33 @@ body {
     to { opacity: 1; transform: scale(1); }
 }
 
+/* Instruction shown as a floating pill at the bottom-centre of the explore map,
+   clear of the HUD (top-left) and the sound/language controls (top-right). */
 .explore-map-header {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 10px 20px;
-    background: rgba(4, 30, 46, 0.9);
-    border-bottom: 2px solid var(--teal);
-    box-shadow: 0 2px 15px rgba(0,180,216,0.2);
-    flex-shrink: 0;
-    z-index: 10;
+    gap: 10px;
+    max-width: min(760px, 86%);
+    padding: 11px 24px;
+    background: rgba(4, 30, 46, 0.94);
+    border: 1.5px solid var(--teal);
+    border-radius: 30px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    z-index: 60;
+    text-align: center;
 }
-.explore-map-title-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--teal-light);
-    text-shadow: 0 0 10px rgba(0,180,216,0.5);
-    letter-spacing: 2px;
-}
+/* Title + Close are redundant with the global "Back" button (and ESC), so hide them */
+.explore-map-title-text { display: none; }
+.explore-close-btn { display: none; }
 .explore-map-hint-text {
     font-family: 'Exo 2', sans-serif;
-    font-size: 0.78rem;
-    color: var(--gray);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--white);
     flex: 1;
 }
 .explore-close-btn {
@@ -3382,6 +3526,67 @@ body {
     font-weight: bold;
 }
 
+/* Persistent global controls (sound toggle + language), fixed top-right on every scene */
+#global-controls {
+    position: fixed;
+    top: 12px;
+    right: 20px;
+    z-index: 1001; /* above the minimap so the cluster is always tappable */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.global-ctrl-btn {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(0, 180, 216, 0.4);
+    color: var(--teal-light);
+    width: 36px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.25s ease;
+    line-height: 1;
+}
+.global-ctrl-btn:hover {
+    background: rgba(0, 180, 216, 0.25);
+    border-color: var(--teal);
+}
+.global-ctrl-btn.muted {
+    color: var(--gray);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+#global-controls .global-lang {
+    display: flex;
+    gap: 6px;
+}
+#global-controls .lang-btn {
+    padding: 5px 9px;
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 640px) {
+    #global-controls {
+        top: 8px;
+        right: 8px;
+        gap: 5px;
+    }
+    .global-ctrl-btn {
+        width: 32px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    #global-controls .lang-btn {
+        padding: 4px 7px;
+        font-size: 0.7rem;
+    }
+}
+
 /* Collapsible Overlay panels styles */
 .ui-toggle-btn {
     position: absolute;
@@ -3500,7 +3705,7 @@ body {
     #mini-map-container {
         transform: scale(0.75);
         transform-origin: top right;
-        top: 15px !important;
+        top: 54px !important; /* clears the persistent controls above it */
         right: 15px !important;
     }
     #todo-panel {
